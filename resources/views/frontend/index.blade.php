@@ -1,0 +1,413 @@
+@extends('layouts.front.app')
+
+@section('content')
+    <!-- Слайдер -->
+    <div data-carousel='{
+        "loadingClasses": "opacity-0",
+        "dotsItemClasses": "carousel-box carousel-active:bg-primary",
+        "isAutoPlay": true, "speed": 5000
+    }' class="relative w-full rounded-xl overflow-hidden shadow-lg">
+        <div class="carousel h-96">
+            <div class="carousel-body h-full opacity-0">
+                <div class="carousel-slide active">
+                    <div class="relative h-full w-full">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&h=400&fit=crop" 
+                             alt="Боулы" 
+                             class="h-full w-full object-cover">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <div class="text-center text-white">
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">Bowlance</h2>
+                                <p class="text-xl sm:text-2xl">Полезная еда быстро и вкусно</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="relative h-full w-full">
+                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&h=400&fit=crop" 
+                             alt="Свежие продукты" 
+                             class="h-full w-full object-cover">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <div class="text-center text-white">
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">Свежие продукты</h2>
+                                <p class="text-xl sm:text-2xl">Только качественные ингредиенты</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="relative h-full w-full">
+                        <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1200&h=400&fit=crop" 
+                             alt="Собери сам" 
+                             class="h-full w-full object-cover">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <div class="text-center text-white">
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">Собери свой боул</h2>
+                                <p class="text-xl sm:text-2xl">Выбери ингредиенты по вкусу</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="carousel-prev start-5 max-sm:start-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
+            <span class="icon-[tabler--chevron-left] size-5"></span>
+            <span class="sr-only">Previous</span>
+        </button>
+        <button type="button" class="carousel-next end-5 max-sm:end-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
+            <span class="icon-[tabler--chevron-right] size-5"></span>
+            <span class="sr-only">Next</span>
+        </button>
+
+        <div class="carousel-pagination absolute bottom-3 end-0 start-0 flex justify-center gap-3"></div>
+    </div>
+
+    <!-- Табы -->
+    <div class="mt-8">
+        <nav class="tabs tabs-lifted" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
+            <button type="button" 
+                    class="tab h-14 text-lg active-tab:tab-active active" 
+                    id="menu-tab" 
+                    data-tab="#menu-content" 
+                    aria-controls="menu-content" 
+                    role="tab" 
+                    aria-selected="true">
+                <span class="icon-[tabler--menu-2] mr-2 size-5"></span>
+                Меню
+            </button>
+            <button type="button" 
+                    class="tab h-14 text-lg active-tab:tab-active" 
+                    id="constructor-tab" 
+                    data-tab="#constructor-content" 
+                    aria-controls="constructor-content" 
+                    role="tab" 
+                    aria-selected="false">
+                <span class="icon-[tabler--tools-kitchen-2] mr-2 size-5"></span>
+                Собери сам
+            </button>
+        </nav>
+
+        <!-- Контент табов -->
+        <div class="rounded-box bg-base-100 p-6 shadow-md">
+            <!-- Таб Меню -->
+            <div id="menu-content" role="tabpanel" aria-labelledby="menu-tab">
+                @if($dishCategories->isEmpty())
+                    <div class="text-center py-12">
+                        <span class="icon-[tabler--shopping-bag-x] size-16 text-base-content/30 mb-4"></span>
+                        <p class="text-base-content/60">Пока нет доступных блюд</p>
+                    </div>
+                @else
+                    @foreach($dishCategories as $category)
+                        <div class="mb-10">
+                            <h3 class="mb-6 flex items-center gap-2 text-2xl font-bold">
+                                <span class="icon-[tabler--category] size-6 text-primary"></span>
+                                {{ $category->name }}
+                            </h3>
+                            
+                            @if($category->dishes->isEmpty())
+                                <p class="text-base-content/50 italic">В этой категории пока нет блюд</p>
+                            @else
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                    @foreach($category->dishes as $dish)
+                                        <div class="card hover:shadow-xl transition-shadow">
+                                            <figure class="h-48 overflow-hidden">
+                                                @if($dish->image)
+                                                    <img src="{{ asset('storage/' . $dish->image) }}" 
+                                                         alt="{{ $dish->name }}" 
+                                                         class="h-full w-full object-cover">
+                                                @else
+                                                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop" 
+                                                         alt="{{ $dish->name }}" 
+                                                         class="h-full w-full object-cover">
+                                                @endif
+                                            </figure>
+                                            <div class="card-body">
+                                                <h4 class="card-title text-lg">{{ $dish->name }}</h4>
+                                                
+                                                @if($dish->description)
+                                                    <p class="text-sm text-base-content/70 line-clamp-2">{{ $dish->description }}</p>
+                                                @endif
+                                                
+                                                <!-- Пищевая ценность -->
+                                                @if($dish->calories || $dish->proteins || $dish->fats || $dish->carbohydrates)
+                                                    <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                                        @if($dish->calories)
+                                                            <span class="badge badge-outline badge-sm">
+                                                                <span class="icon-[tabler--flame] mr-1 size-3"></span>
+                                                                {{ $dish->calories }} ккал
+                                                            </span>
+                                                        @endif
+                                                        @if($dish->proteins)
+                                                            <span class="badge badge-outline badge-sm">Б: {{ $dish->proteins }}г</span>
+                                                        @endif
+                                                        @if($dish->fats)
+                                                            <span class="badge badge-outline badge-sm">Ж: {{ $dish->fats }}г</span>
+                                                        @endif
+                                                        @if($dish->carbohydrates)
+                                                            <span class="badge badge-outline badge-sm">У: {{ $dish->carbohydrates }}г</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+
+                                                @if($dish->weight_volume)
+                                                    <p class="text-xs text-base-content/50 mt-1">{{ $dish->weight_volume }}</p>
+                                                @endif
+                                                
+                                                <div class="card-actions mt-4 items-center justify-between">
+                                                    <div class="flex flex-col">
+                                                        @if($dish->discount_price)
+                                                            <span class="text-xs text-base-content/50 line-through">{{ number_format($dish->price, 2) }} ₾</span>
+                                                            <span class="text-xl font-bold text-primary">{{ number_format($dish->discount_price, 2) }} ₾</span>
+                                                        @else
+                                                            <span class="text-xl font-bold">{{ number_format($dish->price, 2) }} ₾</span>
+                                                        @endif
+                                                    </div>
+                                                    <button type="button" 
+                                                            class="btn btn-primary btn-sm gap-2"
+                                                            x-data
+                                                            @click="
+                                                                $store.cart.addDish({
+                                                                    id: {{ $dish->id }},
+                                                                    name: '{{ addslashes($dish->name) }}',
+                                                                    price: {{ $dish->discount_price ?? $dish->price }},
+                                                                    image: '{{ $dish->image }}',
+                                                                    weight: '{{ $dish->weight_volume }}',
+                                                                    calories: {{ $dish->calories ?? 0 }},
+                                                                    proteins: {{ $dish->proteins ?? 0 }},
+                                                                    fats: {{ $dish->fats ?? 0 }},
+                                                                    carbs: {{ $dish->carbohydrates ?? 0 }}
+                                                                });
+                                                                $store.cart.openDrawer();
+                                                            ">
+                                                        <span class="icon-[tabler--shopping-cart-plus] size-4"></span>
+                                                        В корзину
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+
+            <!-- Таб Конструктор -->
+            <div id="constructor-content" class="hidden" role="tabpanel" aria-labelledby="constructor-tab">
+                <div x-data="bowlConstructor()">
+                    <div class="mb-6 text-center">
+                        <h3 class="text-3xl font-bold mb-2">Собери свой идеальный боул</h3>
+                        <p class="text-base-content/70">Выбери продукты из каждой категории и создай уникальное блюдо</p>
+                    </div>
+
+                    @if($constructorCategories->isEmpty())
+                        <div class="text-center py-12">
+                            <span class="icon-[tabler--tools-kitchen-off] size-16 text-base-content/30 mb-4"></span>
+                            <p class="text-base-content/60">Конструктор временно недоступен</p>
+                        </div>
+                    @else
+                        <!-- Выбранные продукты и итоги -->
+                        <div class="rounded-box bg-primary/10 p-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold">Ваш боул</h4>
+                                <button type="button" 
+                                        @click="clearBowl()" 
+                                        class="btn btn-ghost btn-sm gap-2"
+                                        x-show="selectedProducts.length > 0">
+                                    <span class="icon-[tabler--trash] size-4"></span>
+                                    Очистить
+                                </button>
+                            </div>
+                            
+                            <div x-show="selectedProducts.length === 0" class="text-center py-4 text-base-content/50">
+                                Выберите продукты из категорий ниже
+                            </div>
+                            
+                            <div x-show="selectedProducts.length > 0" class="space-y-2">
+                                <template x-for="product in selectedProducts" :key="product.id">
+                                    <div class="flex items-center justify-between bg-base-100 rounded-lg p-3">
+                                        <div class="flex items-center gap-3">
+                                            <img :src="product.image || 'https://via.placeholder.com/50'" 
+                                                 :alt="product.name" 
+                                                 class="size-12 rounded-lg object-cover">
+                                            <div>
+                                                <p class="font-medium" x-text="product.name"></p>
+                                                <p class="text-sm text-base-content/50" x-text="product.category"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold" x-text="product.price + ' ₾'"></span>
+                                            <button type="button" 
+                                                    @click="removeProduct(product.id)" 
+                                                    class="btn btn-ghost btn-circle btn-sm">
+                                                <span class="icon-[tabler--x] size-4"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <!-- Итоговая информация -->
+                                <div class="border-t border-base-content/10 pt-4 mt-4">
+                                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-5">
+                                        <div class="text-center">
+                                            <p class="text-xs text-base-content/50">Калории</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.calories + ' ккал'"></p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-xs text-base-content/50">Белки</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.proteins + ' г'"></p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-xs text-base-content/50">Жиры</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.fats + ' г'"></p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-xs text-base-content/50">Углеводы</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.carbs + ' г'"></p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-xs text-base-content/50">Итого</p>
+                                            <p class="text-2xl font-bold text-primary" x-text="totalPrice.toFixed(2) + ' ₾'"></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" 
+                                            class="btn btn-primary w-full mt-4 gap-2"
+                                            :disabled="selectedProducts.length === 0"
+                                            @click="addBowlToCart()">
+                                        <span class="icon-[tabler--shopping-cart-plus] size-5"></span>
+                                        Добавить боул в корзину
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Категории продуктов -->
+                        <div class="space-y-8">
+                            @foreach($constructorCategories as $category)
+                                <div>
+                                    <h4 class="mb-4 text-xl font-bold">{{ $category->name }}</h4>
+                                    
+                                    @if($category->products->isEmpty())
+                                        <p class="text-base-content/50 italic">В этой категории пока нет продуктов</p>
+                                    @else
+                                        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                                            @foreach($category->products as $product)
+                                                <div @click="toggleProduct({
+                                                    id: {{ $product->id }},
+                                                    name: '{{ addslashes($product->name) }}',
+                                                    price: {{ $product->price }},
+                                                    category: '{{ addslashes($category->name) }}',
+                                                    image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
+                                                    calories: {{ $product->calories ?? 0 }},
+                                                    proteins: {{ $product->proteins ?? 0 }},
+                                                    fats: {{ $product->fats ?? 0 }},
+                                                    carbs: {{ $product->carbohydrates ?? 0 }}
+                                                })"
+                                                     class="card cursor-pointer transition-all hover:shadow-lg"
+                                                     :class="{ 'ring-2 ring-primary': isSelected({{ $product->id }}) }">
+                                                    <figure class="h-32 overflow-hidden">
+                                                        @if($product->image)
+                                                            <img src="{{ asset('storage/' . $product->image) }}" 
+                                                                 alt="{{ $product->name }}" 
+                                                                 class="h-full w-full object-cover">
+                                                        @else
+                                                            <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=150&fit=crop" 
+                                                                 alt="{{ $product->name }}" 
+                                                                 class="h-full w-full object-cover">
+                                                        @endif
+                                                        <div x-show="isSelected({{ $product->id }})" 
+                                                             class="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                                            <span class="icon-[tabler--check] size-8 text-primary"></span>
+                                                        </div>
+                                                    </figure>
+                                                    <div class="card-body p-3">
+                                                        <h5 class="text-sm font-medium line-clamp-2">{{ $product->name }}</h5>
+                                                        
+                                                        @if($product->weight_volume)
+                                                            <p class="text-xs text-base-content/50">{{ $product->weight_volume }}</p>
+                                                        @endif
+                                                        
+                                                        <div class="mt-2 flex items-center justify-between">
+                                                            <span class="text-base font-bold">{{ number_format($product->price, 2) }} ₾</span>
+                                                            <span x-show="isSelected({{ $product->id }})" 
+                                                                  class="badge badge-primary badge-sm">
+                                                                Выбрано
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+<script>
+function bowlConstructor() {
+    return {
+        selectedProducts: [],
+        
+        toggleProduct(product) {
+            const index = this.selectedProducts.findIndex(p => p.id === product.id);
+            if (index === -1) {
+                this.selectedProducts.push(product);
+            } else {
+                this.selectedProducts.splice(index, 1);
+            }
+        },
+        
+        removeProduct(id) {
+            this.selectedProducts = this.selectedProducts.filter(p => p.id !== id);
+        },
+        
+        isSelected(id) {
+            return this.selectedProducts.some(p => p.id === id);
+        },
+        
+        clearBowl() {
+            this.selectedProducts = [];
+        },
+        
+        addBowlToCart() {
+            if (this.selectedProducts.length === 0) {
+                alert('Выберите продукты для боула');
+                return;
+            }
+            
+            // Добавляем боул в корзину через Alpine store
+            this.$store.cart.addBowl(this.selectedProducts);
+            
+            // Очищаем выбранные продукты
+            this.clearBowl();
+            
+            // Открываем drawer корзины
+            this.$store.cart.openDrawer();
+        },
+        
+        get totalPrice() {
+            return this.selectedProducts.reduce((sum, p) => sum + parseFloat(p.price), 0);
+        },
+        
+        get totalNutrition() {
+            return {
+                calories: this.selectedProducts.reduce((sum, p) => sum + (p.calories || 0), 0),
+                proteins: this.selectedProducts.reduce((sum, p) => sum + (p.proteins || 0), 0).toFixed(1),
+                fats: this.selectedProducts.reduce((sum, p) => sum + (p.fats || 0), 0).toFixed(1),
+                carbs: this.selectedProducts.reduce((sum, p) => sum + (p.carbs || 0), 0).toFixed(1)
+            };
+        }
+    }
+}
+</script>
+@endpush
