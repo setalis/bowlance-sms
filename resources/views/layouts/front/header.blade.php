@@ -322,7 +322,8 @@
             <!-- Кнопка оформления -->
             <button type="button" 
                     class="btn btn-primary w-full gap-2"
-                    :disabled="$store.cart.items.length === 0">
+                    :disabled="$store.cart.items.length === 0"
+                    @click="$dispatch('open-checkout-modal')">
                 <span class="icon-[tabler--check] size-5"></span>
                 Оформить заказ
             </button>
@@ -335,3 +336,130 @@
     <!-- END Offcanvas Backdrop -->
 </div>
 <!-- END Offcanvas Корзина -->
+
+<!-- Модальное окно оформления заказа -->
+<div x-data="checkoutModal()" 
+     x-on:open-checkout-modal.window="open = true"
+     x-on:keydown.esc.prevent="open = false">
+    <!-- Backdrop -->
+    <div
+        x-cloak
+        x-show="open"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[100] overflow-hidden bg-zinc-700/75 backdrop-blur-xs"
+    >
+        <!-- Modal -->
+        <div
+            x-cloak
+            x-show="open"
+            x-on:click.away="open = false"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="flex min-h-screen items-center justify-center p-4"
+        >
+            <div class="w-full max-w-md rounded-lg bg-base-100 p-6 shadow-xl">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-xl font-bold">Оформление заказа</h3>
+                    <button @click="open = false" class="btn btn-circle btn-ghost btn-sm">
+                        <span class="icon-[tabler--x] size-5"></span>
+                    </button>
+                </div>
+
+                <form @submit.prevent="submitOrder">
+                    <div class="space-y-4">
+                        <!-- Имя -->
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Ваше имя <span class="text-error">*</span></span>
+                            </label>
+                            <input type="text" 
+                                   x-model="formData.name" 
+                                   class="input input-bordered w-full" 
+                                   required
+                                   placeholder="Иван Иванов">
+                        </div>
+
+                        <!-- Телефон -->
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Телефон <span class="text-error">*</span></span>
+                            </label>
+                            <input type="tel" 
+                                   x-model="formData.phone" 
+                                   class="input input-bordered w-full" 
+                                   required
+                                   placeholder="+995 555 123 456">
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Email</span>
+                            </label>
+                            <input type="email" 
+                                   x-model="formData.email" 
+                                   class="input input-bordered w-full" 
+                                   placeholder="email@example.com">
+                        </div>
+
+                        <!-- Адрес доставки -->
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Адрес доставки</span>
+                            </label>
+                            <textarea x-model="formData.address" 
+                                      class="textarea textarea-bordered w-full" 
+                                      rows="2"
+                                      placeholder="Улица, дом, квартира"></textarea>
+                        </div>
+
+                        <!-- Комментарий -->
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Комментарий к заказу</span>
+                            </label>
+                            <textarea x-model="formData.comment" 
+                                      class="textarea textarea-bordered w-full" 
+                                      rows="2"
+                                      placeholder="Дополнительные пожелания"></textarea>
+                        </div>
+
+                        <!-- Итоговая сумма -->
+                        <div class="rounded-lg bg-base-200 p-4">
+                            <div class="flex items-center justify-between text-lg font-bold">
+                                <span>Итого к оплате:</span>
+                                <span class="text-primary" x-text="$store.cart.totalPrice.toFixed(2) + ' ₾'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="mt-6 flex gap-3">
+                        <button type="button" 
+                                @click="open = false" 
+                                class="btn btn-ghost flex-1">
+                            Отмена
+                        </button>
+                        <button type="submit" 
+                                class="btn btn-primary flex-1 gap-2"
+                                :disabled="loading">
+                            <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                            <span x-text="loading ? 'Отправка...' : 'Оформить'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END Модальное окно -->

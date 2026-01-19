@@ -147,6 +147,63 @@ export function initCart() {
         // Закрыть drawer
         closeDrawer() {
             this.isOpen = false;
+        },
+
+        // Оформить заказ
+        async checkout(customerData) {
+            if (this.items.length === 0) {
+                this.showNotification('Корзина пуста', 'error');
+                return false;
+            }
+
+            try {
+                // Подготовка данных заказа
+                const orderData = {
+                    customer_name: customerData.name,
+                    customer_phone: customerData.phone,
+                    customer_email: customerData.email || null,
+                    delivery_address: customerData.address || null,
+                    comment: customerData.comment || null,
+                    items: this.items.map(item => ({
+                        type: item.type,
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity,
+                        calories: item.calories,
+                        proteins: item.proteins,
+                        fats: item.fats,
+                        carbs: item.carbs,
+                        products: item.products || null,
+                    })),
+                };
+
+                // Отправка заказа
+                const response = await fetch('/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify(orderData),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Очищаем корзину
+                    this.items = [];
+                    this.saveCart();
+                    this.closeDrawer();
+                    
+                    return result.order;
+                } else {
+                    throw new Error(result.message || 'Ошибка при оформлении заказа');
+                }
+            } catch (error) {
+                this.showNotification(error.message, 'error');
+                return false;
+            }
         }
     }
 }

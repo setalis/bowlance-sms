@@ -62,6 +62,55 @@
         </div>
     </div>
 
+    <script>
+    function checkoutModal() {
+        return {
+            open: false,
+            loading: false,
+            formData: {
+                name: '',
+                phone: '',
+                email: '',
+                address: '',
+                comment: ''
+            },
+
+            async submitOrder() {
+                if (this.loading) return;
+
+                this.loading = true;
+
+                try {
+                    const result = await this.$store.cart.checkout(this.formData);
+
+                    if (result) {
+                        // Успешно оформлен заказ
+                        this.open = false;
+                        this.resetForm();
+
+                        // Показываем сообщение об успехе
+                        alert(`Заказ ${result.order_number} успешно оформлен!\nСумма: ${result.total} ₾\n\nМы свяжемся с вами в ближайшее время.`);
+                    }
+                } catch (error) {
+                    console.error('Ошибка оформления заказа:', error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            resetForm() {
+                this.formData = {
+                    name: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    comment: ''
+                };
+            }
+        }
+    }
+    </script>
+
     @stack('scripts')
 </body>
 
