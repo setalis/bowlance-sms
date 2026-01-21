@@ -13,8 +13,12 @@ class DishCategory extends Model
 
     protected $fillable = [
         'name',
+        'name_ru',
+        'name_ka',
         'slug',
         'description',
+        'description_ru',
+        'description_ka',
         'image',
         'is_active',
         'sort',
@@ -49,14 +53,20 @@ class DishCategory extends Model
     protected static function booted(): void
     {
         static::creating(function (DishCategory $category) {
-            if (empty($category->slug) && ! empty($category->name)) {
-                $category->slug = $category->generateSlug($category->name);
+            if (empty($category->slug)) {
+                $nameForSlug = $category->name_ru ?? $category->name ?? '';
+                if (! empty($nameForSlug)) {
+                    $category->slug = $category->generateSlug($nameForSlug);
+                }
             }
         });
 
         static::updating(function (DishCategory $category) {
-            if (empty($category->slug) && ! empty($category->name)) {
-                $category->slug = $category->generateSlug($category->name);
+            if (empty($category->slug)) {
+                $nameForSlug = $category->name_ru ?? $category->name ?? '';
+                if (! empty($nameForSlug)) {
+                    $category->slug = $category->generateSlug($nameForSlug);
+                }
             }
         });
     }
@@ -64,5 +74,43 @@ class DishCategory extends Model
     public function dishes(): HasMany
     {
         return $this->hasMany(Dish::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Получить название в зависимости от текущей локали.
+     */
+    public function getNameAttribute(?string $value): string
+    {
+        $locale = app()->getLocale();
+        
+        if ($locale === 'ka' && $this->name_ka) {
+            return $this->name_ka;
+        }
+        
+        if ($locale === 'ru' && $this->name_ru) {
+            return $this->name_ru;
+        }
+        
+        // Fallback на русский, затем на старое поле
+        return $this->name_ru ?? $this->attributes['name'] ?? '';
+    }
+
+    /**
+     * Получить описание в зависимости от текущей локали.
+     */
+    public function getDescriptionAttribute(?string $value): ?string
+    {
+        $locale = app()->getLocale();
+        
+        if ($locale === 'ka' && $this->description_ka) {
+            return $this->description_ka;
+        }
+        
+        if ($locale === 'ru' && $this->description_ru) {
+            return $this->description_ru;
+        }
+        
+        // Fallback на русский, затем на старое поле
+        return $this->description_ru ?? $this->attributes['description'] ?? null;
     }
 }

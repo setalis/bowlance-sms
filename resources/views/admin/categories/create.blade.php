@@ -22,46 +22,90 @@
                 <div class="space-y-4">
                     <h4 class="text-base-content text-lg font-semibold">Основная информация</h4>
                     
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="label-text" for="name">Название*</label>
-                            <input type="text" 
-                                   name="name" 
-                                   placeholder="Например: Горячие блюда" 
-                                   class="input @error('name') input-error @enderror" 
-                                   id="name" 
-                                   value="{{ old('name') }}" 
-                                   required />
-                            @error('name')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="label-text" for="slug">Slug</label>
-                            <input type="text" 
-                                   name="slug" 
-                                   placeholder="goriachie-bliuda (оставьте пустым для автогенерации)" 
-                                   class="input @error('slug') input-error @enderror" 
-                                   id="slug" 
-                                   value="{{ old('slug') }}" />
-                            <span class="text-base-content/60 text-xs mt-1 block">Оставьте пустым для автоматической генерации</span>
-                            @error('slug')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="label-text" for="description">Описание</label>
-                        <textarea name="description" 
-                                  placeholder="Краткое описание категории" 
-                                  class="textarea textarea-bordered @error('description') textarea-error @enderror" 
-                                  id="description" 
-                                  rows="3">{{ old('description') }}</textarea>
-                        @error('description')
+                        <label class="label-text" for="slug">Slug</label>
+                        <input type="text" 
+                               name="slug" 
+                               placeholder="goriachie-bliuda (оставьте пустым для автогенерации)" 
+                               class="input @error('slug') input-error @enderror" 
+                               id="slug" 
+                               value="{{ old('slug') }}" />
+                        <span class="text-base-content/60 text-xs mt-1 block">Оставьте пустым для автоматической генерации</span>
+                        @error('slug')
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
+                    </div>
+
+                    <!-- Переводы -->
+                    <div class="space-y-4 border-t border-base-content/10 pt-4">
+                        <h5 class="text-base-content text-base font-semibold">Переводы</h5>
+                        
+                        <!-- Русский язык -->
+                        <div class="space-y-3 rounded-lg bg-base-200/50 p-4">
+                            <div class="flex items-center gap-2">
+                                <span class="icon-[tabler--flag] size-5 text-primary"></span>
+                                <h6 class="text-base-content font-medium">Русский язык</h6>
+                            </div>
+                            
+                            <div>
+                                <label class="label-text" for="name_ru">Название (RU)*</label>
+                                <input type="text" 
+                                       name="name_ru" 
+                                       placeholder="Например: Горячие блюда" 
+                                       class="input @error('name_ru') input-error @enderror" 
+                                       id="name_ru" 
+                                       value="{{ old('name_ru') }}" 
+                                       required />
+                                @error('name_ru')
+                                    <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="label-text" for="description_ru">Описание (RU)</label>
+                                <textarea name="description_ru" 
+                                          placeholder="Краткое описание категории" 
+                                          class="textarea textarea-bordered @error('description_ru') textarea-error @enderror" 
+                                          id="description_ru" 
+                                          rows="3">{{ old('description_ru') }}</textarea>
+                                @error('description_ru')
+                                    <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Грузинский язык -->
+                        <div class="space-y-3 rounded-lg bg-base-200/50 p-4">
+                            <div class="flex items-center gap-2">
+                                <span class="icon-[tabler--flag] size-5 text-primary"></span>
+                                <h6 class="text-base-content font-medium">ქართული ენა (Грузинский язык)</h6>
+                            </div>
+                            
+                            <div>
+                                <label class="label-text" for="name_ka">Название (KA)</label>
+                                <input type="text" 
+                                       name="name_ka" 
+                                       placeholder="მაგალითად: ცხელი კერძები" 
+                                       class="input @error('name_ka') input-error @enderror" 
+                                       id="name_ka" 
+                                       value="{{ old('name_ka') }}" />
+                                @error('name_ka')
+                                    <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label class="label-text" for="description_ka">Описание (KA)</label>
+                                <textarea name="description_ka" 
+                                          placeholder="კატეგორიის მოკლე აღწერა" 
+                                          class="textarea textarea-bordered @error('description_ka') textarea-error @enderror" 
+                                          id="description_ka" 
+                                          rows="3">{{ old('description_ka') }}</textarea>
+                                @error('description_ka')
+                                    <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div>

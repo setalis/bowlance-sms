@@ -22,8 +22,12 @@ class StoreDishRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'name_ru' => ['required', 'string', 'max:255'],
+            'name_ka' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'description_ru' => ['nullable', 'string'],
+            'description_ka' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
             'discount_price' => ['nullable', 'numeric', 'min:0', 'max:999999.99', 'lt:price'],
             'dish_category_id' => ['required', 'exists:dish_categories,id'],
@@ -44,8 +48,9 @@ class StoreDishRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Название блюда обязательно для заполнения.',
-            'name.max' => 'Название не должно превышать 255 символов.',
+            'name_ru.required' => 'Название блюда на русском языке обязательно для заполнения.',
+            'name_ru.max' => 'Название не должно превышать 255 символов.',
+            'name_ka.max' => 'Название на грузинском языке не должно превышать 255 символов.',
             'price.required' => 'Цена обязательна для заполнения.',
             'price.numeric' => 'Цена должна быть числом.',
             'price.min' => 'Цена не может быть отрицательной.',

@@ -22,7 +22,9 @@ class UpdateConstructorCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'name_ru' => ['required', 'string', 'max:255'],
+            'name_ka' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['integer', 'min:0'],
         ];
     }
@@ -33,8 +35,9 @@ class UpdateConstructorCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Название категории обязательно для заполнения.',
-            'name.max' => 'Название не должно превышать 255 символов.',
+            'name_ru.required' => 'Название категории на русском языке обязательно для заполнения.',
+            'name_ru.max' => 'Название не должно превышать 255 символов.',
+            'name_ka.max' => 'Название на грузинском языке не должно превышать 255 символов.',
         ];
     }
 }

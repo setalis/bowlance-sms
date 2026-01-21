@@ -18,11 +18,32 @@ class ConstructorCategory extends Model
 
     protected $fillable = [
         'name',
+        'name_ru',
+        'name_ka',
         'sort_order',
     ];
 
     public function products(): HasMany
     {
         return $this->hasMany(ConstructorProduct::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Получить название в зависимости от текущей локали.
+     */
+    public function getNameAttribute(?string $value): string
+    {
+        $locale = app()->getLocale();
+        
+        if ($locale === 'ka' && $this->name_ka) {
+            return $this->name_ka;
+        }
+        
+        if ($locale === 'ru' && $this->name_ru) {
+            return $this->name_ru;
+        }
+        
+        // Fallback на русский, затем на старое поле
+        return $this->name_ru ?? $this->attributes['name'] ?? '';
     }
 }

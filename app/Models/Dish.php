@@ -13,7 +13,11 @@ class Dish extends Model
 
     protected $fillable = [
         'name',
+        'name_ru',
+        'name_ka',
         'description',
+        'description_ru',
+        'description_ka',
         'price',
         'discount_price',
         'dish_category_id',
@@ -42,5 +46,43 @@ class Dish extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(DishCategory::class, 'dish_category_id');
+    }
+
+    /**
+     * Получить название в зависимости от текущей локали.
+     */
+    public function getNameAttribute(?string $value): string
+    {
+        $locale = app()->getLocale();
+        
+        if ($locale === 'ka' && $this->name_ka) {
+            return $this->name_ka;
+        }
+        
+        if ($locale === 'ru' && $this->name_ru) {
+            return $this->name_ru;
+        }
+        
+        // Fallback на русский, затем на старое поле
+        return $this->name_ru ?? $this->attributes['name'] ?? '';
+    }
+
+    /**
+     * Получить описание в зависимости от текущей локали.
+     */
+    public function getDescriptionAttribute(?string $value): ?string
+    {
+        $locale = app()->getLocale();
+        
+        if ($locale === 'ka' && $this->description_ka) {
+            return $this->description_ka;
+        }
+        
+        if ($locale === 'ru' && $this->description_ru) {
+            return $this->description_ru;
+        }
+        
+        // Fallback на русский, затем на старое поле
+        return $this->description_ru ?? $this->attributes['description'] ?? null;
     }
 }
