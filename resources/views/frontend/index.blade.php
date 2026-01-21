@@ -17,7 +17,7 @@
                         <div class="absolute inset-0 flex items-center justify-center bg-black/40">
                             <div class="text-center text-white">
                                 <h2 class="mb-4 text-4xl font-bold sm:text-5xl">Bowlance</h2>
-                                <p class="text-xl sm:text-2xl">Полезная еда быстро и вкусно</p>
+                                <p class="text-xl sm:text-2xl">{{ __('frontend.tagline') }}</p>
                             </div>
                         </div>
                     </div>
@@ -29,8 +29,8 @@
                              class="h-full w-full object-cover">
                         <div class="absolute inset-0 flex items-center justify-center bg-black/40">
                             <div class="text-center text-white">
-                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">Свежие продукты</h2>
-                                <p class="text-xl sm:text-2xl">Только качественные ингредиенты</p>
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">{{ __('frontend.fresh_products') }}</h2>
+                                <p class="text-xl sm:text-2xl">{{ __('frontend.fresh_products_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -42,8 +42,8 @@
                              class="h-full w-full object-cover">
                         <div class="absolute inset-0 flex items-center justify-center bg-black/40">
                             <div class="text-center text-white">
-                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">Собери свой боул</h2>
-                                <p class="text-xl sm:text-2xl">Выбери ингредиенты по вкусу</p>
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">{{ __('frontend.build_bowl') }}</h2>
+                                <p class="text-xl sm:text-2xl">{{ __('frontend.build_bowl_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                     role="tab" 
                     aria-selected="true">
                 <span class="icon-[tabler--menu-2] mr-2 size-5"></span>
-                Меню
+                {{ __('frontend.menu_tab') }}
             </button>
             <button type="button" 
                     class="tab h-14 text-lg active-tab:tab-active" 
@@ -84,7 +84,7 @@
                     role="tab" 
                     aria-selected="false">
                 <span class="icon-[tabler--tools-kitchen-2] mr-2 size-5"></span>
-                Собери сам
+                {{ __('frontend.constructor_tab') }}
             </button>
         </nav>
 
@@ -95,7 +95,7 @@
                 @if($dishCategories->isEmpty())
                     <div class="text-center py-12">
                         <span class="icon-[tabler--shopping-bag-x] size-16 text-base-content/30 mb-4"></span>
-                        <p class="text-base-content/60">Пока нет доступных блюд</p>
+                        <p class="text-base-content/60">{{ __('frontend.no_dishes_available') }}</p>
                     </div>
                 @else
                     @foreach($dishCategories as $category)
@@ -106,7 +106,7 @@
                             </h3>
                             
                             @if($category->dishes->isEmpty())
-                                <p class="text-base-content/50 italic">В этой категории пока нет блюд</p>
+                                <p class="text-base-content/50 italic">{{ __('frontend.no_dishes_in_category') }}</p>
                             @else
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                     @foreach($category->dishes as $dish)
@@ -135,17 +135,17 @@
                                                         @if($dish->calories)
                                                             <span class="badge badge-outline badge-sm">
                                                                 <span class="icon-[tabler--flame] mr-1 size-3"></span>
-                                                                {{ $dish->calories }} ккал
+                                                                {{ $dish->calories }} {{ __('frontend.calories') }}
                                                             </span>
                                                         @endif
                                                         @if($dish->proteins)
-                                                            <span class="badge badge-outline badge-sm">Б: {{ $dish->proteins }}г</span>
+                                                            <span class="badge badge-outline badge-sm">{{ __('frontend.proteins') }}: {{ $dish->proteins }}{{ __('frontend.grams') }}</span>
                                                         @endif
                                                         @if($dish->fats)
-                                                            <span class="badge badge-outline badge-sm">Ж: {{ $dish->fats }}г</span>
+                                                            <span class="badge badge-outline badge-sm">{{ __('frontend.fats') }}: {{ $dish->fats }}{{ __('frontend.grams') }}</span>
                                                         @endif
                                                         @if($dish->carbohydrates)
-                                                            <span class="badge badge-outline badge-sm">У: {{ $dish->carbohydrates }}г</span>
+                                                            <span class="badge badge-outline badge-sm">{{ __('frontend.carbs') }}: {{ $dish->carbohydrates }}{{ __('frontend.grams') }}</span>
                                                         @endif
                                                     </div>
                                                 @endif
@@ -181,7 +181,7 @@
                                                                 $store.cart.openDrawer();
                                                             ">
                                                         <span class="icon-[tabler--shopping-cart-plus] size-4"></span>
-                                                        В корзину
+                                                        {{ __('frontend.add_to_cart') }}
                                                     </button>
                                                 </div>
                                             </div>
@@ -198,31 +198,31 @@
             <div id="constructor-content" class="hidden" role="tabpanel" aria-labelledby="constructor-tab">
                 <div x-data="bowlConstructor()">
                     <div class="mb-6 text-center">
-                        <h3 class="text-3xl font-bold mb-2">Собери свой идеальный боул</h3>
-                        <p class="text-base-content/70">Выбери продукты из каждой категории и создай уникальное блюдо</p>
+                        <h3 class="text-3xl font-bold mb-2">{{ __('frontend.build_perfect_bowl') }}</h3>
+                        <p class="text-base-content/70">{{ __('frontend.build_perfect_bowl_desc') }}</p>
                     </div>
 
                     @if($constructorCategories->isEmpty())
                         <div class="text-center py-12">
                             <span class="icon-[tabler--tools-kitchen-off] size-16 text-base-content/30 mb-4"></span>
-                            <p class="text-base-content/60">Конструктор временно недоступен</p>
+                            <p class="text-base-content/60">{{ __('frontend.constructor_unavailable') }}</p>
                         </div>
                     @else
                         <!-- Выбранные продукты и итоги -->
                         <div class="rounded-box bg-primary/10 p-6 mb-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-xl font-bold">Ваш боул</h4>
+                                <h4 class="text-xl font-bold">{{ __('frontend.your_bowl') }}</h4>
                                 <button type="button" 
                                         @click="clearBowl()" 
                                         class="btn btn-ghost btn-sm gap-2"
                                         x-show="selectedProducts.length > 0">
                                     <span class="icon-[tabler--trash] size-4"></span>
-                                    Очистить
+                                    {{ __('frontend.clear') }}
                                 </button>
                             </div>
                             
                             <div x-show="selectedProducts.length === 0" class="text-center py-4 text-base-content/50">
-                                Выберите продукты из категорий ниже
+                                {{ __('frontend.select_products') }}
                             </div>
                             
                             <div x-show="selectedProducts.length > 0" class="space-y-2">
@@ -252,23 +252,23 @@
                                 <div class="border-t border-base-content/10 pt-4 mt-4">
                                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-5">
                                         <div class="text-center">
-                                            <p class="text-xs text-base-content/50">Калории</p>
-                                            <p class="text-lg font-bold" x-text="totalNutrition.calories + ' ккал'"></p>
+                                            <p class="text-xs text-base-content/50">{{ __('frontend.nutrition_calories') }}</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.calories + ' {{ __('frontend.calories') }}'"></p>
                                         </div>
                                         <div class="text-center">
-                                            <p class="text-xs text-base-content/50">Белки</p>
-                                            <p class="text-lg font-bold" x-text="totalNutrition.proteins + ' г'"></p>
+                                            <p class="text-xs text-base-content/50">{{ __('frontend.nutrition_proteins') }}</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.proteins + ' {{ __('frontend.grams') }}'"></p>
                                         </div>
                                         <div class="text-center">
-                                            <p class="text-xs text-base-content/50">Жиры</p>
-                                            <p class="text-lg font-bold" x-text="totalNutrition.fats + ' г'"></p>
+                                            <p class="text-xs text-base-content/50">{{ __('frontend.nutrition_fats') }}</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.fats + ' {{ __('frontend.grams') }}'"></p>
                                         </div>
                                         <div class="text-center">
-                                            <p class="text-xs text-base-content/50">Углеводы</p>
-                                            <p class="text-lg font-bold" x-text="totalNutrition.carbs + ' г'"></p>
+                                            <p class="text-xs text-base-content/50">{{ __('frontend.nutrition_carbs') }}</p>
+                                            <p class="text-lg font-bold" x-text="totalNutrition.carbs + ' {{ __('frontend.grams') }}'"></p>
                                         </div>
                                         <div class="text-center">
-                                            <p class="text-xs text-base-content/50">Итого</p>
+                                            <p class="text-xs text-base-content/50">{{ __('frontend.total') }}</p>
                                             <p class="text-2xl font-bold text-primary" x-text="totalPrice.toFixed(2) + ' ₾'"></p>
                                         </div>
                                     </div>
@@ -278,7 +278,7 @@
                                             :disabled="selectedProducts.length === 0"
                                             @click="addBowlToCart()">
                                         <span class="icon-[tabler--shopping-cart-plus] size-5"></span>
-                                        Добавить боул в корзину
+                                        {{ __('frontend.add_bowl_to_cart') }}
                                     </button>
                                 </div>
                             </div>
@@ -291,7 +291,7 @@
                                     <h4 class="mb-4 text-xl font-bold">{{ $category->name }}</h4>
                                     
                                     @if($category->products->isEmpty())
-                                        <p class="text-base-content/50 italic">В этой категории пока нет продуктов</p>
+                                        <p class="text-base-content/50 italic">{{ __('frontend.no_products_in_category') }}</p>
                                     @else
                                         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                                             @foreach($category->products as $product)
@@ -334,7 +334,7 @@
                                                             <span class="text-base font-bold">{{ number_format($product->price, 2) }} ₾</span>
                                                             <span x-show="isSelected({{ $product->id }})" 
                                                                   class="badge badge-primary badge-sm">
-                                                                Выбрано
+                                                                {{ __('frontend.selected') }}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -381,7 +381,6 @@ function bowlConstructor() {
         
         addBowlToCart() {
             if (this.selectedProducts.length === 0) {
-                alert('Выберите продукты для боула');
                 return;
             }
             

@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Переключение языка
+Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
+
 // Публичные маршруты для заказов
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');

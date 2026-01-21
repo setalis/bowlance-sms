@@ -1,0 +1,101 @@
+<?php
+
+return [
+    // Header
+    'phone' => 'ტელეფონი',
+    'location' => 'თბილისი',
+    'cart' => 'კალათა',
+    'menu' => 'მენიუ',
+    'close' => 'დახურვა',
+    
+    // Main page
+    'tagline' => 'სასარგებლო საკვები სწრაფად და გემრიელად',
+    'fresh_products' => 'ახალი პროდუქტები',
+    'fresh_products_desc' => 'მხოლოდ ხარისხიანი ინგრედიენტები',
+    'build_bowl' => 'შექმენი შენი ბოული',
+    'build_bowl_desc' => 'აირჩიე ინგრედიენტები გემოს მიხედვით',
+    
+    // Tabs
+    'menu_tab' => 'მენიუ',
+    'constructor_tab' => 'შეაგროვე თვითონ',
+    
+    // Menu
+    'no_dishes_available' => 'ჯერ არ არის ხელმისაწვდომი კერძები',
+    'no_dishes_in_category' => 'ამ კატეგორიაში ჯერ არ არის კერძები',
+    'add_to_cart' => 'კალათაში',
+    'calories' => 'კკალ',
+    'proteins' => 'ც',
+    'fats' => 'ცხ',
+    'carbs' => 'ნ',
+    'grams' => 'გ',
+    
+    // Constructor
+    'build_perfect_bowl' => 'შექმენი შენი იდეალური ბოული',
+    'build_perfect_bowl_desc' => 'აირჩიე პროდუქტები თითოეული კატეგორიიდან და შექმენი უნიკალური კერძი',
+    'constructor_unavailable' => 'კონსტრუქტორი დროებით მიუწვდომელია',
+    'your_bowl' => 'შენი ბოული',
+    'clear' => 'გასუფთავება',
+    'select_products' => 'აირჩიეთ პროდუქტები ქვემოთ მოცემული კატეგორიებიდან',
+    'no_products_in_category' => 'ამ კატეგორიაში ჯერ არ არის პროდუქტები',
+    'selected' => 'არჩეული',
+    'add_bowl_to_cart' => 'დაამატე ბოული კალათაში',
+    'total' => 'სულ',
+    
+    // Cart
+    'cart_title' => 'კალათა',
+    'items_single' => 'ნივთი',
+    'items_few' => 'ნივთი',
+    'items_many' => 'ნივთი',
+    'cart_empty' => 'თქვენი კალათა ცარიელია',
+    'cart_empty_desc' => 'დაამატეთ კერძები ან შექმენით თქვენი ბოული',
+    'remove' => 'წაშლა',
+    'ingredients' => 'ინგრედიენტი',
+    'bowl_composition' => 'ბოულის შემადგენლობა',
+    'clear_cart' => 'კალათის გასუფთავება',
+    'nutrition' => 'კვების ღირებულება',
+    'nutrition_calories' => 'კკალ',
+    'nutrition_proteins' => 'ცილები',
+    'nutrition_fats' => 'ცხიმები',
+    'nutrition_carbs' => 'ნახშირწყლები',
+    'total_price' => 'სულ:',
+    'checkout' => 'შეკვეთის გაფორმება',
+    
+    // Checkout
+    'checkout_title' => 'შეკვეთის გაფორმება',
+    'your_name' => 'თქვენი სახელი',
+    'phone' => 'ტელეფონი',
+    'email' => 'ელფოსტა',
+    'delivery_address' => 'მიწოდების მისამართი',
+    'order_comment' => 'კომენტარი შეკვეთაზე',
+    'name_placeholder' => 'ივანე ივანოვი',
+    'phone_placeholder' => '+995 555 123 456',
+    'email_placeholder' => 'email@example.com',
+    'address_placeholder' => 'ქუჩა, სახლი, ბინა',
+    'comment_placeholder' => 'დამატებითი სურვილები',
+    'total_to_pay' => 'გადასახდელი თანხა:',
+    'cancel' => 'გაუქმება',
+    'submit' => 'გაფორმება',
+    'submitting' => 'გაგზავნა...',
+    'required' => '*',
+    
+    // Order
+    'back_to_order' => 'უკან შეკვეთაზე',
+    "customer_info" => "მომხმარებლის ინფორმაცია",
+    "customer_name" => "მომხმარებლის სახელი",
+    "customer_phone" => "ტელეფონი",
+    "customer_email" => "ელფოსტა",
+    "delivery_address_label" => "მიწოდების მისამართი",
+    "comment_label" => "კომენტარი",
+    "order_items" => "შეკვეთის პოზიციები",
+    "add_dish" => "კერძი",
+    "add_bowl" => "ბოული",
+    "select_dish" => "აირჩიეთ კერძი",
+    "quantity" => "რაოდენობა",
+    "bowl_products" => "შეგროვილი ბოული",
+    "select_product" => "აირჩიეთ...",
+    "selected_ingredients" => "არჩეული ინგრედიენტები:",
+    "add_items_hint" => "დააჭირეთ \"კერძი\" ან \"ბოული\" პოზიციების დასამატებლად",
+    "order_status" => "შეკვეთის სტატუსი",
+    "save_changes" => "ცვლილებების შენახვა",
+    "cancel_action" => "გაუქმება",
+];

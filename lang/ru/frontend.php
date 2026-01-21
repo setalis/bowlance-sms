@@ -1,0 +1,101 @@
+<?php
+
+return [
+    // Header
+    'phone' => 'Телефон',
+    'location' => 'Тбилиси',
+    'cart' => 'Корзина',
+    'menu' => 'Меню',
+    'close' => 'Закрыть',
+    
+    // Main page
+    'tagline' => 'Полезная еда быстро и вкусно',
+    'fresh_products' => 'Свежие продукты',
+    'fresh_products_desc' => 'Только качественные ингредиенты',
+    'build_bowl' => 'Собери свой боул',
+    'build_bowl_desc' => 'Выбери ингредиенты по вкусу',
+    
+    // Tabs
+    'menu_tab' => 'Меню',
+    'constructor_tab' => 'Собери сам',
+    
+    // Menu
+    'no_dishes_available' => 'Пока нет доступных блюд',
+    'no_dishes_in_category' => 'В этой категории пока нет блюд',
+    'add_to_cart' => 'В корзину',
+    'calories' => 'ккал',
+    'proteins' => 'Б',
+    'fats' => 'Ж',
+    'carbs' => 'У',
+    'grams' => 'г',
+    
+    // Constructor
+    'build_perfect_bowl' => 'Собери свой идеальный боул',
+    'build_perfect_bowl_desc' => 'Выбери продукты из каждой категории и создай уникальное блюдо',
+    'constructor_unavailable' => 'Конструктор временно недоступен',
+    'your_bowl' => 'Ваш боул',
+    'clear' => 'Очистить',
+    'select_products' => 'Выберите продукты из категорий ниже',
+    'no_products_in_category' => 'В этой категории пока нет продуктов',
+    'selected' => 'Выбрано',
+    'add_bowl_to_cart' => 'Добавить боул в корзину',
+    'total' => 'Итого',
+    
+    // Cart
+    'cart_title' => 'Корзина',
+    'items_single' => 'товар',
+    'items_few' => 'товара',
+    'items_many' => 'товаров',
+    'cart_empty' => 'Ваша корзина пуста',
+    'cart_empty_desc' => 'Добавьте блюда или создайте свой боул',
+    'remove' => 'Удалить',
+    'ingredients' => 'ингредиента',
+    'bowl_composition' => 'Состав боула',
+    'clear_cart' => 'Очистить корзину',
+    'nutrition' => 'Пищевая ценность',
+    'nutrition_calories' => 'Ккал',
+    'nutrition_proteins' => 'Белки',
+    'nutrition_fats' => 'Жиры',
+    'nutrition_carbs' => 'Углев.',
+    'total_price' => 'Итого:',
+    'checkout' => 'Оформить заказ',
+    
+    // Checkout
+    'checkout_title' => 'Оформление заказа',
+    'your_name' => 'Ваше имя',
+    'phone' => 'Телефон',
+    'email' => 'Email',
+    'delivery_address' => 'Адрес доставки',
+    'order_comment' => 'Комментарий к заказу',
+    'name_placeholder' => 'Иван Иванов',
+    'phone_placeholder' => '+995 555 123 456',
+    'email_placeholder' => 'email@example.com',
+    'address_placeholder' => 'Улица, дом, квартира',
+    'comment_placeholder' => 'Дополнительные пожелания',
+    'total_to_pay' => 'Итого к оплате:',
+    'cancel' => 'Отмена',
+    'submit' => 'Оформить',
+    'submitting' => 'Отправка...',
+    'required' => '*',
+    
+    // Order
+    'back_to_order' => 'Назад к заказу',
+    "customer_info" => "Информация о клиенте",
+    "customer_name" => "Имя клиента",
+    "customer_phone" => "Телефон",
+    "customer_email" => "Email",
+    "delivery_address_label" => "Адрес доставки",
+    "comment_label" => "Комментарий",
+    "order_items" => "Позиции заказа",
+    "add_dish" => "Блюдо",
+    "add_bowl" => "Боул",
+    "select_dish" => "Выберите блюдо",
+    "quantity" => "Количество",
+    "bowl_products" => "Собранный боул",
+    "select_product" => "Выбрать...",
+    "selected_ingredients" => "Выбранные ингредиенты:",
+    "add_items_hint" => "Нажмите \"Блюдо\" или \"Боул\" для добавления позиций",
+    "order_status" => "Статус заказа",
+    "save_changes" => "Сохранить изменения",
+    "cancel_action" => "Отмена",
+];
