@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'auth.cabinet' => \App\Http\Middleware\AuthenticateCabinet::class,
+            'cabinet' => \App\Http\Middleware\EnsureCabinetUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -178,30 +178,41 @@ export function initCart() {
                     })),
                 };
 
-                // Отправка заказа
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfMeta) {
+                    this.showNotification('Ошибка: отсутствует CSRF-токен. Обновите страницу.', 'error');
+                    return false;
+                }
+
                 const response = await fetch('/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-TOKEN': csrfMeta.getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: JSON.stringify(orderData),
                 });
 
+                if (response.status === 419) {
+                    this.showNotification('Сессия истекла. Обновите страницу (F5) и повторите попытку.', 'error');
+                    setTimeout(() => window.location.reload(), 1500);
+                    return false;
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
-                    // Очищаем корзину
                     this.items = [];
                     this.saveCart();
                     this.closeDrawer();
-                    
+
                     return result.order;
                 } else {
                     throw new Error(result.message || 'Ошибка при оформлении заказа');
                 }
             } catch (error) {
-                this.showNotification(error.message, 'error');
+                this.showNotification(error.message || 'Ошибка при оформлении заказа', 'error');
                 return false;
             }
         }

@@ -5,6 +5,10 @@ use App\Http\Controllers\Admin\ConstructorProductController;
 use App\Http\Controllers\Admin\DishCategoryController;
 use App\Http\Controllers\Admin\DishController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Cabinet\Auth\LoginController as CabinetLoginController;
+use App\Http\Controllers\Cabinet\DashboardController;
+use App\Http\Controllers\Cabinet\OrderController as CabinetOrderController;
+use App\Http\Controllers\Cabinet\ProfileController as CabinetProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
@@ -44,5 +48,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 Route::middleware(['auth', 'admin'])->get('/dashboard', function () {
     return redirect('/admin');
 })->name('dashboard');
+
+// Личный кабинет — вход по телефону (отдельно от админки)
+Route::prefix('cabinet')->name('cabinet.')->group(function () {
+    Route::get('login', [CabinetLoginController::class, 'create'])->name('login');
+    Route::post('login', [CabinetLoginController::class, 'store']);
+
+    Route::middleware(['auth.cabinet', 'cabinet'])->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('profile', [CabinetProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('profile', [CabinetProfileController::class, 'update'])->name('profile.update');
+        Route::get('orders', [CabinetOrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{order}', [CabinetOrderController::class, 'show'])->name('orders.show');
+        Route::post('logout', [CabinetLoginController::class, 'destroy'])->name('logout');
+    });
+});
 
 require __DIR__.'/auth.php';

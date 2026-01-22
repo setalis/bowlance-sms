@@ -60,7 +60,18 @@
                 </li>
               </ul>
             </div>
-            
+
+            @auth
+                @if(auth()->user()->isUser())
+                    <a href="{{ route('cabinet.dashboard') }}" class="btn btn-ghost btn-square btn-sm" aria-label="Личный кабинет" title="Личный кабинет">
+                        <span class="icon-[tabler--user] size-5"></span>
+                    </a>
+                @endif
+            @else
+                <a href="{{ route('cabinet.login') }}" class="btn btn-ghost btn-square btn-sm" aria-label="Личный кабинет" title="Личный кабинет">
+                    <span class="icon-[tabler--user] size-5"></span>
+                </a>
+            @endauth
 
             <!-- Корзина -->
             <button type="button" 
@@ -97,6 +108,19 @@
         </div>
         <div class="p-4 overflow-y-auto">
             <div class="flex flex-col gap-4">
+                @auth
+                    @if(auth()->user()->isUser())
+                        <a href="{{ route('cabinet.dashboard') }}" class="btn btn-outline gap-2">
+                            <span class="icon-[tabler--user] size-5"></span>
+                            <span>Личный кабинет</span>
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('cabinet.login') }}" class="btn btn-outline gap-2">
+                        <span class="icon-[tabler--user] size-5"></span>
+                        <span>Личный кабинет</span>
+                    </a>
+                @endauth
                 <a href="tel:+995555123456" class="btn btn-outline gap-2">
                     <span class="icon-[tabler--phone] size-5"></span>
                     <span>+995 555 123 456</span>
