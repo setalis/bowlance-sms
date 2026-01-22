@@ -33,6 +33,7 @@ class RegistrationController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('admin.dashboard', absolute: false));
+        // Обычные пользователи не могут попасть в админ-панель
+        return redirect('/');
     }
 }

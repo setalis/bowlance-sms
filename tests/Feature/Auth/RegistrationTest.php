@@ -15,5 +15,6 @@ test('new users can register', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('admin.dashboard', absolute: false));
+    // Новые пользователи получают роль User и перенаправляются на главную
+    $response->assertRedirect('/');
 });

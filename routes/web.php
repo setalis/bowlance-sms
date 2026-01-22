@@ -23,7 +23,7 @@ Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, '
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return view('admin.dashboard', ['title' => 'Dashboard']);
     })->name('dashboard');
@@ -41,7 +41,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 // Backward compatibility redirect
-Route::middleware(['auth'])->get('/dashboard', function () {
+Route::middleware(['auth', 'admin'])->get('/dashboard', function () {
     return redirect('/admin');
 })->name('dashboard');
 

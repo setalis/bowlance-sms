@@ -40,7 +40,13 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard', absolute: false));
+        // Перенаправляем администраторов в админ-панель, обычных пользователей на главную
+        $user = Auth::user();
+        if ($user && $user->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
+
+        return redirect()->intended('/');
     }
 
     public function destroy(Request $request): RedirectResponse

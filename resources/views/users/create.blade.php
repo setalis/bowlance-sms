@@ -11,13 +11,12 @@
 
         <div class="bg-base-100 shadow-base-300/20 w-full space-y-6 rounded-xl p-6 shadow-md lg:p-8">
             <div>
-                <h3 class="text-base-content mb-1.5 text-2xl font-semibold">Редактировать пользователя</h3>
-                <p class="text-base-content/80">Обновите информацию о пользователе</p>
+                <h3 class="text-base-content mb-1.5 text-2xl font-semibold">Создать пользователя</h3>
+                <p class="text-base-content/80">Добавьте нового пользователя в систему</p>
             </div>
 
-            <form action="{{ route('admin.users.update', $user) }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-4">
                 @csrf
-                @method('PUT')
 
                 <div>
                     <label class="label-text" for="userName">Имя*</label>
@@ -26,7 +25,7 @@
                            placeholder="Введите имя" 
                            class="input @error('name') input-error @enderror" 
                            id="userName" 
-                           value="{{ old('name', $user->name) }}" 
+                           value="{{ old('name') }}" 
                            required />
                     @error('name')
                         <span class="text-error text-sm mt-1 block">{{ $message }}</span>
@@ -40,7 +39,7 @@
                            placeholder="Введите email адрес" 
                            class="input @error('email') input-error @enderror" 
                            id="userEmail" 
-                           value="{{ old('email', $user->email) }}" 
+                           value="{{ old('email') }}" 
                            required />
                     @error('email')
                         <span class="text-error text-sm mt-1 block">{{ $message }}</span>
@@ -54,32 +53,33 @@
                            placeholder="+995 555 123 456" 
                            class="input @error('phone') input-error @enderror" 
                            id="userPhone" 
-                           value="{{ old('phone', $user->phone) }}" />
+                           value="{{ old('phone') }}" />
                     @error('phone')
                         <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div>
-                    <label class="label-text" for="userPassword">Новый пароль</label>
+                    <label class="label-text" for="userPassword">Пароль*</label>
                     <input type="password" 
                            name="password" 
-                           placeholder="Оставьте пустым, чтобы не менять пароль" 
+                           placeholder="Введите пароль" 
                            class="input @error('password') input-error @enderror" 
-                           id="userPassword" />
-                    <span class="text-base-content/60 text-xs mt-1 block">Оставьте пустым, чтобы не менять пароль</span>
+                           id="userPassword" 
+                           required />
                     @error('password')
                         <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div>
-                    <label class="label-text" for="userPasswordConfirmation">Подтверждение нового пароля</label>
+                    <label class="label-text" for="userPasswordConfirmation">Подтверждение пароля*</label>
                     <input type="password" 
                            name="password_confirmation" 
-                           placeholder="Подтвердите новый пароль" 
+                           placeholder="Подтвердите пароль" 
                            class="input @error('password_confirmation') input-error @enderror" 
-                           id="userPasswordConfirmation" />
+                           id="userPasswordConfirmation" 
+                           required />
                     @error('password_confirmation')
                         <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                     @enderror
@@ -93,7 +93,7 @@
                             required>
                         <option value="">Выберите роль</option>
                         @foreach($roles as $role)
-                            <option value="{{ $role->value }}" {{ old('role', $user->role->value) === $role->value ? 'selected' : '' }}>
+                            <option value="{{ $role->value }}" {{ old('role') === $role->value ? 'selected' : '' }}>
                                 {{ $role === \App\Enums\UserRole::Admin ? 'Администратор' : 'Пользователь' }}
                             </option>
                         @endforeach
@@ -106,7 +106,7 @@
                 <div class="flex items-center gap-3 pt-2">
                     <button type="submit" class="btn btn-lg btn-primary btn-gradient">
                         <span class="icon-[tabler--check] size-5"></span>
-                        Обновить пользователя
+                        Создать пользователя
                     </button>
 
                     <a href="{{ route('admin.users.index') }}" class="btn btn-lg btn-outline">
@@ -117,4 +117,3 @@
         </div>
     </div>
 @endsection
-
