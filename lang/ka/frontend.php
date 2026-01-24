@@ -40,6 +40,8 @@ return [
     'selected' => 'არჩეული',
     'add_bowl_to_cart' => 'დაამატე ბოული კალათაში',
     'total' => 'სულ',
+    'click_to_select' => 'დააჭირეთ არჩევისთვის',
+    'done' => 'მზადაა',
     
     // Cart
     'cart_title' => 'კალათა',

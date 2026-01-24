@@ -208,8 +208,48 @@
                             <p class="text-base-content/60">{{ __('frontend.constructor_unavailable') }}</p>
                         </div>
                     @else
-                        <!-- Выбранные продукты и итоги -->
-                        <div class="rounded-box bg-primary/10 p-6 mb-6">
+                        <!-- Зоны категорий -->
+                        <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach($constructorCategories as $category)
+                                <div @click="openCategoryModal({{ $category->id }})" 
+                                     class="card cursor-pointer transition-all hover:shadow-xl hover:scale-105 min-h-48 border-2 border-dashed"
+                                     :class="getCategoryProducts({{ $category->id }}).length > 0 ? 'border-primary bg-primary/5' : 'border-base-300 hover:border-primary/50'">
+                                    <div class="card-body items-center justify-center p-4">
+                                        <span class="icon-[tabler--tools-kitchen-2] size-12 text-primary mb-2"></span>
+                                        <h4 class="text-lg font-bold text-center">{{ $category->name }}</h4>
+                                        
+                                        <!-- Выбранные продукты в категории -->
+                                        <template x-if="getCategoryProducts({{ $category->id }}).length > 0">
+                                            <div class="mt-3 w-full space-y-2">
+                                                <template x-for="product in getCategoryProducts({{ $category->id }})" :key="product.id">
+                                                    <div class="flex items-center gap-2 bg-base-100 rounded-lg p-2 text-sm">
+                                                        <img :src="product.image || 'https://via.placeholder.com/40'" 
+                                                             :alt="product.name" 
+                                                             class="size-8 rounded object-cover">
+                                                        <div class="flex-1 min-w-0">
+                                                            <p class="font-medium truncate text-xs" x-text="product.name"></p>
+                                                            <p class="text-xs text-primary font-bold" x-text="product.price + ' ₾'"></p>
+                                                        </div>
+                                                        <button type="button" 
+                                                                @click.stop="removeProduct(product.id)" 
+                                                                class="btn btn-ghost btn-circle btn-xs">
+                                                            <span class="icon-[tabler--x] size-3"></span>
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        
+                                        <template x-if="getCategoryProducts({{ $category->id }}).length === 0">
+                                            <p class="text-sm text-base-content/50 text-center mt-2">{{ __('frontend.click_to_select') }}</p>
+                                        </template>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Итоговая информация -->
+                        <div class="rounded-box bg-primary/10 p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-xl font-bold">{{ __('frontend.your_bowl') }}</h4>
                                 <button type="button" 
@@ -225,31 +265,9 @@
                                 {{ __('frontend.select_products') }}
                             </div>
                             
-                            <div x-show="selectedProducts.length > 0" class="space-y-2">
-                                <template x-for="product in selectedProducts" :key="product.id">
-                                    <div class="flex items-center justify-between bg-base-100 rounded-lg p-3">
-                                        <div class="flex items-center gap-3">
-                                            <img :src="product.image || 'https://via.placeholder.com/50'" 
-                                                 :alt="product.name" 
-                                                 class="size-12 rounded-lg object-cover">
-                                            <div>
-                                                <p class="font-medium" x-text="product.name"></p>
-                                                <p class="text-sm text-base-content/50" x-text="product.category"></p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-bold" x-text="product.price + ' ₾'"></span>
-                                            <button type="button" 
-                                                    @click="removeProduct(product.id)" 
-                                                    class="btn btn-ghost btn-circle btn-sm">
-                                                <span class="icon-[tabler--x] size-4"></span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </template>
-                                
+                            <div x-show="selectedProducts.length > 0">
                                 <!-- Итоговая информация -->
-                                <div class="border-t border-base-content/10 pt-4 mt-4">
+                                <div class="border-t border-base-content/10 pt-4">
                                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-5">
                                         <div class="text-center">
                                             <p class="text-xs text-base-content/50">{{ __('frontend.nutrition_calories') }}</p>
@@ -284,67 +302,123 @@
                             </div>
                         </div>
 
-                        <!-- Категории продуктов -->
-                        <div class="space-y-8">
-                            @foreach($constructorCategories as $category)
-                                <div>
-                                    <h4 class="mb-4 text-xl font-bold">{{ $category->name }}</h4>
-                                    
-                                    @if($category->products->isEmpty())
-                                        <p class="text-base-content/50 italic">{{ __('frontend.no_products_in_category') }}</p>
-                                    @else
-                                        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                                            @foreach($category->products as $product)
-                                                <div @click="toggleProduct({
-                                                    id: {{ $product->id }},
-                                                    name: '{{ addslashes($product->name) }}',
-                                                    price: {{ $product->price }},
-                                                    category: '{{ addslashes($category->name) }}',
-                                                    image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
-                                                    calories: {{ $product->calories ?? 0 }},
-                                                    proteins: {{ $product->proteins ?? 0 }},
-                                                    fats: {{ $product->fats ?? 0 }},
-                                                    carbs: {{ $product->carbohydrates ?? 0 }}
-                                                })"
-                                                     class="card cursor-pointer transition-all hover:shadow-lg"
-                                                     :class="{ 'ring-2 ring-primary': isSelected({{ $product->id }}) }">
-                                                    <figure class="h-32 overflow-hidden">
-                                                        @if($product->image)
-                                                            <img src="{{ asset('storage/' . $product->image) }}" 
-                                                                 alt="{{ $product->name }}" 
-                                                                 class="h-full w-full object-cover">
-                                                        @else
-                                                            <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=150&fit=crop" 
-                                                                 alt="{{ $product->name }}" 
-                                                                 class="h-full w-full object-cover">
-                                                        @endif
-                                                        <div x-show="isSelected({{ $product->id }})" 
-                                                             class="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                                                            <span class="icon-[tabler--check] size-8 text-primary"></span>
-                                                        </div>
-                                                    </figure>
-                                                    <div class="card-body p-3">
-                                                        <h5 class="text-sm font-medium line-clamp-2">{{ $product->name }}</h5>
-                                                        
-                                                        @if($product->weight_volume)
-                                                            <p class="text-xs text-base-content/50">{{ $product->weight_volume }}</p>
-                                                        @endif
-                                                        
-                                                        <div class="mt-2 flex items-center justify-between">
-                                                            <span class="text-base font-bold">{{ number_format($product->price, 2) }} ₾</span>
-                                                            <span x-show="isSelected({{ $product->id }})" 
-                                                                  class="badge badge-primary badge-sm">
-                                                                {{ __('frontend.selected') }}
-                                                            </span>
+                        <!-- Модальные окна для каждой категории -->
+                        @foreach($constructorCategories as $category)
+                        <div x-show="modalCategoryId === {{ $category->id }}"
+                             x-cloak
+                             @keydown.esc.prevent="closeModal()"
+                             class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <!-- Backdrop -->
+                            <div
+                                x-show="modalCategoryId === {{ $category->id }}"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-200"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                @click="closeModal()"
+                                class="fixed inset-0 bg-zinc-700/75 backdrop-blur-xs"
+                            ></div>
+                            
+                            <!-- Modal Content -->
+                            <div
+                                x-show="modalCategoryId === {{ $category->id }}"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-200"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="relative w-full max-w-4xl rounded-xl bg-base-100 shadow-2xl max-h-[85vh] flex flex-col"
+                            >
+                                <!-- Header -->
+                                <div class="flex items-center justify-between border-b border-base-content/10 px-6 py-4">
+                                    <h3 class="text-2xl font-bold">{{ $category->name }}</h3>
+                                    <button @click="closeModal()" class="btn btn-circle btn-ghost btn-sm">
+                                        <span class="icon-[tabler--x] size-5"></span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Body -->
+                                <div class="overflow-y-auto p-6 flex-1">
+
+                                        @if($category->products->isEmpty())
+                                            <p class="text-base-content/50 italic text-center py-8">{{ __('frontend.no_products_in_category') }}</p>
+                                        @else
+                                            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                                                @foreach($category->products as $product)
+                                                    <div @click="toggleProduct({
+                                                        id: {{ $product->id }},
+                                                        name: '{{ addslashes($product->name) }}',
+                                                        price: {{ $product->price }},
+                                                        categoryId: {{ $category->id }},
+                                                        category: '{{ addslashes($category->name) }}',
+                                                        image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
+                                                        calories: {{ $product->calories ?? 0 }},
+                                                        proteins: {{ $product->proteins ?? 0 }},
+                                                        fats: {{ $product->fats ?? 0 }},
+                                                        carbs: {{ $product->carbohydrates ?? 0 }}
+                                                    })"
+                                                         class="card bg-base-200 cursor-pointer transition-all hover:shadow-lg hover:bg-base-300"
+                                                         :class="{ 'ring-2 ring-primary bg-primary/10': isSelected({{ $product->id }}) }">
+                                                        <figure class="h-32 overflow-hidden relative">
+                                                            @if($product->image)
+                                                                <img src="{{ asset('storage/' . $product->image) }}" 
+                                                                     alt="{{ $product->name }}" 
+                                                                     class="h-full w-full object-cover">
+                                                            @else
+                                                                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=150&fit=crop" 
+                                                                     alt="{{ $product->name }}" 
+                                                                     class="h-full w-full object-cover">
+                                                            @endif
+                                                            <div x-show="isSelected({{ $product->id }})" 
+                                                                 class="absolute inset-0 bg-primary/30 flex items-center justify-center">
+                                                                <span class="icon-[tabler--check] size-10 text-white bg-primary rounded-full p-1"></span>
+                                                            </div>
+                                                        </figure>
+                                                        <div class="card-body p-3">
+                                                            <h5 class="text-sm font-medium line-clamp-2">{{ $product->name }}</h5>
+                                                            
+                                                            @if($product->weight_volume)
+                                                                <p class="text-xs text-base-content/50">{{ $product->weight_volume }}</p>
+                                                            @endif
+                                                            
+                                                            <!-- Пищевая ценность -->
+                                                            @if($product->calories || $product->proteins || $product->fats || $product->carbohydrates)
+                                                                <div class="mt-1 flex flex-wrap gap-1 text-xs">
+                                                                    @if($product->calories)
+                                                                        <span class="badge badge-outline badge-xs">{{ $product->calories }} {{ __('frontend.calories') }}</span>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+                                                            
+                                                            <div class="mt-2 flex items-center justify-between">
+                                                                <span class="text-base font-bold">{{ number_format($product->price, 2) }} ₾</span>
+                                                                <span x-show="isSelected({{ $product->id }})" 
+                                                                      class="badge badge-primary badge-sm">
+                                                                    {{ __('frontend.selected') }}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Footer -->
+                                    @if(!$category->products->isEmpty())
+                                    <div class="border-t border-base-content/10 px-6 py-4 flex justify-end gap-2">
+                                        <button @click="closeModal()" class="btn btn-primary btn-lg gap-2">
+                                            <span class="icon-[tabler--check] size-5"></span>
+                                            {{ __('frontend.done') }}
+                                        </button>
+                                    </div>
                                     @endif
                                 </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endforeach
                     @endif
                 </div>
             </div>
@@ -357,6 +431,15 @@
 function bowlConstructor() {
     return {
         selectedProducts: [],
+        modalCategoryId: null,
+        
+        openCategoryModal(categoryId) {
+            this.modalCategoryId = categoryId;
+        },
+        
+        closeModal() {
+            this.modalCategoryId = null;
+        },
         
         toggleProduct(product) {
             const index = this.selectedProducts.findIndex(p => p.id === product.id);
@@ -373,6 +456,10 @@ function bowlConstructor() {
         
         isSelected(id) {
             return this.selectedProducts.some(p => p.id === id);
+        },
+        
+        getCategoryProducts(categoryId) {
+            return this.selectedProducts.filter(p => p.categoryId === categoryId);
         },
         
         clearBowl() {

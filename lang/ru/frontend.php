@@ -40,6 +40,8 @@ return [
     'selected' => 'Выбрано',
     'add_bowl_to_cart' => 'Добавить боул в корзину',
     'total' => 'Итого',
+    'click_to_select' => 'Нажмите для выбора',
+    'done' => 'Готово',
     
     // Cart
     'cart_title' => 'Корзина',
