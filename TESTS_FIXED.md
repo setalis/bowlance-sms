@@ -24,9 +24,7 @@
 
 Вы добавили API ключи в `.env`:
 ```env
-VONAGE_KEY= d42e7e62
-VONAGE_SECRET= ^(zsOpK9y
-```
+
 
 Но нужно установить сам пакет:
 
