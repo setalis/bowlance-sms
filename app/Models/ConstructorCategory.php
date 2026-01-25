@@ -34,15 +34,15 @@ class ConstructorCategory extends Model
     public function getNameAttribute(?string $value): string
     {
         $locale = app()->getLocale();
-        
+
         if ($locale === 'ka' && $this->name_ka) {
             return $this->name_ka;
         }
-        
+
         if ($locale === 'ru' && $this->name_ru) {
             return $this->name_ru;
         }
-        
+
         // Fallback на русский, затем на старое поле
         return $this->name_ru ?? $this->attributes['name'] ?? '';
     }

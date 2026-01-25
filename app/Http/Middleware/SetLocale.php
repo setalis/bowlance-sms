@@ -18,11 +18,11 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $locale = Session::get('locale', config('app.locale', 'ru'));
-        
+
         if (in_array($locale, ['ru', 'ka'])) {
             App::setLocale($locale);
         }
-        
+
         return $next($request);
     }
 }

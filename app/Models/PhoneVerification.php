@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PhoneVerification extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'phone',
         'request_id',

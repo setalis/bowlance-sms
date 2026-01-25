@@ -63,10 +63,113 @@
     </div>
 
     <script>
+    // Класс для работы с верификацией телефона через Vonage
+    class PhoneVerification {
+        constructor() {
+            this.requestId = null;
+            this.phone = null;
+            this.verified = false;
+            this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        }
+
+        async sendCode(phone) {
+            try {
+                phone = this.normalizePhone(phone);
+                
+                const response = await fetch('/phone/verify/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ phone })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Не удалось отправить код');
+                }
+
+                if (data.success) {
+                    this.requestId = data.request_id;
+                    this.phone = phone;
+                    return data;
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Ошибка отправки кода:', error);
+                throw error;
+            }
+        }
+
+        async verifyCode(code) {
+            if (!this.requestId) {
+                throw new Error('Сначала необходимо отправить код');
+            }
+
+            try {
+                const response = await fetch('/phone/verify/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        request_id: this.requestId,
+                        code: code
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Неверный код');
+                }
+
+                if (data.success) {
+                    this.verified = true;
+                    return data;
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Ошибка проверки кода:', error);
+                throw error;
+            }
+        }
+
+        normalizePhone(phone) {
+            phone = phone.replace(/[^\d+]/g, '');
+            if (!phone.startsWith('+')) {
+                phone = '+' + phone.replace(/^0+/, '');
+            }
+            return phone;
+        }
+
+        getRequestId() {
+            return this.requestId;
+        }
+
+        isVerified() {
+            return this.verified && this.requestId !== null;
+        }
+
+        reset() {
+            this.requestId = null;
+            this.phone = null;
+            this.verified = false;
+        }
+    }
+
     function checkoutModal() {
         return {
             open: false,
             loading: false,
+            step: 1,
             formData: {
                 name: '',
                 phone: '',
@@ -74,30 +177,120 @@
                 address: '',
                 comment: ''
             },
-
-            async submitOrder() {
-                if (this.loading) return;
-
-                this.loading = true;
-
+            
+            phoneVerification: null,
+            codeSent: false,
+            sendingCode: false,
+            verificationCode: '',
+            verifyingCode: false,
+            phoneVerified: false,
+            verificationRequestId: null,
+            verificationError: '',
+            
+            init() {
+                this.phoneVerification = new PhoneVerification();
+            },
+            
+            goToVerification() {
+                if (!this.formData.name || !this.formData.phone) {
+                    this.$store.cart.showNotification('Заполните имя и телефон', 'error');
+                    return;
+                }
+                this.step = 2;
+            },
+            
+            async sendVerificationCode() {
+                this.sendingCode = true;
+                this.verificationError = '';
+                
                 try {
-                    const result = await this.$store.cart.checkout(this.formData);
-
-                    if (result) {
-                        // Успешно оформлен заказ
-                        this.open = false;
-                        this.resetForm();
-
-                        // Показываем сообщение об успехе
-                        alert(`Заказ ${result.order_number} успешно оформлен!\nСумма: ${result.total} ₾\n\nМы свяжемся с вами в ближайшее время.`);
+                    const result = await this.phoneVerification.sendCode(this.formData.phone);
+                    this.codeSent = true;
+                    this.verificationRequestId = result.request_id;
+                    
+                    // Показываем тестовый код в режиме разработки
+                    if (result.test_mode && result.test_code) {
+                        this.$store.cart.showNotification(
+                            `ТЕСТ: Код отправлен. Используйте: ${result.test_code}`, 
+                            'success'
+                        );
+                        console.log('🔐 Тестовый код верификации:', result.test_code);
+                    } else {
+                        this.$store.cart.showNotification('Код отправлен на ваш номер', 'success');
                     }
                 } catch (error) {
-                    console.error('Ошибка оформления заказа:', error);
+                    this.verificationError = error.message;
+                    this.$store.cart.showNotification(error.message, 'error');
+                } finally {
+                    this.sendingCode = false;
+                }
+            },
+            
+            async verifyCode() {
+                if (this.verificationCode.length !== 6) {
+                    return;
+                }
+                
+                this.verifyingCode = true;
+                this.verificationError = '';
+                
+                try {
+                    await this.phoneVerification.verifyCode(this.verificationCode);
+                    this.phoneVerified = true;
+                    this.$store.cart.showNotification('Номер успешно верифицирован!', 'success');
+                } catch (error) {
+                    this.verificationError = error.message;
+                    this.$store.cart.showNotification(error.message, 'error');
+                } finally {
+                    this.verifyingCode = false;
+                }
+            },
+            
+            async resendCode() {
+                this.verificationCode = '';
+                this.verificationError = '';
+                this.codeSent = false;
+                this.phoneVerification.reset();
+                await this.sendVerificationCode();
+            },
+            
+            async submitOrder() {
+                if (!this.phoneVerified) {
+                    this.$store.cart.showNotification('Необходимо верифицировать номер телефона', 'error');
+                    return;
+                }
+                
+                if (!this.verificationRequestId) {
+                    this.$store.cart.showNotification('Ошибка верификации. Попробуйте снова', 'error');
+                    return;
+                }
+                
+                this.loading = true;
+                
+                try {
+                    const orderData = {
+                        ...this.formData,
+                        verification_request_id: this.verificationRequestId
+                    };
+                    
+                    const order = await this.$store.cart.checkout(orderData);
+                    
+                    if (order) {
+                        this.$store.cart.showNotification(
+                            `Заказ ${order.order_number} успешно оформлен!`,
+                            'success'
+                        );
+                        
+                        this.resetForm();
+                        this.open = false;
+                    }
+                } catch (error) {
+                    this.$store.cart.showNotification(error.message, 'error');
                 } finally {
                     this.loading = false;
                 }
             },
-
+            
             resetForm() {
                 this.formData = {
                     name: '',
@@ -106,8 +299,31 @@
                     address: '',
                     comment: ''
                 };
+                this.step = 1;
+                this.codeSent = false;
+                this.verificationCode = '';
+                this.phoneVerified = false;
+                this.verificationRequestId = null;
+                this.verificationError = '';
+                if (this.phoneVerification) {
+                    this.phoneVerification.reset();
+                }
+            },
+            
+            closeModal() {
+                if (this.loading) {
+                    return;
+                }
+                this.open = false;
+                this.resetForm();
+            },
+            
+            handleEsc() {
+                if (!this.loading) {
+                    this.closeModal();
+                }
             }
-        }
+        };
     }
     </script>
 

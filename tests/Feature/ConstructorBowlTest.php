@@ -86,7 +86,7 @@ it('displays all constructor categories with proper ordering', function () {
     $response = $this->get('/');
 
     $response->assertSuccessful();
-    
+
     $content = $response->getContent();
     $pos1 = strpos($content, 'Категория 1');
     $pos2 = strpos($content, 'Категория 2');

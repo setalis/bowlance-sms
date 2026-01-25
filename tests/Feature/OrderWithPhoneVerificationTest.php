@@ -1,6 +1,13 @@
 <?php
 
 use App\Models\PhoneVerification;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+});
 
 it('требует верификацию телефона при создании заказа', function () {
     $orderData = [
@@ -10,8 +17,7 @@ it('требует верификацию телефона при создани
         'delivery_address' => 'ул. Тестовая, 123',
         'items' => [
             [
-                'type' => 'dish',
-                'id' => 1,
+                'type' => 'bowl',
                 'name' => 'Тестовое блюдо',
                 'price' => 15.50,
                 'quantity' => 2,
@@ -38,8 +44,7 @@ it('не позволяет создать заказ без верифицир�
         'verification_request_id' => $verification->request_id,
         'items' => [
             [
-                'type' => 'dish',
-                'id' => 1,
+                'type' => 'bowl',
                 'name' => 'Тестовое блюдо',
                 'price' => 15.50,
                 'quantity' => 2,

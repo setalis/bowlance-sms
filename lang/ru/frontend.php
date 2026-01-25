@@ -7,18 +7,18 @@ return [
     'cart' => 'Корзина',
     'menu' => 'Меню',
     'close' => 'Закрыть',
-    
+
     // Main page
     'tagline' => 'Полезная еда быстро и вкусно',
     'fresh_products' => 'Свежие продукты',
     'fresh_products_desc' => 'Только качественные ингредиенты',
     'build_bowl' => 'Собери свой боул',
     'build_bowl_desc' => 'Выбери ингредиенты по вкусу',
-    
+
     // Tabs
     'menu_tab' => 'Меню',
     'constructor_tab' => 'Собери сам',
-    
+
     // Menu
     'no_dishes_available' => 'Пока нет доступных блюд',
     'no_dishes_in_category' => 'В этой категории пока нет блюд',
@@ -28,7 +28,7 @@ return [
     'fats' => 'Ж',
     'carbs' => 'У',
     'grams' => 'г',
-    
+
     // Constructor
     'build_perfect_bowl' => 'Собери свой идеальный боул',
     'build_perfect_bowl_desc' => 'Выбери продукты из каждой категории и создай уникальное блюдо',
@@ -42,7 +42,7 @@ return [
     'total' => 'Итого',
     'click_to_select' => 'Нажмите для выбора',
     'done' => 'Готово',
-    
+
     // Cart
     'cart_title' => 'Корзина',
     'items_single' => 'товар',
@@ -61,7 +61,7 @@ return [
     'nutrition_carbs' => 'Углев.',
     'total_price' => 'Итого:',
     'checkout' => 'Оформить заказ',
-    
+
     // Checkout
     'checkout_title' => 'Оформление заказа',
     'your_name' => 'Ваше имя',
@@ -79,25 +79,25 @@ return [
     'submit' => 'Оформить',
     'submitting' => 'Отправка...',
     'required' => '*',
-    
+
     // Order
     'back_to_order' => 'Назад к заказу',
-    "customer_info" => "Информация о клиенте",
-    "customer_name" => "Имя клиента",
-    "customer_phone" => "Телефон",
-    "customer_email" => "Email",
-    "delivery_address_label" => "Адрес доставки",
-    "comment_label" => "Комментарий",
-    "order_items" => "Позиции заказа",
-    "add_dish" => "Блюдо",
-    "add_bowl" => "Боул",
-    "select_dish" => "Выберите блюдо",
-    "quantity" => "Количество",
-    "bowl_products" => "Собранный боул",
-    "select_product" => "Выбрать...",
-    "selected_ingredients" => "Выбранные ингредиенты:",
-    "add_items_hint" => "Нажмите \"Блюдо\" или \"Боул\" для добавления позиций",
-    "order_status" => "Статус заказа",
-    "save_changes" => "Сохранить изменения",
-    "cancel_action" => "Отмена",
+    'customer_info' => 'Информация о клиенте',
+    'customer_name' => 'Имя клиента',
+    'customer_phone' => 'Телефон',
+    'customer_email' => 'Email',
+    'delivery_address_label' => 'Адрес доставки',
+    'comment_label' => 'Комментарий',
+    'order_items' => 'Позиции заказа',
+    'add_dish' => 'Блюдо',
+    'add_bowl' => 'Боул',
+    'select_dish' => 'Выберите блюдо',
+    'quantity' => 'Количество',
+    'bowl_products' => 'Собранный боул',
+    'select_product' => 'Выбрать...',
+    'selected_ingredients' => 'Выбранные ингредиенты:',
+    'add_items_hint' => 'Нажмите "Блюдо" или "Боул" для добавления позиций',
+    'order_status' => 'Статус заказа',
+    'save_changes' => 'Сохранить изменения',
+    'cancel_action' => 'Отмена',
 ];

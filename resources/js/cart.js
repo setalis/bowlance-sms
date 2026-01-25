@@ -156,6 +156,12 @@ export function initCart() {
                 return false;
             }
 
+            // Проверка наличия verification_request_id
+            if (!customerData.verification_request_id) {
+                this.showNotification('Необходимо верифицировать номер телефона', 'error');
+                return false;
+            }
+
             try {
                 // Подготовка данных заказа
                 const orderData = {
@@ -164,6 +170,7 @@ export function initCart() {
                     customer_email: customerData.email || null,
                     delivery_address: customerData.address || null,
                     comment: customerData.comment || null,
+                    verification_request_id: customerData.verification_request_id,
                     items: this.items.map(item => ({
                         type: item.type,
                         id: item.id,

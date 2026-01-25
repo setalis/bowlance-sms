@@ -11,8 +11,7 @@ class PhoneVerificationController extends Controller
 {
     public function __construct(
         protected VonageVerifyService $verifyService
-    ) {
-    }
+    ) {}
 
     public function send(Request $request): JsonResponse
     {

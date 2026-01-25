@@ -57,15 +57,15 @@ class ConstructorProduct extends Model
     public function getNameAttribute(?string $value): string
     {
         $locale = app()->getLocale();
-        
+
         if ($locale === 'ka' && $this->name_ka) {
             return $this->name_ka;
         }
-        
+
         if ($locale === 'ru' && $this->name_ru) {
             return $this->name_ru;
         }
-        
+
         // Fallback на русский, затем на старое поле
         return $this->name_ru ?? $this->attributes['name'] ?? '';
     }
@@ -76,15 +76,15 @@ class ConstructorProduct extends Model
     public function getDescriptionAttribute(?string $value): ?string
     {
         $locale = app()->getLocale();
-        
+
         if ($locale === 'ka' && $this->description_ka) {
             return $this->description_ka;
         }
-        
+
         if ($locale === 'ru' && $this->description_ru) {
             return $this->description_ru;
         }
-        
+
         // Fallback на русский, затем на старое поле
         return $this->description_ru ?? $this->attributes['description'] ?? null;
     }

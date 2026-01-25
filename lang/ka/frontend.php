@@ -7,18 +7,18 @@ return [
     'cart' => 'კალათა',
     'menu' => 'მენიუ',
     'close' => 'დახურვა',
-    
+
     // Main page
     'tagline' => 'სასარგებლო საკვები სწრაფად და გემრიელად',
     'fresh_products' => 'ახალი პროდუქტები',
     'fresh_products_desc' => 'მხოლოდ ხარისხიანი ინგრედიენტები',
     'build_bowl' => 'შექმენი შენი ბოული',
     'build_bowl_desc' => 'აირჩიე ინგრედიენტები გემოს მიხედვით',
-    
+
     // Tabs
     'menu_tab' => 'მენიუ',
     'constructor_tab' => 'შეაგროვე თვითონ',
-    
+
     // Menu
     'no_dishes_available' => 'ჯერ არ არის ხელმისაწვდომი კერძები',
     'no_dishes_in_category' => 'ამ კატეგორიაში ჯერ არ არის კერძები',
@@ -28,7 +28,7 @@ return [
     'fats' => 'ცხ',
     'carbs' => 'ნ',
     'grams' => 'გ',
-    
+
     // Constructor
     'build_perfect_bowl' => 'შექმენი შენი იდეალური ბოული',
     'build_perfect_bowl_desc' => 'აირჩიე პროდუქტები თითოეული კატეგორიიდან და შექმენი უნიკალური კერძი',
@@ -42,7 +42,7 @@ return [
     'total' => 'სულ',
     'click_to_select' => 'დააჭირეთ არჩევისთვის',
     'done' => 'მზადაა',
-    
+
     // Cart
     'cart_title' => 'კალათა',
     'items_single' => 'ნივთი',
@@ -61,7 +61,7 @@ return [
     'nutrition_carbs' => 'ნახშირწყლები',
     'total_price' => 'სულ:',
     'checkout' => 'შეკვეთის გაფორმება',
-    
+
     // Checkout
     'checkout_title' => 'შეკვეთის გაფორმება',
     'your_name' => 'თქვენი სახელი',
@@ -79,25 +79,25 @@ return [
     'submit' => 'გაფორმება',
     'submitting' => 'გაგზავნა...',
     'required' => '*',
-    
+
     // Order
     'back_to_order' => 'უკან შეკვეთაზე',
-    "customer_info" => "მომხმარებლის ინფორმაცია",
-    "customer_name" => "მომხმარებლის სახელი",
-    "customer_phone" => "ტელეფონი",
-    "customer_email" => "ელფოსტა",
-    "delivery_address_label" => "მიწოდების მისამართი",
-    "comment_label" => "კომენტარი",
-    "order_items" => "შეკვეთის პოზიციები",
-    "add_dish" => "კერძი",
-    "add_bowl" => "ბოული",
-    "select_dish" => "აირჩიეთ კერძი",
-    "quantity" => "რაოდენობა",
-    "bowl_products" => "შეგროვილი ბოული",
-    "select_product" => "აირჩიეთ...",
-    "selected_ingredients" => "არჩეული ინგრედიენტები:",
-    "add_items_hint" => "დააჭირეთ \"კერძი\" ან \"ბოული\" პოზიციების დასამატებლად",
-    "order_status" => "შეკვეთის სტატუსი",
-    "save_changes" => "ცვლილებების შენახვა",
-    "cancel_action" => "გაუქმება",
+    'customer_info' => 'მომხმარებლის ინფორმაცია',
+    'customer_name' => 'მომხმარებლის სახელი',
+    'customer_phone' => 'ტელეფონი',
+    'customer_email' => 'ელფოსტა',
+    'delivery_address_label' => 'მიწოდების მისამართი',
+    'comment_label' => 'კომენტარი',
+    'order_items' => 'შეკვეთის პოზიციები',
+    'add_dish' => 'კერძი',
+    'add_bowl' => 'ბოული',
+    'select_dish' => 'აირჩიეთ კერძი',
+    'quantity' => 'რაოდენობა',
+    'bowl_products' => 'შეგროვილი ბოული',
+    'select_product' => 'აირჩიეთ...',
+    'selected_ingredients' => 'არჩეული ინგრედიენტები:',
+    'add_items_hint' => 'დააჭირეთ "კერძი" ან "ბოული" პოზიციების დასამატებლად',
+    'order_status' => 'შეკვეთის სტატუსი',
+    'save_changes' => 'ცვლილებების შენახვა',
+    'cancel_action' => 'გაუქმება',
 ];

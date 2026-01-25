@@ -385,7 +385,7 @@
 <!-- Модальное окно оформления заказа -->
 <div x-data="checkoutModal()" 
      x-on:open-checkout-modal.window="open = true"
-     x-on:keydown.esc.prevent="open = false">
+     x-on:keydown.esc.prevent="handleEsc()">
     <!-- Backdrop -->
     <div
         x-cloak
@@ -402,7 +402,7 @@
         <div
             x-cloak
             x-show="open"
-            x-on:click.away="open = false"
+            x-on:click.away="() => {}"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -411,96 +411,189 @@
             x-transition:leave-end="opacity-0 scale-95"
             class="flex min-h-screen items-center justify-center p-4"
         >
-            <div class="w-full max-w-md rounded-lg bg-base-100 p-6 shadow-xl">
+            <div class="w-full max-w-lg rounded-lg bg-base-100 p-6 shadow-xl max-h-[90vh] overflow-y-auto">
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-xl font-bold">{{ __('frontend.checkout_title') }}</h3>
-                    <button @click="open = false" class="btn btn-circle btn-ghost btn-sm">
+                    <button @click="closeModal()" class="btn btn-circle btn-ghost btn-sm">
                         <span class="icon-[tabler--x] size-5"></span>
                     </button>
                 </div>
 
                 <form @submit.prevent="submitOrder">
                     <div class="space-y-4">
-                        <!-- Имя -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text">{{ __('frontend.your_name') }} <span class="text-error">{{ __('frontend.required') }}</span></span>
-                            </label>
-                            <input type="text" 
-                                   x-model="formData.name" 
-                                   class="input input-bordered w-full" 
-                                   required
-                                   :placeholder="'{{ __('frontend.name_placeholder') }}'">
+                        <!-- Шаг 1: Основная информация -->
+                        <div x-show="step === 1">
+                            <!-- Имя -->
+                            <div>
+                                <label class="label">
+                                    <span class="label-text">{{ __('frontend.your_name') }} <span class="text-error">*</span></span>
+                                </label>
+                                <input type="text" 
+                                       x-model="formData.name" 
+                                       class="input input-bordered w-full" 
+                                       required
+                                       placeholder="{{ __('frontend.name_placeholder') }}">
+                            </div>
+
+                            <!-- Телефон -->
+                            <div>
+                                <label class="label">
+                                    <span class="label-text">{{ __('frontend.phone') }} <span class="text-error">*</span></span>
+                                </label>
+                                <input type="tel" 
+                                       x-model="formData.phone" 
+                                       class="input input-bordered w-full" 
+                                       required
+                                       placeholder="+995555123456"
+                                       :disabled="phoneVerified"
+                                       @input="phoneVerified = false; verificationRequestId = null">
+                                <div x-show="phoneVerified" class="mt-2">
+                                    <div class="alert alert-success">
+                                        <span class="icon-[tabler--check] size-5"></span>
+                                        <span class="text-sm">Номер верифицирован</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label class="label">
+                                    <span class="label-text">{{ __('frontend.email') }}</span>
+                                </label>
+                                <input type="email" 
+                                       x-model="formData.email" 
+                                       class="input input-bordered w-full" 
+                                       placeholder="{{ __('frontend.email_placeholder') }}">
+                            </div>
+
+                            <!-- Адрес доставки -->
+                            <div>
+                                <label class="label">
+                                    <span class="label-text">{{ __('frontend.delivery_address') }}</span>
+                                </label>
+                                <textarea x-model="formData.address" 
+                                          class="textarea textarea-bordered w-full" 
+                                          rows="2"
+                                          placeholder="{{ __('frontend.address_placeholder') }}"></textarea>
+                            </div>
+
+                            <!-- Комментарий -->
+                            <div>
+                                <label class="label">
+                                    <span class="label-text">{{ __('frontend.order_comment') }}</span>
+                                </label>
+                                <textarea x-model="formData.comment" 
+                                          class="textarea textarea-bordered w-full" 
+                                          rows="2"
+                                          placeholder="{{ __('frontend.comment_placeholder') }}"></textarea>
+                            </div>
+
+                            <!-- Итоговая сумма -->
+                            <div class="rounded-lg bg-base-200 p-4">
+                                <div class="flex items-center justify-between text-lg font-bold">
+                                    <span>{{ __('frontend.total_to_pay') }}</span>
+                                    <span class="text-primary" x-text="$store.cart.totalPrice.toFixed(2) + ' ₾'"></span>
+                                </div>
+                            </div>
+
+                            <!-- Кнопка далее -->
+                            <button type="button" 
+                                    @click="goToVerification()"
+                                    class="btn btn-primary w-full gap-2 mt-4"
+                                    :disabled="!formData.name || !formData.phone">
+                                <span>Далее: Верификация телефона</span>
+                                <span class="icon-[tabler--arrow-right] size-5"></span>
+                            </button>
                         </div>
 
-                        <!-- Телефон -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text">{{ __('frontend.phone') }} <span class="text-error">{{ __('frontend.required') }}</span></span>
-                            </label>
-                            <input type="tel" 
-                                   x-model="formData.phone" 
-                                   class="input input-bordered w-full" 
-                                   required
-                                   :placeholder="'{{ __('frontend.phone_placeholder') }}'">
-                        </div>
+                        <!-- Шаг 2: Верификация телефона -->
+                        <div x-show="step === 2">
+                            <div class="mb-4">
+                                <button type="button" 
+                                        @click="step = 1" 
+                                        class="btn btn-ghost btn-sm gap-2">
+                                    <span class="icon-[tabler--arrow-left] size-4"></span>
+                                    Назад
+                                </button>
+                            </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text">{{ __('frontend.email') }}</span>
-                            </label>
-                            <input type="email" 
-                                   x-model="formData.email" 
-                                   class="input input-bordered w-full" 
-                                   :placeholder="'{{ __('frontend.email_placeholder') }}'">
-                        </div>
+                            <div class="space-y-4">
+                                <!-- Информация о номере -->
+                                <div class="alert">
+                                    <span class="icon-[tabler--info-circle] size-5"></span>
+                                    <div class="text-sm">
+                                        <p>На номер <strong x-text="formData.phone"></strong> будет отправлен код подтверждения</p>
+                                    </div>
+                                </div>
 
-                        <!-- Адрес доставки -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text">{{ __('frontend.delivery_address') }}</span>
-                            </label>
-                            <textarea x-model="formData.address" 
-                                      class="textarea textarea-bordered w-full" 
-                                      rows="2"
-                                      :placeholder="'{{ __('frontend.address_placeholder') }}'"></textarea>
-                        </div>
+                                <!-- Кнопка отправки кода -->
+                                <div x-show="!codeSent">
+                                    <button type="button" 
+                                            @click="sendVerificationCode()"
+                                            class="btn btn-primary w-full gap-2"
+                                            :disabled="sendingCode">
+                                        <span x-show="!sendingCode" class="icon-[tabler--send] size-5"></span>
+                                        <span x-show="sendingCode" class="loading loading-spinner loading-sm"></span>
+                                        <span x-text="sendingCode ? 'Отправка...' : 'Отправить код'"></span>
+                                    </button>
+                                </div>
 
-                        <!-- Комментарий -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text">{{ __('frontend.order_comment') }}</span>
-                            </label>
-                            <textarea x-model="formData.comment" 
-                                      class="textarea textarea-bordered w-full" 
-                                      rows="2"
-                                      :placeholder="'{{ __('frontend.comment_placeholder') }}'"></textarea>
-                        </div>
+                                <!-- Поле ввода кода -->
+                                <div x-show="codeSent && !phoneVerified">
+                                    <label class="label">
+                                        <span class="label-text">Введите 6-значный код <span class="text-error">*</span></span>
+                                    </label>
+                                    <input type="text" 
+                                           x-model="verificationCode" 
+                                           maxlength="6"
+                                           class="input input-bordered w-full text-center text-2xl tracking-widest font-mono" 
+                                           placeholder="••••••"
+                                           @input="verificationCode = verificationCode.replace(/[^0-9]/g, '')"
+                                           autofocus>
+                                    
+                                    <div x-show="verificationError" class="mt-2">
+                                        <div class="alert alert-error">
+                                            <span class="icon-[tabler--alert-circle] size-5"></span>
+                                            <span class="text-sm" x-text="verificationError"></span>
+                                        </div>
+                                    </div>
 
-                        <!-- Итоговая сумма -->
-                        <div class="rounded-lg bg-base-200 p-4">
-                            <div class="flex items-center justify-between text-lg font-bold">
-                                <span>{{ __('frontend.total_to_pay') }}</span>
-                                <span class="text-primary" x-text="$store.cart.totalPrice.toFixed(2) + ' ₾'"></span>
+                                    <button type="button" 
+                                            @click="verifyCode()"
+                                            class="btn btn-primary w-full gap-2 mt-4"
+                                            :disabled="verificationCode.length !== 6 || verifyingCode">
+                                        <span x-show="!verifyingCode" class="icon-[tabler--check] size-5"></span>
+                                        <span x-show="verifyingCode" class="loading loading-spinner loading-sm"></span>
+                                        <span x-text="verifyingCode ? 'Проверка...' : 'Подтвердить код'"></span>
+                                    </button>
+
+                                    <button type="button" 
+                                            @click="resendCode()"
+                                            class="btn btn-ghost btn-sm w-full mt-2">
+                                        Отправить код повторно
+                                    </button>
+                                </div>
+
+                                <!-- Успешная верификация -->
+                                <div x-show="phoneVerified">
+                                    <div class="alert alert-success">
+                                        <span class="icon-[tabler--circle-check] size-6"></span>
+                                        <div>
+                                            <h4 class="font-bold">Номер верифицирован!</h4>
+                                            <p class="text-sm">Теперь вы можете оформить заказ</p>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" 
+                                            class="btn btn-primary w-full gap-2 mt-4"
+                                            :disabled="loading">
+                                        <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
+                                        <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                                        <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Кнопки -->
-                    <div class="mt-6 flex gap-3">
-                        <button type="button" 
-                                @click="open = false" 
-                                class="btn btn-ghost flex-1">
-                            {{ __('frontend.cancel') }}
-                        </button>
-                        <button type="submit" 
-                                class="btn btn-primary flex-1 gap-2"
-                                :disabled="loading">
-                            <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
-                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                            <span x-text="loading ? '{{ __('frontend.submitting') }}' : '{{ __('frontend.submit') }}'"></span>
-                        </button>
                     </div>
                 </form>
             </div>

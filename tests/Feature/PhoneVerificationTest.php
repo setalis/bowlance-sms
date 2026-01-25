@@ -1,13 +1,15 @@
 <?php
 
 use App\Models\PhoneVerification;
-use App\Services\VonageVerifyService;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
+    $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
     config([
         'vonage.api_key' => 'test_key',
         'vonage.api_secret' => 'test_secret',
+        'vonage.test_mode' => true, // Включаем тестовый режим
     ]);
 });
 
