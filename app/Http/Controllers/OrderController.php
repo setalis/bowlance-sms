@@ -3,55 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
+use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PhoneVerification;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(StoreOrderRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
-            'customer_email' => 'nullable|email|max:255',
-            'delivery_address' => 'nullable|string|max:1000',
-            'comment' => 'nullable|string|max:1000',
-            'items' => 'required|array|min:1',
-            'items.*.type' => 'required|in:dish,bowl',
-            'items.*.id' => 'required|integer',
-            'items.*.name' => 'required|string',
-            'items.*.price' => 'required|numeric|min:0',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.calories' => 'nullable|integer',
-            'items.*.proteins' => 'nullable|numeric',
-            'items.*.fats' => 'nullable|numeric',
-            'items.*.carbs' => 'nullable|numeric',
-            'items.*.products' => 'nullable|array',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
         try {
             DB::beginTransaction();
 
-            // Подсчёт итоговой суммы
+            $verification = PhoneVerification::where('request_id', $request->verification_request_id)
+                ->where('verified', true)
+                ->first();
+
             $subtotal = collect($request->items)->sum(function ($item) {
                 return $item['price'] * $item['quantity'];
             });
 
-            $deliveryFee = 0; // Можно добавить логику расчёта доставки
+            $deliveryFee = 0;
             $total = $subtotal + $deliveryFee;
 
-            // Создание заказа
             $order = Order::create([
                 'user_id' => auth()->id(),
                 'customer_name' => $request->customer_name,
@@ -63,9 +39,10 @@ class OrderController extends Controller
                 'delivery_fee' => $deliveryFee,
                 'total' => $total,
                 'status' => OrderStatus::New,
+                'phone_verified' => true,
+                'phone_verified_at' => $verification?->verified_at ?? now(),
             ]);
 
-            // Создание позиций заказа
             foreach ($request->items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,

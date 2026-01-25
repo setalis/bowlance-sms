@@ -23,6 +23,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Переключение языка
 Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
 
+// Верификация телефона
+Route::post('/phone/verify/send', [\App\Http\Controllers\PhoneVerificationController::class, 'send'])->name('phone.verify.send');
+Route::post('/phone/verify/check', [\App\Http\Controllers\PhoneVerificationController::class, 'verify'])->name('phone.verify.check');
+Route::post('/phone/verify/cancel', [\App\Http\Controllers\PhoneVerificationController::class, 'cancel'])->name('phone.verify.cancel');
+
 // Публичные маршруты для заказов
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
@@ -62,6 +67,12 @@ Route::prefix('cabinet')->name('cabinet.')->group(function () {
         Route::get('orders/{order}', [CabinetOrderController::class, 'show'])->name('orders.show');
         Route::post('logout', [CabinetLoginController::class, 'destroy'])->name('logout');
     });
+});
+
+Route::get('/test-vonage', function () {
+    $service = app(\App\Services\VonageVerifyService::class);
+    $result = $service->sendVerificationCode('+380507082864'); // Ваш реальный номер
+    dd($result);
 });
 
 require __DIR__.'/auth.php';
