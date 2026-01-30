@@ -36,6 +36,12 @@
                             <span class="grow">Мои данные</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('cabinet.addresses.index') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('cabinet.addresses.*')])>
+                            <span class="icon-[tabler--map-pin] size-4.5"></span>
+                            <span class="grow">Мои адреса</span>
+                        </a>
+                    </li>
                     <li
                         class="text-base-content/50 before:bg-base-content/20 mt-2 p-2 text-xs uppercase before:absolute before:-start-3 before:top-1/2 before:h-0.5 before:w-2.5">
                         Заказы</li>

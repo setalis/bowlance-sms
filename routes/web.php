@@ -5,12 +5,14 @@ use App\Http\Controllers\Admin\ConstructorProductController;
 use App\Http\Controllers\Admin\DishCategoryController;
 use App\Http\Controllers\Admin\DishController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Cabinet\AddressController as CabinetAddressController;
 use App\Http\Controllers\Cabinet\Auth\LoginController as CabinetLoginController;
 use App\Http\Controllers\Cabinet\DashboardController;
 use App\Http\Controllers\Cabinet\OrderController as CabinetOrderController;
 use App\Http\Controllers\Cabinet\ProfileController as CabinetProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\UserAddressController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +33,15 @@ Route::post('/phone/verify/cancel', [\App\Http\Controllers\PhoneVerificationCont
 // Публичные маршруты для заказов
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+// API для управления адресами (требует авторизации)
+Route::middleware('auth')->prefix('user')->group(function () {
+    Route::get('/addresses', [UserAddressController::class, 'index'])->name('user.addresses.index');
+    Route::post('/addresses', [UserAddressController::class, 'store'])->name('user.addresses.store');
+    Route::put('/addresses/{address}', [UserAddressController::class, 'update'])->name('user.addresses.update');
+    Route::delete('/addresses/{address}', [UserAddressController::class, 'destroy'])->name('user.addresses.destroy');
+    Route::post('/addresses/{address}/set-default', [UserAddressController::class, 'setDefault'])->name('user.addresses.setDefault');
+});
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
@@ -65,6 +76,11 @@ Route::prefix('cabinet')->name('cabinet.')->group(function () {
         Route::put('profile', [CabinetProfileController::class, 'update'])->name('profile.update');
         Route::get('orders', [CabinetOrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [CabinetOrderController::class, 'show'])->name('orders.show');
+
+        // Управление адресами
+        Route::resource('addresses', CabinetAddressController::class)->except(['show']);
+        Route::post('addresses/{address}/set-default', [CabinetAddressController::class, 'setDefault'])->name('addresses.setDefault');
+
         Route::post('logout', [CabinetLoginController::class, 'destroy'])->name('logout');
     });
 });

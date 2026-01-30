@@ -59,6 +59,35 @@
 
                             <div class="md:col-span-2">
                                 <label class="label">
+                                    <span class="label-text">Способ получения <span class="text-error">*</span></span>
+                                </label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" 
+                                               name="delivery_type" 
+                                               value="delivery" 
+                                               x-model="deliveryType"
+                                               class="radio radio-primary"
+                                               {{ old('delivery_type', 'delivery') === 'delivery' ? 'checked' : '' }}>
+                                        <span>Доставка</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" 
+                                               name="delivery_type" 
+                                               value="pickup" 
+                                               x-model="deliveryType"
+                                               class="radio radio-primary"
+                                               {{ old('delivery_type') === 'pickup' ? 'checked' : '' }}>
+                                        <span>Самовывоз</span>
+                                    </label>
+                                </div>
+                                @error('delivery_type')
+                                    <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
+                                @enderror
+                            </div>
+
+                            <div class="md:col-span-2" x-show="deliveryType === 'delivery'">
+                                <label class="label">
                                     <span class="label-text">Адрес доставки</span>
                                 </label>
                                 <textarea name="delivery_address" rows="2" 
@@ -246,6 +275,7 @@ function orderForm() {
     return {
         items: [],
         productsData: productsData,
+        deliveryType: '{{ old('delivery_type', 'delivery') }}',
 
         addDishItem() {
             this.items.push({ 

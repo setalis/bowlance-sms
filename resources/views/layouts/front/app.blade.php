@@ -174,7 +174,15 @@
                 name: '',
                 phone: '',
                 email: '',
+                deliveryType: 'delivery',
                 address: '',
+                entrance: '',
+                floor: '',
+                apartment: '',
+                intercom: '',
+                courierComment: '',
+                receiverPhone: '',
+                leaveAtDoor: false,
                 comment: ''
             },
             
@@ -187,8 +195,22 @@
             verificationRequestId: null,
             verificationError: '',
             
-            init() {
+            // Адреса
+            savedAddresses: [],
+            guestAddresses: [],
+            selectedAddressId: '',
+            selectedGuestAddressIndex: '',
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            
+            async init() {
                 this.phoneVerification = new PhoneVerification();
+                
+                // Загрузить адреса
+                if (this.isAuthenticated) {
+                    await this.loadSavedAddresses();
+                } else {
+                    this.loadGuestAddresses();
+                }
             },
             
             goToVerification() {
@@ -207,6 +229,11 @@
                     const result = await this.phoneVerification.sendCode(this.formData.phone);
                     this.codeSent = true;
                     this.verificationRequestId = result.request_id;
+                    
+                    // Сохранить адрес в localStorage для гостей ДО верификации
+                    if (!this.isAuthenticated && this.formData.deliveryType === 'delivery' && this.formData.address) {
+                        this.saveGuestAddress();
+                    }
                     
                     // Показываем тестовый код в режиме разработки
                     if (result.test_mode && result.test_code) {
@@ -296,7 +323,15 @@
                     name: '',
                     phone: '',
                     email: '',
+                    deliveryType: 'delivery',
                     address: '',
+                    entrance: '',
+                    floor: '',
+                    apartment: '',
+                    intercom: '',
+                    courierComment: '',
+                    receiverPhone: '',
+                    leaveAtDoor: false,
                     comment: ''
                 };
                 this.step = 1;
@@ -305,6 +340,8 @@
                 this.phoneVerified = false;
                 this.verificationRequestId = null;
                 this.verificationError = '';
+                this.selectedAddressId = '';
+                this.selectedGuestAddressIndex = '';
                 if (this.phoneVerification) {
                     this.phoneVerification.reset();
                 }
@@ -321,6 +358,124 @@
             handleEsc() {
                 if (!this.loading) {
                     this.closeModal();
+                }
+            },
+            
+            // Методы для работы с адресами
+            async loadSavedAddresses() {
+                try {
+                    const response = await fetch('/user/addresses');
+                    const data = await response.json();
+                    this.savedAddresses = data.addresses || [];
+                    
+                    // Если есть дефолтный - выбрать его
+                    const defaultAddr = this.savedAddresses.find(a => a.is_default);
+                    if (defaultAddr) {
+                        this.selectedAddressId = defaultAddr.id;
+                        this.loadAddress();
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки адресов:', error);
+                }
+            },
+            
+            loadAddress() {
+                if (this.selectedAddressId) {
+                    const addr = this.savedAddresses.find(a => a.id == this.selectedAddressId);
+                    if (addr) {
+                        // Загрузить все поля адреса
+                        this.formData.address = addr.address || '';
+                        this.formData.entrance = addr.entrance || '';
+                        this.formData.floor = addr.floor || '';
+                        this.formData.apartment = addr.apartment || '';
+                        this.formData.intercom = addr.intercom || '';
+                        this.formData.courierComment = addr.courier_comment || '';
+                        this.formData.receiverPhone = addr.receiver_phone || '';
+                        this.formData.leaveAtDoor = addr.leave_at_door || false;
+                    }
+                } else {
+                    // Очистить, если выбрано "новый адрес"
+                    this.formData.address = '';
+                    this.formData.entrance = '';
+                    this.formData.floor = '';
+                    this.formData.apartment = '';
+                    this.formData.intercom = '';
+                    this.formData.courierComment = '';
+                    this.formData.receiverPhone = '';
+                    this.formData.leaveAtDoor = false;
+                }
+            },
+            
+            loadGuestAddresses() {
+                try {
+                    const stored = localStorage.getItem('delivery_addresses');
+                    if (stored) {
+                        this.guestAddresses = JSON.parse(stored);
+                        // Автоматически выбрать последний использованный адрес
+                        if (this.guestAddresses.length > 0) {
+                            this.selectedGuestAddressIndex = 0;
+                            this.loadGuestAddress();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка чтения localStorage:', error);
+                }
+            },
+            
+            loadGuestAddress() {
+                if (this.selectedGuestAddressIndex !== '' && this.guestAddresses[this.selectedGuestAddressIndex]) {
+                    const addr = this.guestAddresses[this.selectedGuestAddressIndex];
+                    this.formData.address = addr.address || '';
+                    this.formData.entrance = addr.entrance || '';
+                    this.formData.floor = addr.floor || '';
+                    this.formData.apartment = addr.apartment || '';
+                    this.formData.intercom = addr.intercom || '';
+                    this.formData.courierComment = addr.courierComment || '';
+                    this.formData.receiverPhone = addr.receiverPhone || '';
+                    this.formData.leaveAtDoor = addr.leaveAtDoor || false;
+                } else {
+                    // Очистить все поля если выбрано "Ввести новый адрес"
+                    this.formData.address = '';
+                    this.formData.entrance = '';
+                    this.formData.floor = '';
+                    this.formData.apartment = '';
+                    this.formData.intercom = '';
+                    this.formData.courierComment = '';
+                    this.formData.receiverPhone = '';
+                    this.formData.leaveAtDoor = false;
+                }
+            },
+            
+            saveGuestAddress() {
+                try {
+                    // Создать объект адреса
+                    const addressObj = {
+                        address: this.formData.address,
+                        entrance: this.formData.entrance,
+                        floor: this.formData.floor,
+                        apartment: this.formData.apartment,
+                        intercom: this.formData.intercom,
+                        courierComment: this.formData.courierComment,
+                        receiverPhone: this.formData.receiverPhone,
+                        leaveAtDoor: this.formData.leaveAtDoor
+                    };
+                    
+                    let addresses = [];
+                    const stored = localStorage.getItem('delivery_addresses');
+                    if (stored) {
+                        addresses = JSON.parse(stored);
+                    }
+                    
+                    // Удалить дубликаты по адресу и добавить в начало
+                    addresses = addresses.filter(a => a.address !== addressObj.address);
+                    addresses.unshift(addressObj);
+                    
+                    // Хранить максимум 5 последних адресов
+                    addresses = addresses.slice(0, 5);
+                    
+                    localStorage.setItem('delivery_addresses', JSON.stringify(addresses));
+                } catch (error) {
+                    console.error('Ошибка сохранения в localStorage:', error);
                 }
             }
         };

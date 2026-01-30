@@ -19,9 +19,9 @@ class DishSeeder extends Seeder
         $dishes = [
             // Основные блюда
             [
-                'name' => 'Боул Power',
+                'name' => 'Боул с курицей, овощами и арахисовым соусом',
                 'description' => 'Крупа гречневая, куриное филе, перец болгарский (запечённый), картофель (запеченный) брокколи.',
-                'price' => 0,
+                'price' => 26.00,
                 'discount_price' => 0,
                 'dish_category_id' => $mainDishesCategory->id,
                 'weight_volume' => '450 г',

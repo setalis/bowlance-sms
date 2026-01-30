@@ -33,7 +33,15 @@ class OrderController extends Controller
                 'customer_name' => $request->customer_name,
                 'customer_phone' => $request->customer_phone,
                 'customer_email' => $request->customer_email,
+                'delivery_type' => $request->delivery_type ?? 'delivery',
                 'delivery_address' => $request->delivery_address,
+                'entrance' => $request->entrance,
+                'floor' => $request->floor,
+                'apartment' => $request->apartment,
+                'intercom' => $request->intercom,
+                'courier_comment' => $request->courier_comment,
+                'receiver_phone' => $request->receiver_phone,
+                'leave_at_door' => $request->boolean('leave_at_door', false),
                 'comment' => $request->comment,
                 'subtotal' => $subtotal,
                 'delivery_fee' => $deliveryFee,
@@ -58,6 +66,29 @@ class OrderController extends Controller
                     'carbohydrates' => $item['carbs'] ?? null,
                     'bowl_products' => $item['type'] === 'bowl' ? ($item['products'] ?? []) : null,
                 ]);
+            }
+
+            // Автосохранение адреса для авторизованных пользователей
+            if (auth()->check() && $request->delivery_type === 'delivery' && $request->delivery_address) {
+                $addressExists = auth()->user()->addresses()
+                    ->where('address', $request->delivery_address)
+                    ->exists();
+
+                if (! $addressExists) {
+                    $addressCount = auth()->user()->addresses()->count();
+                    auth()->user()->addresses()->create([
+                        'label' => 'Адрес '.($addressCount + 1),
+                        'address' => $request->delivery_address,
+                        'entrance' => $request->entrance,
+                        'floor' => $request->floor,
+                        'apartment' => $request->apartment,
+                        'intercom' => $request->intercom,
+                        'courier_comment' => $request->courier_comment,
+                        'receiver_phone' => $request->receiver_phone,
+                        'leave_at_door' => $request->boolean('leave_at_door', false),
+                        'is_default' => $addressCount === 0,
+                    ]);
+                }
             }
 
             DB::commit();

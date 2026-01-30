@@ -466,15 +466,149 @@
                                        placeholder="{{ __('frontend.email_placeholder') }}">
                             </div>
 
-                            <!-- Адрес доставки -->
+                            <!-- Тип доставки -->
                             <div>
                                 <label class="label">
-                                    <span class="label-text">{{ __('frontend.delivery_address') }}</span>
+                                    <span class="label-text">Способ получения <span class="text-error">*</span></span>
                                 </label>
-                                <textarea x-model="formData.address" 
-                                          class="textarea textarea-bordered w-full" 
-                                          rows="2"
-                                          placeholder="{{ __('frontend.address_placeholder') }}"></textarea>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" 
+                                               x-model="formData.deliveryType" 
+                                               value="delivery" 
+                                               name="delivery_type" 
+                                               class="radio radio-primary">
+                                        <span>Доставка</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" 
+                                               x-model="formData.deliveryType" 
+                                               value="pickup" 
+                                               name="delivery_type" 
+                                               class="radio radio-primary">
+                                        <span>Самовывоз</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Детали доставки -->
+                            <div x-show="formData.deliveryType === 'delivery'" class="space-y-4">
+                                <!-- Выбор сохраненного адреса для авторизованных -->
+                                <div x-show="isAuthenticated && savedAddresses.length > 0">
+                                    <label class="label">
+                                        <span class="label-text">Выберите сохраненный адрес</span>
+                                    </label>
+                                    <select x-model="selectedAddressId" 
+                                            @change="loadAddress()"
+                                            class="select select-bordered w-full">
+                                        <option value="">Ввести новый адрес</option>
+                                        <template x-for="addr in savedAddresses" :key="addr.id">
+                                            <option :value="addr.id" x-text="addr.label + ': ' + addr.address"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
+                                <!-- Выбор сохраненного адреса для гостей -->
+                                <div x-show="!isAuthenticated && guestAddresses.length > 0">
+                                    <label class="label">
+                                        <span class="label-text">Выберите сохраненный адрес</span>
+                                    </label>
+                                    <select x-model="selectedGuestAddressIndex" 
+                                            @change="loadGuestAddress()"
+                                            class="select select-bordered w-full">
+                                        <option value="">Ввести новый адрес</option>
+                                        <template x-for="(addr, index) in guestAddresses" :key="index">
+                                            <option :value="index" x-text="addr.address"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
+                                <!-- Основной адрес -->
+                                <div>
+                                    <label class="label">
+                                        <span class="label-text">{{ __('frontend.delivery_address') }}</span>
+                                    </label>
+                                    <input type="text" 
+                                           x-model="formData.address" 
+                                           class="input input-bordered w-full" 
+                                           placeholder="{{ __('frontend.address_placeholder') }}">
+                                </div>
+
+                                <!-- Подъезд и Этаж -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">
+                                            <span class="label-text">Подъезд</span>
+                                        </label>
+                                        <input type="text" 
+                                               x-model="formData.entrance" 
+                                               class="input input-bordered w-full" 
+                                               placeholder="1">
+                                    </div>
+                                    <div>
+                                        <label class="label">
+                                            <span class="label-text">Этаж</span>
+                                        </label>
+                                        <input type="text" 
+                                               x-model="formData.floor" 
+                                               class="input input-bordered w-full" 
+                                               placeholder="5">
+                                    </div>
+                                </div>
+
+                                <!-- Квартира и Домофон -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">
+                                            <span class="label-text">Квартира</span>
+                                        </label>
+                                        <input type="text" 
+                                               x-model="formData.apartment" 
+                                               class="input input-bordered w-full" 
+                                               placeholder="42">
+                                    </div>
+                                    <div>
+                                        <label class="label">
+                                            <span class="label-text">Домофон</span>
+                                        </label>
+                                        <input type="text" 
+                                               x-model="formData.intercom" 
+                                               class="input input-bordered w-full" 
+                                               placeholder="42К">
+                                    </div>
+                                </div>
+
+                                <!-- Комментарий курьеру -->
+                                <div>
+                                    <label class="label">
+                                        <span class="label-text">Комментарий курьеру</span>
+                                    </label>
+                                    <textarea x-model="formData.courierComment" 
+                                              class="textarea textarea-bordered w-full" 
+                                              rows="2"
+                                              placeholder="Например: позвоните за 5 минут"></textarea>
+                                </div>
+
+                                <!-- Телефон получателя -->
+                                <div>
+                                    <label class="label">
+                                        <span class="label-text">Телефон получателя</span>
+                                    </label>
+                                    <input type="tel" 
+                                           x-model="formData.receiverPhone" 
+                                           class="input input-bordered w-full" 
+                                           placeholder="+995 555 12 34 56">
+                                </div>
+
+                                <!-- Оставить у двери -->
+                                <div class="form-control">
+                                    <label class="label cursor-pointer justify-start gap-3">
+                                        <input type="checkbox" 
+                                               x-model="formData.leaveAtDoor" 
+                                               class="toggle toggle-primary">
+                                        <span class="label-text">Оставить у двери</span>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Комментарий -->

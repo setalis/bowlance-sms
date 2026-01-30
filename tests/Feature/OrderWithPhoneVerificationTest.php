@@ -14,6 +14,7 @@ it('требует верификацию телефона при создани
         'customer_name' => 'Тестовый Клиент',
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
+        'delivery_type' => 'delivery',
         'delivery_address' => 'ул. Тестовая, 123',
         'items' => [
             [
@@ -41,6 +42,7 @@ it('не позволяет создать заказ без верифицир�
         'customer_name' => 'Тестовый Клиент',
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
+        'delivery_type' => 'delivery',
         'verification_request_id' => $verification->request_id,
         'items' => [
             [
@@ -67,6 +69,7 @@ it('позволяет создать заказ с верифицированн
         'customer_name' => 'Тестовый Клиент',
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
+        'delivery_type' => 'delivery',
         'delivery_address' => 'ул. Тестовая, 123',
         'comment' => 'Тестовый комментарий',
         'verification_request_id' => $verification->request_id,
@@ -112,6 +115,7 @@ it('не позволяет создать заказ с истекшей вер
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
         'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
         'items' => [
             [
@@ -138,6 +142,7 @@ it('не позволяет использовать чужую верифика
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
         'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
         'items' => [
             [
@@ -164,6 +169,7 @@ it('сохраняет данные о верификации телефона �
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
         'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
         'items' => [
             [
@@ -188,4 +194,89 @@ it('сохраняет данные о верификации телефона �
 
     $order = \App\Models\Order::latest()->first();
     expect($order->phone_verified_at)->not->toBeNull();
+});
+
+it('требует указания типа доставки при создании заказа', function () {
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 15.50,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/orders', $orderData);
+
+    $response->assertStatus(422);
+    $response->assertJsonValidationErrors('delivery_type');
+});
+
+it('требует адрес доставки при выборе доставки', function () {
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'delivery',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 15.50,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/orders', $orderData);
+
+    $response->assertStatus(422);
+    $response->assertJsonValidationErrors('delivery_address');
+});
+
+it('не требует адрес доставки при выборе самовывоза', function () {
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 15.50,
+                'quantity' => 1,
+                'products' => ['ingredient1'],
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/orders', $orderData);
+
+    $response->assertStatus(201);
+
+    $this->assertDatabaseHas('orders', [
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+    ]);
 });

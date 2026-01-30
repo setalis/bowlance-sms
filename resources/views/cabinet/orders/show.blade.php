@@ -127,9 +127,13 @@
                                 <a href="mailto:{{ $order->customer_email }}" class="link link-primary">{{ $order->customer_email }}</a>
                             </div>
                         @endif
-                        @if($order->delivery_address)
+                        <div>
+                            <p class="mb-1 text-xs text-base-content/60">Способ получения</p>
+                            <p>{{ $order->delivery_type?->label() ?? 'Доставка' }}</p>
+                        </div>
+                        @if($order->delivery_address && $order->delivery_type?->value === 'delivery')
                             <div>
-                                <p class="mb-1 text-xs text-base-content/60">Адрес</p>
+                                <p class="mb-1 text-xs text-base-content/60">Адрес доставки</p>
                                 <p>{{ $order->delivery_address }}</p>
                             </div>
                         @endif

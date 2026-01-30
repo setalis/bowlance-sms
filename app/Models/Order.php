@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,15 @@ class Order extends Model
         'customer_name',
         'customer_phone',
         'customer_email',
+        'delivery_type',
         'delivery_address',
+        'entrance',
+        'floor',
+        'apartment',
+        'intercom',
+        'courier_comment',
+        'receiver_phone',
+        'leave_at_door',
         'comment',
         'subtotal',
         'delivery_fee',
@@ -35,10 +44,12 @@ class Order extends Model
     {
         return [
             'status' => OrderStatus::class,
+            'delivery_type' => DeliveryType::class,
             'subtotal' => 'decimal:2',
             'delivery_fee' => 'decimal:2',
             'total' => 'decimal:2',
             'phone_verified' => 'boolean',
+            'leave_at_door' => 'boolean',
             'phone_verified_at' => 'datetime',
             'confirmed_at' => 'datetime',
             'completed_at' => 'datetime',

@@ -176,7 +176,11 @@
                                 </a>
                             </div>
                         @endif
-                        @if($order->delivery_address)
+                        <div>
+                            <p class="text-xs text-base-content/60 mb-1">Способ получения</p>
+                            <p>{{ $order->delivery_type?->label() ?? 'Доставка' }}</p>
+                        </div>
+                        @if($order->delivery_address && $order->delivery_type?->value === 'delivery')
                             <div>
                                 <p class="text-xs text-base-content/60 mb-1">Адрес доставки</p>
                                 <p>{{ $order->delivery_address }}</p>
