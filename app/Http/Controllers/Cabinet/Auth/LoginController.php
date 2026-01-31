@@ -19,7 +19,7 @@ class LoginController extends Controller
 {
     public function create(): View|RedirectResponse|Response
     {
-        if (auth()->check() && auth()->user()->isUser()) {
+        if (auth()->check()) {
             return redirect()->intended(route('cabinet.dashboard', absolute: false));
         }
 
@@ -46,12 +46,6 @@ class LoginController extends Controller
 
             throw ValidationException::withMessages([
                 'phone' => [__('auth.failed')],
-            ]);
-        }
-
-        if ($user->isAdmin()) {
-            throw ValidationException::withMessages([
-                'phone' => ['Для входа в админ-панель используйте форму входа по email.'],
             ]);
         }
 

@@ -269,6 +269,149 @@
                     </div>
                 </div>
 
+                <!-- Информация о соусе -->
+                <div class="space-y-4 border-t border-base-content/10 pt-6">
+                    <h4 class="text-base-content text-lg font-semibold">Информация о соусе (необязательно)</h4>
+                    <p class="text-base-content/60 text-sm">Заполните эти поля, если к блюду подается соус с отдельной пищевой ценностью</p>
+                    
+                    <!-- Переводы названия соуса -->
+                    <div class="space-y-4">
+                        <!-- Русский язык -->
+                        <div class="space-y-3 rounded-lg bg-base-200/50 p-4">
+                            <div class="flex items-center gap-2">
+                                <span class="icon-[tabler--bottle] size-5 text-primary"></span>
+                                <h6 class="text-base-content font-medium">Название соуса (Русский)</h6>
+                            </div>
+                            
+                            <div>
+                                <label class="label-text" for="sauce_name_ru">Название соуса (RU)</label>
+                                <input type="text" 
+                                       name="sauce_name_ru" 
+                                       placeholder="Например: Арахисовый соус" 
+                                       class="input @error('sauce_name_ru') input-error @enderror" 
+                                       id="sauce_name_ru" 
+                                       value="{{ old('sauce_name_ru', $dish->sauce_name_ru ?? $dish->getRawOriginal('sauce_name')) }}" />
+                                @error('sauce_name_ru')
+                                    <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Грузинский язык -->
+                        <div class="space-y-3 rounded-lg bg-base-200/50 p-4">
+                            <div class="flex items-center gap-2">
+                                <span class="icon-[tabler--bottle] size-5 text-primary"></span>
+                                <h6 class="text-base-content font-medium">Название соуса (Грузинский)</h6>
+                            </div>
+                            
+                            <div>
+                                <label class="label-text" for="sauce_name_ka">Название соуса (KA)</label>
+                                <input type="text" 
+                                       name="sauce_name_ka" 
+                                       placeholder="მაგალითად: არაქისის სოუსი" 
+                                       class="input @error('sauce_name_ka') input-error @enderror" 
+                                       id="sauce_name_ka" 
+                                       value="{{ old('sauce_name_ka', $dish->sauce_name_ka) }}" />
+                                @error('sauce_name_ka')
+                                    <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- КБЖУ соуса -->
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="label-text" for="sauce_weight_volume">Вес/Объем соуса</label>
+                            <input type="text" 
+                                   name="sauce_weight_volume" 
+                                   placeholder="Например: 40 г или 30 мл" 
+                                   class="input @error('sauce_weight_volume') input-error @enderror" 
+                                   id="sauce_weight_volume" 
+                                   value="{{ old('sauce_weight_volume', $dish->sauce_weight_volume) }}" />
+                            @error('sauce_weight_volume')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="label-text" for="sauce_calories">Калории соуса (ккал)</label>
+                            <input type="number" 
+                                   name="sauce_calories" 
+                                   placeholder="0" 
+                                   class="input @error('sauce_calories') input-error @enderror" 
+                                   id="sauce_calories" 
+                                   value="{{ old('sauce_calories', $dish->sauce_calories) }}" 
+                                   min="0" />
+                            @error('sauce_calories')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                        <div>
+                            <label class="label-text" for="sauce_proteins">Белки соуса (г)</label>
+                            <input type="number" 
+                                   name="sauce_proteins" 
+                                   placeholder="0.00" 
+                                   class="input @error('sauce_proteins') input-error @enderror" 
+                                   id="sauce_proteins" 
+                                   value="{{ old('sauce_proteins', $dish->sauce_proteins) }}" 
+                                   step="0.01"
+                                   min="0" />
+                            @error('sauce_proteins')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="label-text" for="sauce_fats">Жиры соуса (г)</label>
+                            <input type="number" 
+                                   name="sauce_fats" 
+                                   placeholder="0.00" 
+                                   class="input @error('sauce_fats') input-error @enderror" 
+                                   id="sauce_fats" 
+                                   value="{{ old('sauce_fats', $dish->sauce_fats) }}" 
+                                   step="0.01"
+                                   min="0" />
+                            @error('sauce_fats')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="label-text" for="sauce_carbohydrates">Углеводы соуса (г)</label>
+                            <input type="number" 
+                                   name="sauce_carbohydrates" 
+                                   placeholder="0.00" 
+                                   class="input @error('sauce_carbohydrates') input-error @enderror" 
+                                   id="sauce_carbohydrates" 
+                                   value="{{ old('sauce_carbohydrates', $dish->sauce_carbohydrates) }}" 
+                                   step="0.01"
+                                   min="0" />
+                            @error('sauce_carbohydrates')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="label-text" for="sauce_fiber">Клетчатка соуса (г)</label>
+                            <input type="number" 
+                                   name="sauce_fiber" 
+                                   placeholder="0.00" 
+                                   class="input @error('sauce_fiber') input-error @enderror" 
+                                   id="sauce_fiber" 
+                                   value="{{ old('sauce_fiber', $dish->sauce_fiber) }}" 
+                                   step="0.01"
+                                   min="0" />
+                            @error('sauce_fiber')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Дополнительно -->
                 <div class="space-y-4 border-t border-base-content/10 pt-6">
                     <h4 class="text-base-content text-lg font-semibold">Дополнительно</h4>

@@ -18,7 +18,7 @@ test('cabinet user can authenticate with phone and password', function () {
     $response->assertRedirect(route('cabinet.dashboard', absolute: false));
 });
 
-test('admin cannot login via cabinet', function () {
+test('admin can login via cabinet', function () {
     $admin = User::factory()->admin()->create(['phone' => '+995555333444']);
 
     $response = $this->post(route('cabinet.login'), [
@@ -26,8 +26,8 @@ test('admin cannot login via cabinet', function () {
         'password' => 'password',
     ]);
 
-    $response->assertSessionHasErrors('phone');
-    $this->assertGuest();
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('cabinet.dashboard', absolute: false));
 });
 
 test('cabinet user cannot authenticate with invalid password', function () {
@@ -41,10 +41,18 @@ test('cabinet user cannot authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
-test('logged-in cabinet user is redirected from login to dashboard', function () {
+test('logged-in user is redirected from login to dashboard', function () {
     $user = User::factory()->create(['phone' => '+995555777888']);
 
     $response = $this->actingAs($user)->get(route('cabinet.login'));
+
+    $response->assertRedirect(route('cabinet.dashboard', absolute: false));
+});
+
+test('logged-in admin is redirected from login to dashboard', function () {
+    $admin = User::factory()->admin()->create(['phone' => '+995555888999']);
+
+    $response = $this->actingAs($admin)->get(route('cabinet.login'));
 
     $response->assertRedirect(route('cabinet.dashboard', absolute: false));
 });
@@ -58,10 +66,10 @@ test('cabinet user can logout', function () {
     $response->assertRedirect(route('cabinet.login'));
 });
 
-test('admin cannot access cabinet routes', function () {
+test('admin can access cabinet routes', function () {
     $admin = User::factory()->admin()->create(['phone' => '+995555000111']);
 
     $this->actingAs($admin)
         ->get(route('cabinet.dashboard'))
-        ->assertForbidden();
+        ->assertSuccessful();
 });

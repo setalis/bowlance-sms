@@ -129,29 +129,79 @@
                                                     <p class="text-sm text-base-content/70 line-clamp-2">{{ $dish->description }}</p>
                                                 @endif
                                                 
-                                                <!-- Пищевая ценность -->
+                                                <!-- Пищевая ценность блюда -->
                                                 @if($dish->calories || $dish->proteins || $dish->fats || $dish->carbohydrates)
-                                                    <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                                                        @if($dish->calories)
-                                                            <span class="badge badge-outline badge-sm">
-                                                                <span class="icon-[tabler--flame] mr-1 size-3"></span>
-                                                                {{ $dish->calories }} {{ __('frontend.calories') }}
-                                                            </span>
-                                                        @endif
-                                                        @if($dish->proteins)
-                                                            <span class="badge badge-outline badge-sm">{{ __('frontend.proteins') }}: {{ $dish->proteins }}{{ __('frontend.grams') }}</span>
-                                                        @endif
-                                                        @if($dish->fats)
-                                                            <span class="badge badge-outline badge-sm">{{ __('frontend.fats') }}: {{ $dish->fats }}{{ __('frontend.grams') }}</span>
-                                                        @endif
-                                                        @if($dish->carbohydrates)
-                                                            <span class="badge badge-outline badge-sm">{{ __('frontend.carbs') }}: {{ $dish->carbohydrates }}{{ __('frontend.grams') }}</span>
+                                                    <div class="mt-2">
+                                                        <p class="text-xs font-medium text-base-content/60 mb-1">Блюдо:</p>
+                                                        <div class="flex flex-wrap gap-2 text-xs">
+                                                            @if($dish->calories)
+                                                                <span class="badge badge-outline badge-sm">
+                                                                    <span class="icon-[tabler--flame] mr-1 size-3"></span>
+                                                                    {{ $dish->calories }} {{ __('frontend.calories') }}
+                                                                </span>
+                                                            @endif
+                                                            @if($dish->proteins)
+                                                                <span class="badge badge-outline badge-sm">{{ __('frontend.proteins') }}: {{ $dish->proteins }}{{ __('frontend.grams') }}</span>
+                                                            @endif
+                                                            @if($dish->fats)
+                                                                <span class="badge badge-outline badge-sm">{{ __('frontend.fats') }}: {{ $dish->fats }}{{ __('frontend.grams') }}</span>
+                                                            @endif
+                                                            @if($dish->carbohydrates)
+                                                                <span class="badge badge-outline badge-sm">{{ __('frontend.carbs') }}: {{ $dish->carbohydrates }}{{ __('frontend.grams') }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                <!-- Пищевая ценность соуса -->
+                                                @if($dish->sauce_name_ru)
+                                                    <div class="mt-2 rounded-lg bg-primary/5 p-2">
+                                                        <div class="flex items-center gap-1 mb-1">
+                                                            <span class="icon-[tabler--bottle] size-3 text-primary"></span>
+                                                            <p class="text-xs font-medium text-primary">+ {{ $dish->sauce_name }}</p>
+                                                            @if($dish->sauce_weight_volume)
+                                                                <span class="text-xs text-base-content/40">({{ $dish->sauce_weight_volume }})</span>
+                                                            @endif
+                                                        </div>
+                                                        @if($dish->sauce_calories || $dish->sauce_proteins || $dish->sauce_fats || $dish->sauce_carbohydrates)
+                                                            <div class="flex flex-wrap gap-1 text-xs">
+                                                                @if($dish->sauce_calories)
+                                                                    <span class="badge badge-outline badge-xs">
+                                                                        {{ $dish->sauce_calories }} {{ __('frontend.calories') }}
+                                                                    </span>
+                                                                @endif
+                                                                @if($dish->sauce_proteins)
+                                                                    <span class="badge badge-outline badge-xs">Б: {{ $dish->sauce_proteins }}{{ __('frontend.grams') }}</span>
+                                                                @endif
+                                                                @if($dish->sauce_fats)
+                                                                    <span class="badge badge-outline badge-xs">Ж: {{ $dish->sauce_fats }}{{ __('frontend.grams') }}</span>
+                                                                @endif
+                                                                @if($dish->sauce_carbohydrates)
+                                                                    <span class="badge badge-outline badge-xs">У: {{ $dish->sauce_carbohydrates }}{{ __('frontend.grams') }}</span>
+                                                                @endif
+                                                            </div>
                                                         @endif
                                                     </div>
                                                 @endif
 
+                                                <!-- Общая КБЖУ -->
+                                                @if(($dish->calories || $dish->proteins || $dish->fats || $dish->carbohydrates) && $dish->sauce_name_ru)
+                                                    <div class="mt-2 border-t border-base-content/10 pt-2">
+                                                        <p class="text-xs font-semibold text-base-content mb-1">Итого с соусом:</p>
+                                                        <div class="flex flex-wrap gap-2 text-xs">
+                                                            <span class="badge badge-primary badge-sm">
+                                                                <span class="icon-[tabler--flame] mr-1 size-3"></span>
+                                                                {{ ($dish->calories ?? 0) + ($dish->sauce_calories ?? 0) }} {{ __('frontend.calories') }}
+                                                            </span>
+                                                            <span class="badge badge-primary badge-sm">Б: {{ number_format(($dish->proteins ?? 0) + ($dish->sauce_proteins ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-primary badge-sm">Ж: {{ number_format(($dish->fats ?? 0) + ($dish->sauce_fats ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-primary badge-sm">У: {{ number_format(($dish->carbohydrates ?? 0) + ($dish->sauce_carbohydrates ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
                                                 @if($dish->weight_volume)
-                                                    <p class="text-xs text-base-content/50 mt-1">{{ $dish->weight_volume }}</p>
+                                                    <p class="text-xs text-base-content/50 mt-2">Вес блюда: {{ $dish->weight_volume }}</p>
                                                 @endif
                                                 
                                                 <div class="card-actions mt-4 items-center justify-between">
@@ -176,7 +226,22 @@
                                                                     calories: {{ $dish->calories ?? 0 }},
                                                                     proteins: {{ $dish->proteins ?? 0 }},
                                                                     fats: {{ $dish->fats ?? 0 }},
-                                                                    carbs: {{ $dish->carbohydrates ?? 0 }}
+                                                                    carbs: {{ $dish->carbohydrates ?? 0 }},
+                                                                    @if($dish->sauce_name_ru)
+                                                                    sauce_name: '{{ addslashes($dish->sauce_name) }}',
+                                                                    sauce_weight: '{{ $dish->sauce_weight_volume }}',
+                                                                    sauce_calories: {{ $dish->sauce_calories ?? 0 }},
+                                                                    sauce_proteins: {{ $dish->sauce_proteins ?? 0 }},
+                                                                    sauce_fats: {{ $dish->sauce_fats ?? 0 }},
+                                                                    sauce_carbs: {{ $dish->sauce_carbohydrates ?? 0 }}
+                                                                    @else
+                                                                    sauce_name: null,
+                                                                    sauce_weight: null,
+                                                                    sauce_calories: 0,
+                                                                    sauce_proteins: 0,
+                                                                    sauce_fats: 0,
+                                                                    sauce_carbs: 0
+                                                                    @endif
                                                                 });
                                                                 $store.cart.openDrawer();
                                                             ">

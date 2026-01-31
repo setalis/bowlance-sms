@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\UserRole;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +10,7 @@ class EnsureCabinetUser
 {
     /**
      * Handle an incoming request.
-     * Разрешает доступ только пользователям с ролью User (не админам).
+     * Разрешает доступ всем авторизованным пользователям (включая админов).
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
@@ -19,10 +18,6 @@ class EnsureCabinetUser
     {
         if (! $request->user()) {
             return redirect()->route('cabinet.login');
-        }
-
-        if ($request->user()->role === UserRole::Admin) {
-            abort(403, 'Доступ в личный кабинет запрещён для администраторов.');
         }
 
         return $next($request);

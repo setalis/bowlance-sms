@@ -38,6 +38,15 @@ class UpdateDishRequest extends FormRequest
             'fats' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'carbohydrates' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'fiber' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'sauce_name' => ['nullable', 'string', 'max:255'],
+            'sauce_name_ru' => ['nullable', 'string', 'max:255'],
+            'sauce_name_ka' => ['nullable', 'string', 'max:255'],
+            'sauce_weight_volume' => ['nullable', 'string', 'max:255'],
+            'sauce_calories' => ['nullable', 'integer', 'min:0'],
+            'sauce_proteins' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'sauce_fats' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'sauce_carbohydrates' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'sauce_fiber' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'sort_order' => ['integer', 'min:0'],
         ];
     }

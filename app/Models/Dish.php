@@ -28,6 +28,15 @@ class Dish extends Model
         'fats',
         'carbohydrates',
         'fiber',
+        'sauce_name',
+        'sauce_name_ru',
+        'sauce_name_ka',
+        'sauce_weight_volume',
+        'sauce_calories',
+        'sauce_proteins',
+        'sauce_fats',
+        'sauce_carbohydrates',
+        'sauce_fiber',
         'sort_order',
     ];
 
@@ -40,6 +49,10 @@ class Dish extends Model
             'fats' => 'decimal:2',
             'carbohydrates' => 'decimal:2',
             'fiber' => 'decimal:2',
+            'sauce_proteins' => 'decimal:2',
+            'sauce_fats' => 'decimal:2',
+            'sauce_carbohydrates' => 'decimal:2',
+            'sauce_fiber' => 'decimal:2',
         ];
     }
 
@@ -84,5 +97,24 @@ class Dish extends Model
 
         // Fallback на русский, затем на старое поле
         return $this->description_ru ?? $this->attributes['description'] ?? null;
+    }
+
+    /**
+     * Получить название соуса в зависимости от текущей локали.
+     */
+    public function getSauceNameAttribute(?string $value): ?string
+    {
+        $locale = app()->getLocale();
+
+        if ($locale === 'ka' && $this->sauce_name_ka) {
+            return $this->sauce_name_ka;
+        }
+
+        if ($locale === 'ru' && $this->sauce_name_ru) {
+            return $this->sauce_name_ru;
+        }
+
+        // Fallback на русский, затем на старое поле
+        return $this->sauce_name_ru ?? $this->attributes['sauce_name'] ?? null;
     }
 }

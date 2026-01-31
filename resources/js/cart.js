@@ -34,7 +34,13 @@ export function initCart() {
                     calories: dish.calories || 0,
                     proteins: dish.proteins || 0,
                     fats: dish.fats || 0,
-                    carbs: dish.carbs || 0
+                    carbs: dish.carbs || 0,
+                    sauce_name: dish.sauce_name || null,
+                    sauce_weight: dish.sauce_weight || null,
+                    sauce_calories: dish.sauce_calories || 0,
+                    sauce_proteins: dish.sauce_proteins || 0,
+                    sauce_fats: dish.sauce_fats || 0,
+                    sauce_carbs: dish.sauce_carbs || 0
                 });
             }
             
@@ -123,10 +129,26 @@ export function initCart() {
         // Получить общую пищевую ценность
         get totalNutrition() {
             return {
-                calories: this.items.reduce((sum, item) => sum + ((item.calories || 0) * item.quantity), 0),
-                proteins: this.items.reduce((sum, item) => sum + ((item.proteins || 0) * item.quantity), 0),
-                fats: this.items.reduce((sum, item) => sum + ((item.fats || 0) * item.quantity), 0),
-                carbs: this.items.reduce((sum, item) => sum + ((item.carbs || 0) * item.quantity), 0)
+                calories: this.items.reduce((sum, item) => {
+                    const dishCalories = (item.calories || 0) * item.quantity;
+                    const sauceCalories = (item.sauce_calories || 0) * item.quantity;
+                    return sum + dishCalories + sauceCalories;
+                }, 0),
+                proteins: this.items.reduce((sum, item) => {
+                    const dishProteins = (item.proteins || 0) * item.quantity;
+                    const sauceProteins = (item.sauce_proteins || 0) * item.quantity;
+                    return sum + dishProteins + sauceProteins;
+                }, 0),
+                fats: this.items.reduce((sum, item) => {
+                    const dishFats = (item.fats || 0) * item.quantity;
+                    const sauceFats = (item.sauce_fats || 0) * item.quantity;
+                    return sum + dishFats + sauceFats;
+                }, 0),
+                carbs: this.items.reduce((sum, item) => {
+                    const dishCarbs = (item.carbs || 0) * item.quantity;
+                    const sauceCarbs = (item.sauce_carbs || 0) * item.quantity;
+                    return sum + dishCarbs + sauceCarbs;
+                }, 0)
             };
         },
 

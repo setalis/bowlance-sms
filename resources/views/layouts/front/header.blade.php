@@ -62,11 +62,9 @@
             </div>
 
             @auth
-                @if(auth()->user()->isUser())
-                    <a href="{{ route('cabinet.dashboard') }}" class="btn btn-ghost btn-square btn-sm" aria-label="Личный кабинет" title="Личный кабинет">
-                        <span class="icon-[tabler--user] size-5"></span>
-                    </a>
-                @endif
+                <a href="{{ route('cabinet.dashboard') }}" class="btn btn-ghost btn-square btn-sm" aria-label="Личный кабинет" title="Личный кабинет">
+                    <span class="icon-[tabler--user] size-5"></span>
+                </a>
             @else
                 <a href="{{ route('cabinet.login') }}" class="btn btn-ghost btn-square btn-sm" aria-label="Личный кабинет" title="Личный кабинет">
                     <span class="icon-[tabler--user] size-5"></span>
@@ -109,12 +107,10 @@
         <div class="p-4 overflow-y-auto">
             <div class="flex flex-col gap-4">
                 @auth
-                    @if(auth()->user()->isUser())
-                        <a href="{{ route('cabinet.dashboard') }}" class="btn btn-outline gap-2">
-                            <span class="icon-[tabler--user] size-5"></span>
-                            <span>Личный кабинет</span>
-                        </a>
-                    @endif
+                    <a href="{{ route('cabinet.dashboard') }}" class="btn btn-outline gap-2">
+                        <span class="icon-[tabler--user] size-5"></span>
+                        <span>Личный кабинет</span>
+                    </a>
                 @else
                     <a href="{{ route('cabinet.login') }}" class="btn btn-outline gap-2">
                         <span class="icon-[tabler--user] size-5"></span>
@@ -249,28 +245,92 @@
                                         </button>
                                     </div>
 
-                                    <!-- Пищевая ценность (если есть) -->
-                                    <template x-if="item.calories > 0">
-                                        <div class="flex flex-wrap gap-1 mb-2 text-xs">
-                                            <span class="badge badge-outline badge-xs">
-                                                <span class="icon-[tabler--flame] mr-0.5 size-3"></span>
-                                                <span x-text="Math.round(item.calories)"></span> {{ __('frontend.calories') }}
-                                            </span>
-                                            <template x-if="item.proteins > 0">
-                                                <span class="badge badge-outline badge-xs">
-                                                    {{ __('frontend.proteins') }}: <span x-text="item.proteins.toFixed(1)"></span>{{ __('frontend.grams') }}
-                                                </span>
+                                    <!-- Пищевая ценность блюда (если есть) -->
+                                    <template x-if="item.calories > 0 || item.proteins > 0 || item.fats > 0 || item.carbs > 0">
+                                        <div class="mb-2">
+                                            <p class="text-xs font-medium text-base-content/70 mb-1">Блюдо:</p>
+                                            <div class="flex flex-wrap gap-1 text-xs">
+                                                <template x-if="item.calories > 0">
+                                                    <span class="badge badge-outline badge-xs">
+                                                        <span class="icon-[tabler--flame] mr-0.5 size-3"></span>
+                                                        <span x-text="Math.round(item.calories)"></span> {{ __('frontend.calories') }}
+                                                    </span>
+                                                </template>
+                                                <template x-if="item.proteins > 0">
+                                                    <span class="badge badge-outline badge-xs">
+                                                        Б: <span x-text="item.proteins.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                    </span>
+                                                </template>
+                                                <template x-if="item.fats > 0">
+                                                    <span class="badge badge-outline badge-xs">
+                                                        Ж: <span x-text="item.fats.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                    </span>
+                                                </template>
+                                                <template x-if="item.carbs > 0">
+                                                    <span class="badge badge-outline badge-xs">
+                                                        У: <span x-text="item.carbs.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Информация о соусе (если есть) -->
+                                    <template x-if="item.sauce_name">
+                                        <div class="mb-2 rounded bg-primary/5 p-2">
+                                            <div class="flex items-center gap-1 mb-1">
+                                                <span class="icon-[tabler--bottle] size-3 text-primary"></span>
+                                                <span class="text-xs font-medium text-primary">+ <span x-text="item.sauce_name"></span></span>
+                                                <template x-if="item.sauce_weight">
+                                                    <span class="text-xs text-base-content/40">(<span x-text="item.sauce_weight"></span>)</span>
+                                                </template>
+                                            </div>
+                                            <template x-if="item.sauce_calories > 0 || item.sauce_proteins > 0 || item.sauce_fats > 0 || item.sauce_carbs > 0">
+                                                <div class="flex flex-wrap gap-1 text-xs">
+                                                    <template x-if="item.sauce_calories > 0">
+                                                        <span class="badge badge-outline badge-xs">
+                                                            <span x-text="Math.round(item.sauce_calories)"></span> {{ __('frontend.calories') }}
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="item.sauce_proteins > 0">
+                                                        <span class="badge badge-outline badge-xs">
+                                                            Б: <span x-text="item.sauce_proteins.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="item.sauce_fats > 0">
+                                                        <span class="badge badge-outline badge-xs">
+                                                            Ж: <span x-text="item.sauce_fats.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="item.sauce_carbs > 0">
+                                                        <span class="badge badge-outline badge-xs">
+                                                            У: <span x-text="item.sauce_carbs.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                        </span>
+                                                    </template>
+                                                </div>
                                             </template>
-                                            <template x-if="item.fats > 0">
-                                                <span class="badge badge-outline badge-xs">
-                                                    {{ __('frontend.fats') }}: <span x-text="item.fats.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Итоговая КБЖУ (если есть соус) -->
+                                    <template x-if="item.sauce_name && (item.calories > 0 || item.sauce_calories > 0)">
+                                        <div class="mb-2 border-t border-base-content/10 pt-2">
+                                            <p class="text-xs font-semibold text-base-content/80 mb-1">Итого:</p>
+                                            <div class="flex flex-wrap gap-1 text-xs">
+                                                <span class="badge badge-primary badge-xs">
+                                                    <span class="icon-[tabler--flame] mr-0.5 size-3"></span>
+                                                    <span x-text="Math.round((item.calories || 0) + (item.sauce_calories || 0))"></span> {{ __('frontend.calories') }}
                                                 </span>
-                                            </template>
-                                            <template x-if="item.carbs > 0">
-                                                <span class="badge badge-outline badge-xs">
-                                                    {{ __('frontend.carbs') }}: <span x-text="item.carbs.toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                <span class="badge badge-primary badge-xs">
+                                                    Б: <span x-text="((item.proteins || 0) + (item.sauce_proteins || 0)).toFixed(1)"></span>{{ __('frontend.grams') }}
                                                 </span>
-                                            </template>
+                                                <span class="badge badge-primary badge-xs">
+                                                    Ж: <span x-text="((item.fats || 0) + (item.sauce_fats || 0)).toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                </span>
+                                                <span class="badge badge-primary badge-xs">
+                                                    У: <span x-text="((item.carbs || 0) + (item.sauce_carbs || 0)).toFixed(1)"></span>{{ __('frontend.grams') }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </template>
 
