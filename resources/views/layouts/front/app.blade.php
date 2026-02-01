@@ -20,7 +20,7 @@
     
 </head>
 
-<body class="bg-base-200" x-data>
+<body class="" x-data>
     <!-- Header -->
     @include('layouts.front.header')
 

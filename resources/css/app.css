@@ -22,9 +22,9 @@ li:not(.menu-title, .menu-disabled)
     color: var(--color-primary-content);
 }
 
-body {
+/* body {
     color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
-}
+} */
 
 .auth-background {
     background-image: url('/images/auth-background-2.png');

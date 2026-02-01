@@ -1,43 +1,45 @@
-<header class="navbar fixed top-0 z-50">
-    <div class="container mx-auto flex items-center justify-between px-4">
+<header class="navbar h-18 fixed top-0 z-50">
+    <div class="container mx-auto flex items-center justify-between gap-6 md:gap-6">
         <!-- Логотип -->
         <div class="navbar-start">
             <a href="{{ route('home') }}" class="flex items-center gap-2 text-2xl font-bold text-primary">
-                <span class="icon-[tabler--bowl] size-8"></span>
-                <span>Bowlance</span>
+                <!-- <span class="icon-[tabler--bowl] size-8"></span>
+                <span>Bowlance</span> -->
+                <img src="{{ asset('storage/images/logo.png') }}" alt="Bowlance" class="size-16">
             </a>
         </div>
 
         <!-- Центральная часть - иконки -->
-        <div class="navbar-center hidden gap-6 lg:flex">
-            <a href="tel:+995555123456" class="btn btn-ghost btn-sm gap-2" aria-label="{{ __('frontend.phone') }}">
-                <span class="icon-[tabler--phone] size-5"></span>
-                <span>+995 555 123 456</span>
-            </a>
-            
-            <a href="https://instagram.com/bowlance" target="_blank" class="btn btn-ghost btn-sm gap-2" aria-label="Instagram">
-                <span class="icon-[tabler--brand-instagram] size-5"></span>
-            </a>
-            
-            <button type="button" class="btn btn-ghost btn-sm gap-2" aria-label="{{ __('frontend.location') }}">
-                <span class="icon-[tabler--map-pin] size-5"></span>
-                <span>{{ __('frontend.location') }}</span>
+        <div class="navbar-center hidden md:flex gap-2 md:gap-6 items-center">
+
+            <!-- Телефон -->
+            <a href="tel:+995555123456" class="flex items-center justify-center" aria-label="{{ __('frontend.phone') }}">
+                <span class="icon-[tabler--phone] size-8 text-emerald-600"></span>
+                <span class="hidden md:block">+995 500 700 877</span>
+            </a>     
+            <button type="button" class="flex items-center justify-center" aria-label="{{ __('frontend.location') }}">
+                <span class="icon-[tabler--live-view] bg-amber-700 size-8"></span>
+                <span class="ml-3 text-sm hidden md:block">{{ __('frontend.location') }}</span>
             </button>
+
+            <a href="https://instagram.com/bowlance.ge" target="_blank" class="flex items-center justify-center" aria-label="Instagram">
+                <span class="icon-[tabler--brand-instagram] size-8 bg-linear-65 from-pink-400 to-purple-500"></span>
+            </a>
         </div>
 
         <!-- Правая часть - язык и корзина -->        
 
 
-        <div class="navbar-end flex items-center gap-2">
+        <div class="navbar-end flex items-center gap-3">
             <div class="dropdown relative inline-flex [--placement:bottom-end]">
               <button id="locale-dropdown" 
                       type="button" 
-                      class="dropdown-toggle btn btn-primary btn-sm gap-2" 
+                      class="dropdown-toggle bg-transparent flex items-center justify-center gap-2 border border-emerald-600 rounded-full px-2 py-1" 
                       aria-haspopup="menu"
                       aria-expanded="false" 
                       aria-label="Выбрать язык">
-                <span class="icon-[tabler--language] size-4"></span>
-                <span>{{ strtoupper(app()->getLocale()) }}</span>
+                <!-- <span class="icon-[tabler--language] size-4"></span> -->
+                <span class="text-sm">{{ strtoupper(app()->getLocale()) }}</span>
                 <span class="icon-[tabler--chevron-down] dropdown-open:rotate-180 size-4 transition-transform"></span>
               </button>
               <ul class="dropdown-menu dropdown-open:opacity-100 hidden w-40 space-y-0.5 bg-base-100 rounded-box shadow-lg border border-base-content/10 py-2" 
@@ -62,13 +64,17 @@
             </div>
 
             @auth
-                <a href="{{ route('cabinet.dashboard') }}" class="btn btn-ghost btn-square btn-sm" aria-label="Личный кабинет" title="Личный кабинет">
+            <div class="flex items-center justify-center">
+                <a href="{{ route('cabinet.dashboard') }}" class="border border-emerald-600 rounded-full px-3 py-1" aria-label="Личный кабинет" title="Личный кабинет">
                     <span class="icon-[tabler--user] size-5"></span>
                 </a>
+            </div>
             @else
-                <a href="{{ route('cabinet.login') }}" class="btn btn-ghost btn-square btn-sm" aria-label="Личный кабинет" title="Личный кабинет">
-                    <span class="icon-[tabler--user] size-5"></span>
+            <div class="flex items-center justify-center">
+                <a href="{{ route('cabinet.login') }}" class="text-emerald-600"  aria-label="Личный кабинет" title="Личный кабинет">
+                    <span class="icon-[tabler--user] size-6"></span>
                 </a>
+            </div>
             @endauth
 
             <!-- Корзина -->
@@ -84,10 +90,32 @@
                       x-cloak></span>
             </button>
 
-            <!-- Меню для мобильных -->
-            <button type="button" class="btn btn-ghost btn-square btn-sm lg:hidden" data-hs-overlay="#mobileMenu" aria-label="{{ __('frontend.menu') }}">
-                <span class="icon-[tabler--menu-2] size-6"></span>
+            <button type="button" class="btn btn-primary" aria-haspopup="dialog" aria-expanded="false" aria-controls="overlay-end-example" data-overlay="#overlay-end-example">
+                <span class="icon-[tabler--baseline-density-medium] size-5"></span>
             </button>
+
+            <div id="overlay-end-example" class="overlay overlay-open:translate-x-0 drawer drawer-end hidden" role="dialog" tabindex="-1">
+                <div class="drawer-header">
+                    <h3 class="drawer-title">Drawer Title</h3>
+                    <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#overlay-end-example">
+                    <span class="icon-[tabler--x] size-5"></span>
+                    </button>
+                </div>
+                <div class="drawer-body">
+                    <p>
+                    Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.
+                    </p>
+                </div>
+                <div class="drawer-footer">
+                    <button type="button" class="btn btn-soft btn-secondary" data-overlay="#overlay-end-example">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+
+            <!-- Меню для мобильных -->
+            <!-- <button type="button" class="btn btn-ghost btn-square btn-sm lg:hidden" data-hs-overlay="#mobileMenu" aria-label="{{ __('frontend.menu') }}">
+                <span class="icon-[tabler--menu-2] size-6"></span>
+            </button> -->
         </div>
     </div>
 </header>
