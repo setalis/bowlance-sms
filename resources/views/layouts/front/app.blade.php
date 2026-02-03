@@ -297,7 +297,8 @@
                 try {
                     const orderData = {
                         ...this.formData,
-                        verification_request_id: this.verificationRequestId
+                        verification_request_id: this.verificationRequestId,
+                        confirm_switch_user: this.formData.confirm_switch_user || false
                     };
                     
                     const order = await this.$store.cart.checkout(orderData);
@@ -312,7 +313,21 @@
                         this.open = false;
                     }
                 } catch (error) {
-                    this.$store.cart.showNotification(error.message, 'error');
+                    // Check if it requires user confirmation for switching accounts
+                    if (error.requires_confirmation && error.target_user) {
+                        const confirmMessage = `Вы авторизованы как другой пользователь.\n\nПереключиться на:\n${error.target_user.name} (${error.target_user.phone})?`;
+                        
+                        if (confirm(confirmMessage)) {
+                            // User confirmed - retry with confirmation flag
+                            this.formData.confirm_switch_user = true;
+                            await this.submitOrder();
+                            return;
+                        } else {
+                            this.$store.cart.showNotification('Заказ отменён', 'info');
+                        }
+                    } else {
+                        this.$store.cart.showNotification(error.message, 'error');
+                    }
                 } finally {
                     this.loading = false;
                 }

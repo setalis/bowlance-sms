@@ -193,6 +193,7 @@ export function initCart() {
                     delivery_address: customerData.address || null,
                     comment: customerData.comment || null,
                     verification_request_id: customerData.verification_request_id,
+                    confirm_switch_user: customerData.confirm_switch_user || false,
                     items: this.items.map(item => ({
                         type: item.type,
                         id: item.id,
@@ -237,10 +238,20 @@ export function initCart() {
                     this.closeDrawer();
 
                     return result.order;
+                } else if (result.requires_confirmation) {
+                    // Return special object indicating confirmation is needed
+                    const error = new Error(result.message || 'Требуется подтверждение');
+                    error.requires_confirmation = true;
+                    error.target_user = result.target_user;
+                    throw error;
                 } else {
                     throw new Error(result.message || 'Ошибка при оформлении заказа');
                 }
             } catch (error) {
+                // Re-throw if it has requires_confirmation flag
+                if (error.requires_confirmation) {
+                    throw error;
+                }
                 this.showNotification(error.message || 'Ошибка при оформлении заказа', 'error');
                 return false;
             }

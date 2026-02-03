@@ -7,11 +7,16 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
+use App\Services\PhoneAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        protected PhoneAuthService $phoneAuthService
+    ) {}
+
     public function store(StoreOrderRequest $request): JsonResponse
     {
         try {
@@ -21,6 +26,38 @@ class OrderController extends Controller
                 ->where('verified', true)
                 ->first();
 
+            // Check if we need to re-authenticate (user switching scenario)
+            $authResult = $this->phoneAuthService->shouldReauthenticate(
+                auth()->id(),
+                $request->customer_phone
+            );
+
+            // If requires confirmation and user hasn't confirmed yet
+            if ($authResult['should_reauth'] && ! $request->boolean('confirm_switch_user')) {
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'requires_confirmation' => true,
+                    'message' => 'Вы авторизованы как другой пользователь. Переключиться?',
+                    'target_user' => [
+                        'id' => $authResult['target_user']->id,
+                        'name' => $authResult['target_user']->name,
+                        'phone' => $authResult['target_user']->phone,
+                    ],
+                ], 409);
+            }
+
+            // Find or create user by verified phone
+            $user = $this->phoneAuthService->findOrCreateUser(
+                $request->customer_phone,
+                $request->customer_email,
+                $request->customer_name
+            );
+
+            // Authenticate the user
+            $this->phoneAuthService->authenticateUser($user);
+
             $subtotal = collect($request->items)->sum(function ($item) {
                 return $item['price'] * $item['quantity'];
             });
@@ -29,7 +66,7 @@ class OrderController extends Controller
             $total = $subtotal + $deliveryFee;
 
             $order = Order::create([
-                'user_id' => auth()->id(),
+                'user_id' => $user->id,
                 'customer_name' => $request->customer_name,
                 'customer_phone' => $request->customer_phone,
                 'customer_email' => $request->customer_email,

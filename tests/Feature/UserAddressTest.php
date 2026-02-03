@@ -139,7 +139,10 @@ it('нельзя удалить чужой адрес', function () {
 });
 
 it('адрес автоматически сохраняется при создании заказа', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'phone' => '+995555123456',
+    ]);
+
     $verification = \App\Models\PhoneVerification::factory()->verified()->create([
         'phone' => '+995555123456',
     ]);
@@ -173,7 +176,9 @@ it('адрес автоматически сохраняется при созд
 });
 
 it('не создаются дубликаты адресов при заказе', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'phone' => '+995555123456',
+    ]);
 
     UserAddress::create([
         'user_id' => $user->id,

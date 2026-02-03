@@ -22,6 +22,7 @@ class StoreOrderRequest extends FormRequest
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string|max:1000',
             'comment' => 'nullable|string|max:1000',
             'verification_request_id' => 'required|string',
+            'confirm_switch_user' => 'nullable|boolean',
             'items' => 'required|array|min:1',
             'items.*.type' => 'required|in:dish,bowl',
             'items.*.id' => 'required|integer',
