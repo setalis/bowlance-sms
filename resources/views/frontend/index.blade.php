@@ -257,6 +257,99 @@
                         </div>
                     @endforeach
                 @endif
+
+                <!-- Раздел с напитками -->
+                @if($drinks->isNotEmpty())
+                    <div class="mt-12 border-t border-base-content/10 pt-8">
+                        <h3 class="mb-6 flex items-center gap-2 text-2xl font-bold">
+                            <span class="icon-[tabler--cup] size-6 text-primary"></span>
+                            Напитки
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach($drinks as $drink)
+                                <div class="card hover:shadow-xl transition-shadow">
+                                    <figure class="h-48 overflow-hidden">
+                                        @if($drink->image)
+                                            <img src="{{ asset('storage/' . $drink->image) }}" 
+                                                 alt="{{ $drink->name }}" 
+                                                 class="h-full w-full object-cover">
+                                        @else
+                                            <img src="https://images.unsplash.com/photo-1437418747212-8d9709afab22?w=400&h=300&fit=crop" 
+                                                 alt="{{ $drink->name }}" 
+                                                 class="h-full w-full object-cover">
+                                        @endif
+                                    </figure>
+                                    <div class="card-body">
+                                        <h4 class="card-title text-lg">{{ $drink->name }}</h4>
+                                        
+                                        @if($drink->description)
+                                            <p class="text-sm text-base-content/70 line-clamp-2">{{ $drink->description }}</p>
+                                        @endif
+                                        
+                                        <!-- Пищевая ценность напитка -->
+                                        @if($drink->calories || $drink->proteins || $drink->fats || $drink->carbohydrates)
+                                            <div class="mt-2">
+                                                <div class="flex flex-wrap gap-2 text-xs">
+                                                    @if($drink->calories)
+                                                        <span class="badge badge-outline badge-sm">
+                                                            <span class="icon-[tabler--flame] mr-1 size-3"></span>
+                                                            {{ $drink->calories }} {{ __('frontend.calories') }}
+                                                        </span>
+                                                    @endif
+                                                    @if($drink->proteins)
+                                                        <span class="badge badge-outline badge-sm">{{ __('frontend.proteins') }}: {{ $drink->proteins }}{{ __('frontend.grams') }}</span>
+                                                    @endif
+                                                    @if($drink->fats)
+                                                        <span class="badge badge-outline badge-sm">{{ __('frontend.fats') }}: {{ $drink->fats }}{{ __('frontend.grams') }}</span>
+                                                    @endif
+                                                    @if($drink->carbohydrates)
+                                                        <span class="badge badge-outline badge-sm">{{ __('frontend.carbs') }}: {{ $drink->carbohydrates }}{{ __('frontend.grams') }}</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if($drink->volume)
+                                            <p class="text-xs text-base-content/50 mt-2">Объем: {{ $drink->volume }}</p>
+                                        @endif
+                                        
+                                        <div class="card-actions mt-4 items-center justify-between">
+                                            <div class="flex flex-col">
+                                                @if($drink->discount_price)
+                                                    <span class="text-xs text-base-content/50 line-through">{{ number_format($drink->price, 2) }} ₾</span>
+                                                    <span class="text-xl font-bold text-primary">{{ number_format($drink->discount_price, 2) }} ₾</span>
+                                                @else
+                                                    <span class="text-xl font-bold">{{ number_format($drink->price, 2) }} ₾</span>
+                                                @endif
+                                            </div>
+                                            <button type="button" 
+                                                    class="btn btn-primary btn-sm gap-2"
+                                                    x-data
+                                                    @click="
+                                                        $store.cart.addDrink({
+                                                            id: {{ $drink->id }},
+                                                            name: '{{ addslashes($drink->name) }}',
+                                                            price: {{ $drink->discount_price ?? $drink->price }},
+                                                            image: '{{ $drink->image }}',
+                                                            volume: '{{ $drink->volume }}',
+                                                            calories: {{ $drink->calories ?? 0 }},
+                                                            proteins: {{ $drink->proteins ?? 0 }},
+                                                            fats: {{ $drink->fats ?? 0 }},
+                                                            carbs: {{ $drink->carbohydrates ?? 0 }}
+                                                        });
+                                                        $store.cart.openDrawer();
+                                                    ">
+                                                <span class="icon-[tabler--shopping-cart-plus] size-4"></span>
+                                                {{ __('frontend.add_to_cart') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Таб Конструктор -->

@@ -90,6 +90,34 @@
                         </div>
                     </li>
 
+                    <!-- Drinks Management Menu -->
+                    <li @class(['accordion-item', 'active' => request()->routeIs('admin.drinks.*')]) id="drinks-management">
+                        <button
+                            class="accordion-toggle accordion-item-active:bg-neutral/10 inline-flex w-full items-center p-2 text-start text-sm font-normal"
+                            aria-controls="drinks-management-collapse" aria-expanded="true">
+                            <span class="icon-[tabler--cup] size-4.5"></span>
+                            <span class="grow">Напитки</span>
+                            <span
+                                class="icon-[tabler--chevron-right] accordion-item-active:rotate-90 size-4.5 shrink-0 transition-transform duration-300 rtl:rotate-180"></span>
+                        </button>
+                        <div id="drinks-management-collapse"
+                            class="accordion-content mt-1 hidden w-full overflow-hidden transition-[height] duration-300"
+                            aria-labelledby="drinks-management" role="region" @if(request()->routeIs('admin.drinks.*')) style="display: block;" @endif>
+                            <ul class="space-y-1">
+                                <li>
+                                    <a href="{{ route('admin.drinks.index') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('admin.drinks.index')])>
+                                        <span>Все напитки</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.drinks.create') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('admin.drinks.create')])>
+                                        <span>Добавить напиток</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
                     <!-- Section Divider -->
                     <li
                         class="text-base-content/50 before:bg-base-content/20 mt-2 p-2 text-xs uppercase before:absolute before:-start-3 before:top-1/2 before:h-0.5 before:w-2.5">

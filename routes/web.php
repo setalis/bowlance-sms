@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ConstructorCategoryController;
 use App\Http\Controllers\Admin\ConstructorProductController;
 use App\Http\Controllers\Admin\DishCategoryController;
 use App\Http\Controllers\Admin\DishController;
+use App\Http\Controllers\Admin\DrinkController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Cabinet\AddressController as CabinetAddressController;
 use App\Http\Controllers\Cabinet\Auth\LoginController as CabinetLoginController;
@@ -50,6 +51,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::resource('categories', DishCategoryController::class)->except(['show']);
     Route::resource('dishes', DishController::class)->except(['show']);
+    Route::resource('drinks', DrinkController::class)->except(['show']);
     Route::resource('constructor-categories', ConstructorCategoryController::class)->except(['show']);
     Route::resource('constructor-products', ConstructorProductController::class)->except(['show']);
     Route::resource('users', UserController::class);

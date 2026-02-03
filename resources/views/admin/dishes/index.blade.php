@@ -73,10 +73,10 @@
                                 <td>
                                     <div>
                                         @if($dish->discount_price)
-                                            <div class="text-success font-semibold">{{ number_format($dish->discount_price, 2) }} ₽</div>
-                                            <div class="text-base-content/50 text-sm line-through">{{ number_format($dish->price, 2) }} ₽</div>
+                                            <div class="text-success font-semibold">{{ number_format($dish->discount_price, 2) }} ₾</div>
+                                            <div class="text-base-content/50 text-sm line-through">{{ number_format($dish->price, 2) }} ₾</div>
                                         @else
-                                            <div class="font-semibold">{{ number_format($dish->price, 2) }} ₽</div>
+                                            <div class="font-semibold">{{ number_format($dish->price, 2) }} ₾</div>
                                         @endif
                                     </div>
                                 </td>

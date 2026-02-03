@@ -4,12 +4,12 @@
     <div class="space-y-6">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-base-content text-2xl font-semibold">Продукты конструктора</h2>
-                <p class="text-base-content/70">Управление продуктами для конструктора боулов</p>
+                <h2 class="text-base-content text-2xl font-semibold">Напитки</h2>
+                <p class="text-base-content/70">Управление напитками меню</p>
             </div>
-            <a href="{{ route('admin.constructor-products.create') }}" class="btn btn-primary">
+            <a href="{{ route('admin.drinks.create') }}" class="btn btn-primary">
                 <span class="icon-[tabler--plus] size-5"></span>
-                Создать продукт
+                Создать напиток
             </a>
         </div>
 
@@ -27,23 +27,23 @@
                             <th>ID</th>
                             <th>Изображение</th>
                             <th>Название</th>
-                            <th>Категория</th>
                             <th>Цена</th>
-                            <th>Вес/Объем</th>
+                            <th>Объем</th>
                             <th>Калории</th>
                             <th>Сортировка</th>
+                            <th>Создано</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($products as $product)
+                        @forelse ($drinks as $drink)
                             <tr>
-                                <td>{{ $product->id }}</td>
+                                <td>{{ $drink->id }}</td>
                                 <td>
-                                    @if($product->image)
+                                    @if($drink->image)
                                         <div class="avatar">
                                             <div class="size-20 rounded">
-                                                <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" />
+                                                <img src="{{ Storage::url($drink->image) }}" alt="{{ $drink->name }}" />
                                             </div>
                                         </div>
                                     @else
@@ -56,35 +56,36 @@
                                 </td>
                                 <td>
                                     <div>
-                                        <div class="font-medium">{{ $product->name }}</div>
-                                        @if($product->description)
-                                            <div class="text-base-content/60 text-sm">{{ Str::limit($product->description, 50) }}</div>
+                                        <div class="font-medium">{{ $drink->name }}</div>
+                                        @if($drink->description)
+                                            <div class="text-base-content/60 text-sm">{{ Str::limit($drink->description, 50) }}</div>
                                         @endif
                                     </div>
                                 </td>
                                 <td>
-                                    @if($product->category)
-                                        <span class="badge badge-outline">{{ $product->category->name }}</span>
-                                    @else
-                                        <span class="text-base-content/40 text-sm">Без категории</span>
-                                    @endif
+                                    <div>
+                                        @if($drink->discount_price)
+                                            <div class="text-success font-semibold">{{ number_format($drink->discount_price, 2) }} ₾</div>
+                                            <div class="text-base-content/50 text-sm line-through">{{ number_format($drink->price, 2) }} ₾</div>
+                                        @else
+                                            <div class="font-semibold">{{ number_format($drink->price, 2) }} ₾</div>
+                                        @endif
+                                    </div>
                                 </td>
-                                <td>
-                                    <div class="font-semibold">{{ number_format($product->price, 2) }} ₾</div>
-                                </td>
-                                <td>{{ $product->weight_volume ?? '—' }}</td>
-                                <td>{{ $product->calories ? $product->calories . ' ккал' : '—' }}</td>
-                                <td>{{ $product->sort_order }}</td>
+                                <td>{{ $drink->volume ?? '—' }}</td>
+                                <td>{{ $drink->calories ? $drink->calories . ' ккал' : '—' }}</td>
+                                <td>{{ $drink->sort_order }}</td>
+                                <td>{{ $drink->created_at->format('d.m.Y') }}</td>
                                 <td>
                                     <div class="flex gap-2">
-                                        <a href="{{ route('admin.constructor-products.edit', $product) }}" 
+                                        <a href="{{ route('admin.drinks.edit', $drink) }}" 
                                            class="btn btn-circle btn-text btn-sm" 
                                            aria-label="Редактировать">
                                             <span class="icon-[tabler--pencil] size-5"></span>
                                         </a>
-                                        <form action="{{ route('admin.constructor-products.destroy', $product) }}" 
+                                        <form action="{{ route('admin.drinks.destroy', $drink) }}" 
                                               method="POST" 
-                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот продукт?');">
+                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот напиток?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" 
@@ -100,14 +101,14 @@
                             <tr>
                                 <td colspan="9" class="text-center py-8">
                                     <div class="flex flex-col items-center gap-4">
-                                        <span class="icon-[tabler--bowl] size-12 text-base-content/30"></span>
+                                        <span class="icon-[tabler--cup] size-12 text-base-content/30"></span>
                                         <div>
-                                            <p class="text-base-content/70 text-lg font-medium">Продуктов пока нет</p>
-                                            <p class="text-base-content/50 text-sm">Создайте первый продукт для начала работы</p>
+                                            <p class="text-base-content/70 text-lg font-medium">Напитков пока нет</p>
+                                            <p class="text-base-content/50 text-sm">Создайте первый напиток для начала работы</p>
                                         </div>
-                                        <a href="{{ route('admin.constructor-products.create') }}" class="btn btn-primary btn-sm">
+                                        <a href="{{ route('admin.drinks.create') }}" class="btn btn-primary btn-sm">
                                             <span class="icon-[tabler--plus] size-4"></span>
-                                            Создать продукт
+                                            Создать напиток
                                         </a>
                                     </div>
                                 </td>
@@ -118,9 +119,9 @@
             </div>
         </div>
 
-        @if ($products->hasPages())
+        @if ($drinks->hasPages())
             <div class="mt-4">
-                {{ $products->links() }}
+                {{ $drinks->links() }}
             </div>
         @endif
     </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ConstructorCategory;
 use App\Models\DishCategory;
+use App\Models\Drink;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -21,12 +22,18 @@ class HomeController extends Controller
             }])
             ->get();
 
+        // Загружаем напитки
+        $drinks = Drink::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
         // Загружаем категории конструктора с продуктами
         $constructorCategories = ConstructorCategory::query()
             ->orderBy('sort_order')
             ->with('products')
             ->get();
 
-        return view('frontend.index', compact('title', 'dishCategories', 'constructorCategories'));
+        return view('frontend.index', compact('title', 'dishCategories', 'drinks', 'constructorCategories'));
     }
 }
