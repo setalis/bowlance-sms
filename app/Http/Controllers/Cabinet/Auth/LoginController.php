@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Cabinet\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\PhoneVerification;
+use App\Services\PhoneAuthService;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -17,6 +19,10 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
+    public function __construct(
+        protected PhoneAuthService $phoneAuthService
+    ) {}
+
     public function create(): View|RedirectResponse|Response
     {
         if (auth()->check()) {
@@ -30,32 +36,65 @@ class LoginController extends Controller
             ->header('Expires', '0');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
             'phone' => ['required', 'string', 'max:20'],
-            'password' => ['required', 'string'],
+            'code' => ['required', 'string', 'digits:6'],
+            'request_id' => ['required', 'string'],
         ]);
 
         $this->ensureIsNotRateLimited($request);
 
-        $user = User::where('phone', $request->phone)->first();
+        try {
+            // Проверяем верификацию телефона
+            $verification = PhoneVerification::where('request_id', $request->request_id)
+                ->where('verified', true)
+                ->where('phone', $request->phone)
+                ->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            RateLimiter::hit($this->throttleKey($request));
+            if (! $verification) {
+                RateLimiter::hit($this->throttleKey($request));
 
-            throw ValidationException::withMessages([
-                'phone' => [__('auth.failed')],
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Верификация не найдена или номер не подтвержден',
+                ], 422);
+            }
+
+            RateLimiter::clear($this->throttleKey($request));
+
+            // Находим или создаем пользователя
+            $user = $this->phoneAuthService->findOrCreateUser(
+                $request->phone,
+                null, // email не обязателен
+                null  // имя установится автоматически
+            );
+
+            // Авторизуем пользователя
+            Auth::login($user, true); // remember = true
+            $request->session()->regenerate();
+
+            Log::info('User logged in via SMS verification', [
+                'user_id' => $user->id,
+                'phone' => $user->phone,
             ]);
+
+            return response()->json([
+                'success' => true,
+                'redirect' => route('cabinet.dashboard', absolute: false),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Cabinet login error', [
+                'error' => $e->getMessage(),
+                'phone' => $request->phone,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Произошла ошибка при входе',
+            ], 500);
         }
-
-        RateLimiter::clear($this->throttleKey($request));
-
-        Auth::login($user, $request->boolean('remember'));
-
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('cabinet.dashboard', absolute: false));
     }
 
     public function destroy(Request $request): RedirectResponse

@@ -244,6 +244,16 @@
                                             <span class="icon-[tabler--bowl] size-8 text-base-content/30"></span>
                                         </div>
                                     </template>
+                                    <template x-if="item.type === 'drink' && item.image">
+                                        <img :src="'/storage/' + item.image" 
+                                             :alt="item.name" 
+                                             class="size-20 rounded-lg object-cover">
+                                    </template>
+                                    <template x-if="item.type === 'drink' && !item.image">
+                                        <div class="size-20 rounded-lg bg-base-300 flex items-center justify-center">
+                                            <span class="icon-[tabler--cup] size-8 text-base-content/30"></span>
+                                        </div>
+                                    </template>
                                     <template x-if="item.type === 'bowl'">
                                         <div class="size-20 rounded-lg bg-primary/20 flex items-center justify-center">
                                             <span class="icon-[tabler--tools-kitchen-2] size-8 text-primary"></span>
@@ -263,6 +273,9 @@
                                             </template>
                                             <template x-if="item.weight">
                                                 <p class="text-xs text-base-content/50" x-text="item.weight"></p>
+                                            </template>
+                                            <template x-if="item.volume">
+                                                <p class="text-xs text-base-content/50" x-text="item.volume"></p>
                                             </template>
                                         </div>
                                         <button type="button" 
@@ -803,6 +816,14 @@
                                         <div>
                                             <h4 class="font-bold">Номер верифицирован!</h4>
                                             <p class="text-sm">Теперь вы можете оформить заказ</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ошибка при оформлении заказа -->
+                                    <div x-show="orderError" class="mt-3">
+                                        <div class="alert alert-error">
+                                            <span class="icon-[tabler--alert-circle] size-5"></span>
+                                            <span class="text-sm" x-text="orderError"></span>
                                         </div>
                                     </div>
 

@@ -48,6 +48,121 @@
                         @enderror
                     </div>
 
+                    <!-- Детали адреса -->
+                    <div class="divider">Дополнительная информация</div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Подъезд</span>
+                            </label>
+                            <input type="text" 
+                                   name="entrance" 
+                                   value="{{ old('entrance') }}" 
+                                   placeholder="1"
+                                   class="input input-bordered w-full @error('entrance') input-error @enderror">
+                            @error('entrance')
+                                <label class="label">
+                                    <span class="label-text-alt text-error">{{ $message }}</span>
+                                </label>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Этаж</span>
+                            </label>
+                            <input type="text" 
+                                   name="floor" 
+                                   value="{{ old('floor') }}" 
+                                   placeholder="5"
+                                   class="input input-bordered w-full @error('floor') input-error @enderror">
+                            @error('floor')
+                                <label class="label">
+                                    <span class="label-text-alt text-error">{{ $message }}</span>
+                                </label>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Квартира</span>
+                            </label>
+                            <input type="text" 
+                                   name="apartment" 
+                                   value="{{ old('apartment') }}" 
+                                   placeholder="42"
+                                   class="input input-bordered w-full @error('apartment') input-error @enderror">
+                            @error('apartment')
+                                <label class="label">
+                                    <span class="label-text-alt text-error">{{ $message }}</span>
+                                </label>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="label">
+                                <span class="label-text">Домофон</span>
+                            </label>
+                            <input type="text" 
+                                   name="intercom" 
+                                   value="{{ old('intercom') }}" 
+                                   placeholder="42К"
+                                   class="input input-bordered w-full @error('intercom') input-error @enderror">
+                            @error('intercom')
+                                <label class="label">
+                                    <span class="label-text-alt text-error">{{ $message }}</span>
+                                </label>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="label">
+                            <span class="label-text">Комментарий курьеру</span>
+                        </label>
+                        <textarea name="courier_comment" 
+                                  rows="2"
+                                  placeholder="Например: позвоните за 5 минут"
+                                  class="textarea textarea-bordered w-full @error('courier_comment') textarea-error @enderror">{{ old('courier_comment') }}</textarea>
+                        @error('courier_comment')
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ $message }}</span>
+                            </label>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="label">
+                            <span class="label-text">Телефон получателя</span>
+                        </label>
+                        <input type="tel" 
+                               name="receiver_phone" 
+                               value="{{ old('receiver_phone') }}" 
+                               placeholder="+995 555 12 34 56"
+                               class="input input-bordered w-full @error('receiver_phone') input-error @enderror">
+                        @error('receiver_phone')
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ $message }}</span>
+                            </label>
+                        @enderror
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-start gap-3">
+                            <input type="checkbox" 
+                                   name="leave_at_door" 
+                                   value="1"
+                                   {{ old('leave_at_door') ? 'checked' : '' }}
+                                   class="toggle toggle-primary">
+                            <span class="label-text">Оставить у двери</span>
+                        </label>
+                    </div>
+
+                    <div class="divider"></div>
+
                     <div class="form-control">
                         <label class="label cursor-pointer justify-start gap-3">
                             <input type="checkbox" 

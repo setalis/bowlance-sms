@@ -49,9 +49,55 @@
                             @endif
                         </div>
 
-                        <p class="text-sm text-base-content/70 mb-4">{{ $address->address }}</p>
+                        <p class="text-sm text-base-content/70 mb-2">{{ $address->address }}</p>
 
-                        <div class="flex flex-wrap gap-2">
+                        @if($address->entrance || $address->floor || $address->apartment || $address->intercom)
+                            <div class="text-xs text-base-content/60 mb-2 space-y-1">
+                                @if($address->entrance || $address->floor)
+                                    <div class="flex gap-3">
+                                        @if($address->entrance)
+                                            <span>Подъезд: {{ $address->entrance }}</span>
+                                        @endif
+                                        @if($address->floor)
+                                            <span>Этаж: {{ $address->floor }}</span>
+                                        @endif
+                                    </div>
+                                @endif
+                                @if($address->apartment || $address->intercom)
+                                    <div class="flex gap-3">
+                                        @if($address->apartment)
+                                            <span>Кв: {{ $address->apartment }}</span>
+                                        @endif
+                                        @if($address->intercom)
+                                            <span>Домофон: {{ $address->intercom }}</span>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
+                        @if($address->courier_comment)
+                            <div class="text-xs text-base-content/50 italic mb-2">
+                                <span class="icon-[tabler--message] size-3 inline"></span>
+                                {{ $address->courier_comment }}
+                            </div>
+                        @endif
+
+                        @if($address->receiver_phone)
+                            <div class="text-xs text-base-content/60 mb-2">
+                                <span class="icon-[tabler--phone] size-3 inline"></span>
+                                {{ $address->receiver_phone }}
+                            </div>
+                        @endif
+
+                        @if($address->leave_at_door)
+                            <div class="badge badge-outline badge-sm mb-3">
+                                <span class="icon-[tabler--door] size-3 mr-1"></span>
+                                Оставить у двери
+                            </div>
+                        @endif
+
+                        <div class="flex flex-wrap gap-2 mt-3">
                             @if(!$address->is_default)
                                 <form action="{{ route('cabinet.addresses.setDefault', $address) }}" method="POST">
                                     @csrf

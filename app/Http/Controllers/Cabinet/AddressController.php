@@ -44,6 +44,13 @@ class AddressController extends Controller
             auth()->user()->addresses()->create([
                 'label' => $request->label,
                 'address' => $request->address,
+                'entrance' => $request->entrance,
+                'floor' => $request->floor,
+                'apartment' => $request->apartment,
+                'intercom' => $request->intercom,
+                'courier_comment' => $request->courier_comment,
+                'receiver_phone' => $request->receiver_phone,
+                'leave_at_door' => $request->boolean('leave_at_door', false),
                 'is_default' => $isDefault,
             ]);
 
@@ -85,6 +92,13 @@ class AddressController extends Controller
             $address->update([
                 'label' => $request->label,
                 'address' => $request->address,
+                'entrance' => $request->entrance,
+                'floor' => $request->floor,
+                'apartment' => $request->apartment,
+                'intercom' => $request->intercom,
+                'courier_comment' => $request->courier_comment,
+                'receiver_phone' => $request->receiver_phone,
+                'leave_at_door' => $request->boolean('leave_at_door', false),
                 'is_default' => $request->boolean('is_default', $address->is_default),
             ]);
 

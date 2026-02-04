@@ -48,6 +48,32 @@ export function initCart() {
             this.showNotification('Блюдо добавлено в корзину');
         },
 
+        // Добавить напиток в корзину
+        addDrink(drink) {
+            const existingItem = this.items.find(item => item.type === 'drink' && item.id === drink.id);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                this.items.push({
+                    type: 'drink',
+                    id: drink.id,
+                    name: drink.name,
+                    price: parseFloat(drink.price),
+                    image: drink.image,
+                    quantity: 1,
+                    volume: drink.volume || null,
+                    calories: drink.calories || 0,
+                    proteins: drink.proteins || 0,
+                    fats: drink.fats || 0,
+                    carbs: drink.carbs || 0
+                });
+            }
+            
+            this.saveCart();
+            this.showNotification('Напиток добавлен в корзину');
+        },
+
         // Добавить собранный боул в корзину
         addBowl(products) {
             if (!products || products.length === 0) {
@@ -190,7 +216,15 @@ export function initCart() {
                     customer_name: customerData.name,
                     customer_phone: customerData.phone,
                     customer_email: customerData.email || null,
+                    delivery_type: customerData.deliveryType || 'delivery',
                     delivery_address: customerData.address || null,
+                    entrance: customerData.entrance || null,
+                    floor: customerData.floor || null,
+                    apartment: customerData.apartment || null,
+                    intercom: customerData.intercom || null,
+                    courier_comment: customerData.courierComment || null,
+                    receiver_phone: customerData.receiverPhone || null,
+                    leave_at_door: customerData.leaveAtDoor || false,
                     comment: customerData.comment || null,
                     verification_request_id: customerData.verification_request_id,
                     confirm_switch_user: customerData.confirm_switch_user || false,
@@ -230,7 +264,11 @@ export function initCart() {
                     return false;
                 }
 
+                // Получаем JSON ответ
                 const result = await response.json();
+                
+                // Логируем для отладки
+                console.log('Ответ сервера:', result);
 
                 if (result.success) {
                     this.items = [];

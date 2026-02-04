@@ -24,6 +24,13 @@ class StoreUserAddressRequest extends FormRequest
         return [
             'label' => 'required|string|max:50',
             'address' => 'required|string|max:500',
+            'entrance' => 'nullable|string|max:10',
+            'floor' => 'nullable|string|max:10',
+            'apartment' => 'nullable|string|max:10',
+            'intercom' => 'nullable|string|max:20',
+            'courier_comment' => 'nullable|string|max:500',
+            'receiver_phone' => 'nullable|string|max:20',
+            'leave_at_door' => 'boolean',
             'is_default' => 'boolean',
         ];
     }
@@ -40,6 +47,12 @@ class StoreUserAddressRequest extends FormRequest
             'label.max' => 'Название адреса слишком длинное',
             'address.required' => 'Необходимо указать адрес',
             'address.max' => 'Адрес слишком длинный',
+            'entrance.max' => 'Номер подъезда слишком длинный',
+            'floor.max' => 'Номер этажа слишком длинный',
+            'apartment.max' => 'Номер квартиры слишком длинный',
+            'intercom.max' => 'Код домофона слишком длинный',
+            'courier_comment.max' => 'Комментарий слишком длинный',
+            'receiver_phone.max' => 'Номер телефона слишком длинный',
         ];
     }
 }

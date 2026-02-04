@@ -53,7 +53,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
          x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-         class="fixed bottom-4 right-4 z-50 max-w-sm"
+         class="fixed bottom-4 right-4 z-[110] max-w-sm"
          style="display: none;">
         <div class="alert" :class="type === 'success' ? 'alert-success' : 'alert-error'">
             <span class="icon-[tabler--check]" x-show="type === 'success'"></span>
@@ -281,6 +281,8 @@
                 await this.sendVerificationCode();
             },
             
+            orderError: '',
+            
             async submitOrder() {
                 if (!this.phoneVerified) {
                     this.$store.cart.showNotification('Необходимо верифицировать номер телефона', 'error');
@@ -293,6 +295,7 @@
                 }
                 
                 this.loading = true;
+                this.orderError = '';
                 
                 try {
                     const orderData = {
@@ -311,6 +314,11 @@
                         
                         this.resetForm();
                         this.open = false;
+                        
+                        // Обновить страницу через 2 секунды, чтобы пользователь увидел авторизацию
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
                     }
                 } catch (error) {
                     // Check if it requires user confirmation for switching accounts
@@ -326,7 +334,8 @@
                             this.$store.cart.showNotification('Заказ отменён', 'info');
                         }
                     } else {
-                        this.$store.cart.showNotification(error.message, 'error');
+                        this.orderError = error.message || 'Произошла ошибка при оформлении заказа';
+                        this.$store.cart.showNotification(this.orderError, 'error');
                     }
                 } finally {
                     this.loading = false;

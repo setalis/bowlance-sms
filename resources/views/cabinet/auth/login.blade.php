@@ -29,35 +29,83 @@
                     <h3 class="text-base-content mb-1.5 text-2xl font-semibold">Личный кабинет</h3>
                     <p class="text-base-content/80">Войдите по номеру телефона</p>
                 </div>
-                <div class="space-y-4">
-                    <form class="mb-4 space-y-4" action="/cabinet/login" method="POST" accept-charset="UTF-8">
-                        @csrf
-                        <div>
-                            <label class="label-text" for="userPhone">Телефон *</label>
-                            <input type="text" name="phone" placeholder="+995 5XX XXX XXX" class="input @error('phone') input-error @enderror" id="userPhone" value="{{ old('phone') }}" required autocomplete="tel" />
-                            @error('phone')
-                                <span class="text-error text-sm mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="label-text" for="userPassword">Пароль *</label>
-                            <div class="input @error('password') input-error @enderror">
-                                <input id="userPassword" name="password" type="password" placeholder="············" required />
-                                <button type="button" data-toggle-password='{ "target": "#userPassword" }' class="block cursor-pointer" aria-label="Показать пароль">
-                                    <span class="icon-[tabler--eye] password-active:block hidden size-5 shrink-0"></span>
-                                    <span class="icon-[tabler--eye-off] password-active:hidden block size-5 shrink-0"></span>
-                                </button>
+                
+                <div class="space-y-4" x-data="cabinetLogin()">
+                    <!-- Шаг 1: Ввод телефона -->
+                    <div x-show="step === 1">
+                        <form @submit.prevent="sendCode" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label class="label-text" for="userPhone">Телефон *</label>
+                                <input type="tel" 
+                                       x-model="phone" 
+                                       placeholder="+995 5XX XXX XXX" 
+                                       class="input w-full" 
+                                       id="userPhone" 
+                                       required 
+                                       autocomplete="tel" 
+                                       :disabled="loading" />
+                                <div x-show="errors.phone" class="text-error text-sm mt-1" x-text="errors.phone"></div>
                             </div>
-                            @error('password')
-                                <span class="text-error text-sm mt-1">{{ $message }}</span>
-                            @enderror
+                            
+                            <button type="submit" 
+                                    class="btn btn-lg btn-primary btn-gradient btn-block" 
+                                    :disabled="loading || !phone">
+                                <span x-show="!loading">Получить код</span>
+                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Шаг 2: Ввод кода верификации -->
+                    <div x-show="step === 2">
+                        <div class="mb-4">
+                            <button @click="resetForm" class="btn btn-ghost btn-sm gap-2">
+                                <span class="icon-[tabler--arrow-left] size-4"></span>
+                                Назад
+                            </button>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" id="rememberMe" name="remember" />
-                            <label class="label-text text-base-content/80 p-0 text-base" for="rememberMe">Запомнить меня</label>
+
+                        <div class="alert mb-4">
+                            <span class="icon-[tabler--info-circle] size-5"></span>
+                            <div class="text-sm">
+                                <p>На номер <strong x-text="phone"></strong> отправлен код подтверждения</p>
+                            </div>
                         </div>
-                        <button class="btn btn-lg btn-primary btn-gradient btn-block" type="submit">Войти</button>
-                    </form>
+
+                        <form @submit.prevent="verifyCode" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label class="label-text" for="verCode">Код подтверждения *</label>
+                                <input type="text" 
+                                       x-model="code" 
+                                       maxlength="6"
+                                       placeholder="••••••" 
+                                       class="input w-full text-center text-2xl tracking-widest font-mono" 
+                                       id="verCode" 
+                                       required
+                                       autofocus
+                                       @input="code = code.replace(/[^0-9]/g, '')"
+                                       :disabled="loading" />
+                                <div x-show="errors.code" class="text-error text-sm mt-1" x-text="errors.code"></div>
+                            </div>
+
+                            <button type="submit" 
+                                    class="btn btn-lg btn-primary btn-gradient btn-block" 
+                                    :disabled="loading || code.length !== 6">
+                                <span x-show="!loading">Войти</span>
+                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                            </button>
+
+                            <button type="button" 
+                                    @click="resendCode" 
+                                    class="btn btn-ghost btn-sm w-full"
+                                    :disabled="loading">
+                                Отправить код повторно
+                            </button>
+                        </form>
+                    </div>
+
                     <p class="text-base-content/80 text-center">
                         <a href="{{ route('home') }}" class="link link-animated link-primary font-normal">На главную</a>
                     </p>
@@ -65,4 +113,158 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function cabinetLogin() {
+            return {
+                step: 1,
+                phone: '',
+                code: '',
+                requestId: null,
+                loading: false,
+                errors: {},
+
+                getCsrfToken() {
+                    return document.querySelector('meta[name="csrf-token"]')?.content;
+                },
+
+                async sendCode() {
+                    this.loading = true;
+                    this.errors = {};
+
+                    try {
+                        const response = await fetch('/phone/verify/send', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': this.getCsrfToken(),
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ 
+                                phone: this.normalizePhone(this.phone) 
+                            })
+                        });
+
+                        if (response.status === 419) {
+                            this.errors.phone = 'Сессия истекла. Обновите страницу (F5)';
+                            this.loading = false;
+                            return;
+                        }
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.requestId = data.request_id;
+                            this.step = 2;
+                            
+                            // Показываем тестовый код в консоли для разработки
+                            if (data.test_mode && data.test_code) {
+                                console.log('🔐 Тестовый код верификации:', data.test_code);
+                                alert('ТЕСТОВЫЙ РЕЖИМ: Используйте код ' + data.test_code);
+                            }
+                        } else {
+                            this.errors.phone = data.message || 'Не удалось отправить код';
+                        }
+                    } catch (error) {
+                        this.errors.phone = 'Произошла ошибка при отправке кода';
+                        console.error(error);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async verifyCode() {
+                    this.loading = true;
+                    this.errors = {};
+
+                    try {
+                        // Сначала проверяем код через PhoneVerificationController
+                        const verifyResponse = await fetch('/phone/verify/check', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': this.getCsrfToken(),
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                request_id: this.requestId,
+                                code: this.code
+                            })
+                        });
+
+                        if (verifyResponse.status === 419) {
+                            this.errors.code = 'Сессия истекла. Обновите страницу (F5)';
+                            this.loading = false;
+                            return;
+                        }
+
+                        const verifyData = await verifyResponse.json();
+                        console.log('Результат верификации:', verifyData);
+
+                        if (!verifyData.success) {
+                            this.errors.code = verifyData.message || 'Неверный код';
+                            this.loading = false;
+                            return;
+                        }
+
+                        // Теперь отправляем запрос на вход
+                        const loginResponse = await fetch('/cabinet/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': this.getCsrfToken(),
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                phone: this.normalizePhone(this.phone),
+                                code: this.code,
+                                request_id: this.requestId
+                            })
+                        });
+
+                        if (loginResponse.status === 419) {
+                            this.errors.code = 'Сессия истекла. Обновите страницу (F5)';
+                            this.loading = false;
+                            return;
+                        }
+
+                        const loginData = await loginResponse.json();
+                        console.log('Результат входа:', loginData);
+
+                        if (loginData.success) {
+                            window.location.href = loginData.redirect || '/cabinet';
+                        } else {
+                            this.errors.code = loginData.message || 'Ошибка входа';
+                        }
+                    } catch (error) {
+                        this.errors.code = 'Произошла ошибка при проверке кода';
+                        console.error('Ошибка верификации:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async resendCode() {
+                    this.code = '';
+                    this.errors = {};
+                    await this.sendCode();
+                },
+
+                resetForm() {
+                    this.step = 1;
+                    this.code = '';
+                    this.requestId = null;
+                    this.errors = {};
+                },
+
+                normalizePhone(phone) {
+                    phone = phone.replace(/[^\d+]/g, '');
+                    if (!phone.startsWith('+')) {
+                        phone = '+' + phone.replace(/^0+/, '');
+                    }
+                    return phone;
+                }
+            };
+        }
+    </script>
 @endsection
