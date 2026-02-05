@@ -28,6 +28,7 @@ return [
     'fats' => 'ცხ',
     'carbs' => 'ნ',
     'grams' => 'გ',
+    'kbgu' => 'კერძი (კკალ/ც/ცხ/ნ)',
 
     // Constructor
     'build_perfect_bowl' => 'შექმენი შენი იდეალური ბოული',

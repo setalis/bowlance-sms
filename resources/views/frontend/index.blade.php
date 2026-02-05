@@ -65,9 +65,9 @@
 
     <!-- Табы -->
     <div class="mt-8">
-        <nav class="tabs tabs-lifted" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
+        <nav class="tabs tabs-bordered" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
             <button type="button" 
-                    class="tab h-14 text-lg active-tab:tab-active active" 
+                    class="tab w-full h-14 text-lg active-tab:tab-active active" 
                     id="menu-tab" 
                     data-tab="#menu-content" 
                     aria-controls="menu-content" 
@@ -77,7 +77,7 @@
                 {{ __('frontend.menu_tab') }}
             </button>
             <button type="button" 
-                    class="tab h-14 text-lg active-tab:tab-active" 
+                    class="tab w-full h-14 text-lg active-tab:tab-active" 
                     id="constructor-tab" 
                     data-tab="#constructor-content" 
                     aria-controls="constructor-content" 
@@ -89,9 +89,9 @@
         </nav>
 
         <!-- Контент табов -->
-        <div class="rounded-box bg-base-100 p-6 shadow-md">
+        <!-- <div class="rounded-box bg-base-100 p-6 shadow-md"> -->
             <!-- Таб Меню -->
-            <div id="menu-content" role="tabpanel" aria-labelledby="menu-tab">
+            <div id="menu-content" role="tabpanel" aria-labelledby="menu-tab" class="pt-6">
                 @if($dishCategories->isEmpty())
                     <div class="text-center py-12">
                         <span class="icon-[tabler--shopping-bag-x] size-16 text-base-content/30 mb-4"></span>
@@ -110,8 +110,8 @@
                             @else
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                     @foreach($category->dishes as $dish)
-                                        <div class="card hover:shadow-xl transition-shadow">
-                                            <figure class="h-48 overflow-hidden">
+                                        <div class="border border-emerald-600/20 rounded-2xl p-2 hover:shadow-md transition-shadow">
+                                            <figure class="h-56 overflow-hidden">
                                                 @if($dish->image)
                                                     <img src="{{ asset('storage/' . $dish->image) }}" 
                                                          alt="{{ $dish->name }}" 
@@ -122,32 +122,32 @@
                                                          class="h-full w-full object-cover">
                                                 @endif
                                             </figure>
-                                            <div class="card-body">
+                                            <div class="card-body p-3">
                                                 <h4 class="card-title text-lg">{{ $dish->name }}</h4>
                                                 
                                                 @if($dish->description)
-                                                    <p class="text-sm text-base-content/70 line-clamp-2">{{ $dish->description }}</p>
+                                                    <p class="text-sm text-base-content/70 line-clamp-4">{{ $dish->description }}</p>
                                                 @endif
                                                 
                                                 <!-- Пищевая ценность блюда -->
                                                 @if($dish->calories || $dish->proteins || $dish->fats || $dish->carbohydrates)
                                                     <div class="mt-2">
-                                                        <p class="text-xs font-medium text-base-content/60 mb-1">Блюдо:</p>
-                                                        <div class="flex flex-wrap gap-2 text-xs">
+                                                        <p class="text-xs font-medium text-base-content/60 mb-1">{{ __('frontend.kbgu') }}:</p>
+                                                        <div class="flex flex-wrap gap-1 text-xs">
                                                             @if($dish->calories)
-                                                                <span class="badge badge-outline badge-sm">
+                                                                <span class="badge badge-outline border-dashed badge-info badge-sm">
                                                                     <span class="icon-[tabler--flame] mr-1 size-3"></span>
                                                                     {{ $dish->calories }} {{ __('frontend.calories') }}
                                                                 </span>
                                                             @endif
                                                             @if($dish->proteins)
-                                                                <span class="badge badge-outline badge-sm">{{ __('frontend.proteins') }}: {{ $dish->proteins }}{{ __('frontend.grams') }}</span>
+                                                                <span class="badge badge-outline border-dashed badge-success badge-sm">{{ __('frontend.proteins') }}: {{ $dish->proteins }}{{ __('frontend.grams') }}</span>
                                                             @endif
                                                             @if($dish->fats)
-                                                                <span class="badge badge-outline badge-sm">{{ __('frontend.fats') }}: {{ $dish->fats }}{{ __('frontend.grams') }}</span>
+                                                                <span class="badge badge-outline border-dashed badge-warning badge-sm">{{ __('frontend.fats') }}: {{ $dish->fats }}{{ __('frontend.grams') }}</span>
                                                             @endif
                                                             @if($dish->carbohydrates)
-                                                                <span class="badge badge-outline badge-sm">{{ __('frontend.carbs') }}: {{ $dish->carbohydrates }}{{ __('frontend.grams') }}</span>
+                                                                <span class="badge badge-outline border-dashed badge-error badge-sm">{{ __('frontend.carbs') }}: {{ $dish->carbohydrates }}{{ __('frontend.grams') }}</span>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -166,18 +166,18 @@
                                                         @if($dish->sauce_calories || $dish->sauce_proteins || $dish->sauce_fats || $dish->sauce_carbohydrates)
                                                             <div class="flex flex-wrap gap-1 text-xs">
                                                                 @if($dish->sauce_calories)
-                                                                    <span class="badge badge-outline badge-xs">
+                                                                    <span class="badge badge-soft badge-info badge-xs">
                                                                         {{ $dish->sauce_calories }} {{ __('frontend.calories') }}
                                                                     </span>
                                                                 @endif
                                                                 @if($dish->sauce_proteins)
-                                                                    <span class="badge badge-outline badge-xs">Б: {{ $dish->sauce_proteins }}{{ __('frontend.grams') }}</span>
+                                                                    <span class="badge badge-soft badge-success badge-xs">Б: {{ $dish->sauce_proteins }}{{ __('frontend.grams') }}</span>
                                                                 @endif
                                                                 @if($dish->sauce_fats)
-                                                                    <span class="badge badge-outline badge-xs">Ж: {{ $dish->sauce_fats }}{{ __('frontend.grams') }}</span>
+                                                                    <span class="badge badge-soft badge-warning badge-xs">Ж: {{ $dish->sauce_fats }}{{ __('frontend.grams') }}</span>
                                                                 @endif
                                                                 @if($dish->sauce_carbohydrates)
-                                                                    <span class="badge badge-outline badge-xs">У: {{ $dish->sauce_carbohydrates }}{{ __('frontend.grams') }}</span>
+                                                                    <span class="badge badge-soft badge-error badge-xs">У: {{ $dish->sauce_carbohydrates }}{{ __('frontend.grams') }}</span>
                                                                 @endif
                                                             </div>
                                                         @endif
@@ -188,14 +188,14 @@
                                                 @if(($dish->calories || $dish->proteins || $dish->fats || $dish->carbohydrates) && $dish->sauce_name_ru)
                                                     <div class="mt-2 border-t border-base-content/10 pt-2">
                                                         <p class="text-xs font-semibold text-base-content mb-1">Итого с соусом:</p>
-                                                        <div class="flex flex-wrap gap-2 text-xs">
-                                                            <span class="badge badge-primary badge-sm">
+                                                        <div class="flex flex-wrap gap-1 text-xs">
+                                                            <span class="badge badge-info badge-sm">
                                                                 <span class="icon-[tabler--flame] mr-1 size-3"></span>
                                                                 {{ ($dish->calories ?? 0) + ($dish->sauce_calories ?? 0) }} {{ __('frontend.calories') }}
                                                             </span>
-                                                            <span class="badge badge-primary badge-sm">Б: {{ number_format(($dish->proteins ?? 0) + ($dish->sauce_proteins ?? 0), 1) }}{{ __('frontend.grams') }}</span>
-                                                            <span class="badge badge-primary badge-sm">Ж: {{ number_format(($dish->fats ?? 0) + ($dish->sauce_fats ?? 0), 1) }}{{ __('frontend.grams') }}</span>
-                                                            <span class="badge badge-primary badge-sm">У: {{ number_format(($dish->carbohydrates ?? 0) + ($dish->sauce_carbohydrates ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-success badge-sm">Б: {{ number_format(($dish->proteins ?? 0) + ($dish->sauce_proteins ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-warning badge-sm">Ж: {{ number_format(($dish->fats ?? 0) + ($dish->sauce_fats ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-error badge-sm">У: {{ number_format(($dish->carbohydrates ?? 0) + ($dish->sauce_carbohydrates ?? 0), 1) }}{{ __('frontend.grams') }}</span>
                                                         </div>
                                                     </div>
                                                 @endif
@@ -214,7 +214,7 @@
                                                         @endif
                                                     </div>
                                                     <button type="button" 
-                                                            class="btn btn-primary btn-sm gap-2"
+                                                            class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-0 gap-2"
                                                             x-data
                                                             @click="
                                                                 $store.cart.addDish({
@@ -580,7 +580,7 @@
                     @endif
                 </div>
             </div>
-        </div>
+        <!-- </div> -->
     </div>
 @endsection
 

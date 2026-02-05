@@ -65,7 +65,7 @@
 
             @auth
             <div class="flex items-center justify-center">
-                <a href="{{ route('cabinet.dashboard') }}" class="border border-emerald-600 rounded-full px-3 py-1" aria-label="Личный кабинет" title="Личный кабинет">
+                <a href="{{ route('cabinet.dashboard') }}" class="w-full h-full flex items-center justify-center" aria-label="Личный кабинет" title="Личный кабинет">
                     <span class="icon-[tabler--user] size-5"></span>
                 </a>
             </div>
@@ -77,20 +77,10 @@
             </div>
             @endauth
 
-            <!-- Корзина -->
-            <button type="button" 
-                    class="btn btn-primary btn-sm gap-2 relative" 
-                    aria-label="{{ __('frontend.cart') }}" 
-                    @click="$store.cart.openDrawer()"
-                    x-data>
-                <span class="icon-[tabler--shopping-cart] size-5"></span>
-                <span class="badge badge-secondary badge-sm absolute -top-1 -right-1" 
-                      x-show="$store.cart.totalItems > 0"
-                      x-text="$store.cart.totalItems"
-                      x-cloak></span>
-            </button>
+            
+            <!-- Offcanvas Меню -->
 
-            <button type="button" class="btn btn-primary" aria-haspopup="dialog" aria-expanded="false" aria-controls="overlay-end-example" data-overlay="#overlay-end-example">
+            <button type="button" class="w-full h-full flex items-center justify-center" aria-haspopup="dialog" aria-expanded="false" aria-controls="overlay-end-example" data-overlay="#overlay-end-example">
                 <span class="icon-[tabler--baseline-density-medium] size-5"></span>
             </button>
 
@@ -112,10 +102,21 @@
                 </div>
             </div>
 
-            <!-- Меню для мобильных -->
-            <!-- <button type="button" class="btn btn-ghost btn-square btn-sm lg:hidden" data-hs-overlay="#mobileMenu" aria-label="{{ __('frontend.menu') }}">
-                <span class="icon-[tabler--menu-2] size-6"></span>
-            </button> -->
+            <!-- Корзина -->
+            <button type="button" 
+                    class="btn btn-circle btn-success btn-sm gap-2 relative" 
+                    aria-label="{{ __('frontend.cart') }}" 
+                    @click="$store.cart.openDrawer()"
+                    x-data>
+                <span class="icon-[tabler--shopping-cart] size-5"></span>
+                <span class="badge badge-secondary badge-sm absolute -top-1 -right-1" 
+                      x-show="$store.cart.totalItems > 0"
+                      x-text="$store.cart.totalItems"
+                      x-cloak></span>
+            </button>
+
+
+            
         </div>
     </div>
 </header>

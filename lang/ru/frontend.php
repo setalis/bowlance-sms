@@ -28,6 +28,7 @@ return [
     'fats' => 'Ж',
     'carbs' => 'У',
     'grams' => 'г',
+    'kbgu' => 'Блюдо (ккал/б/ж/у)',
 
     // Constructor
     'build_perfect_bowl' => 'Собери свой идеальный боул',
