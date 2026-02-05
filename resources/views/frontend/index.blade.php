@@ -51,11 +51,11 @@
             </div>
         </div>
 
-        <button type="button" class="carousel-prev hidden md:block start-5 max-sm:start-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
+        <button type="button" class="carousel-prev hidden md:flex start-5 max-sm:start-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
             <span class="icon-[tabler--chevron-left] size-5"></span>
             <span class="sr-only">Previous</span>
         </button>
-        <button type="button" class="carousel-next hidden md:block end-5 max-sm:end-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
+        <button type="button" class="carousel-next hidden md:flex end-5 max-sm:end-3 carousel-disabled:opacity-50 size-9.5 bg-base-100 items-center justify-center rounded-full shadow-base-300/20 shadow-sm">
             <span class="icon-[tabler--chevron-right] size-5"></span>
             <span class="sr-only">Next</span>
         </button>
