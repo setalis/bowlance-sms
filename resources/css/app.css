@@ -22,6 +22,9 @@ li:not(.menu-title, .menu-disabled)
     color: var(--color-primary-content);
 }
 
+:root {
+    --color-primary: #096;
+}
 /* body {
     color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
 } */
@@ -33,4 +36,13 @@ li:not(.menu-title, .menu-disabled)
 /* Alpine.js x-cloak */
 [x-cloak] {
     display: none !important;
+}
+
+.active-tab\:tab-active {
+    &[data-tab].active {
+        &:not([disabled]) {
+            border-color: #096;
+            color: #096;
+        }
+    }
 }

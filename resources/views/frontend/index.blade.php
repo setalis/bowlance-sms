@@ -73,17 +73,17 @@
                     aria-controls="menu-content" 
                     role="tab" 
                     aria-selected="true">
-                <span class="icon-[tabler--menu-2] mr-2 size-5"></span>
+                <span class="icon-[tabler--checkup-list] mr-2 size-5"></span>
                 {{ __('frontend.menu_tab') }}
             </button>
             <button type="button" 
-                    class="tab w-full h-14 text-lg active-tab:tab-active" 
+                    class="tab w-full h-14 text-base md:text-lg font-medium active-tab:tab-active" 
                     id="constructor-tab" 
                     data-tab="#constructor-content" 
                     aria-controls="constructor-content" 
                     role="tab" 
                     aria-selected="false">
-                <span class="icon-[tabler--tools-kitchen-2] mr-2 size-5"></span>
+                <span class="icon-[tabler--category-plus] mr-2 size-5"></span>
                 {{ __('frontend.constructor_tab') }}
             </button>
         </nav>
@@ -101,7 +101,7 @@
                     @foreach($dishCategories as $category)
                         <div class="mb-10">
                             <h3 class="mb-6 flex items-center gap-2 text-2xl font-bold">
-                                <span class="icon-[tabler--category] size-6 text-primary"></span>
+                                <span class="icon-[tabler--bowl-chopsticks] size-6 text-emerald-600"></span>
                                 {{ $category->name }}
                             </h3>
                             
@@ -110,16 +110,16 @@
                             @else
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                     @foreach($category->dishes as $dish)
-                                        <div class="border border-emerald-600/20 rounded-2xl p-2 hover:shadow-md transition-shadow">
-                                            <figure class="h-56 overflow-hidden">
+                                        <div class="border border-emerald-600/20 rounded-2xl hover:shadow-md transition-shadow">
+                                            <figure class="h-76 overflow-hidden">
                                                 @if($dish->image)
                                                     <img src="{{ asset('storage/' . $dish->image) }}" 
                                                          alt="{{ $dish->name }}" 
-                                                         class="h-full w-full object-cover">
+                                                         class="h-full w-full object-cover rounded-t-2xl">
                                                 @else
                                                     <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop" 
                                                          alt="{{ $dish->name }}" 
-                                                         class="h-full w-full object-cover">
+                                                         class="h-full w-full object-cover rounded-t-2xl">
                                                 @endif
                                             </figure>
                                             <div class="card-body p-3">
@@ -155,29 +155,29 @@
 
                                                 <!-- Пищевая ценность соуса -->
                                                 @if($dish->sauce_name_ru)
-                                                    <div class="mt-2 rounded-lg bg-primary/5 p-2">
+                                                    <div class="mt-2 rounded-lg bg-primary/3 p-2">
                                                         <div class="flex items-center gap-1 mb-1">
-                                                            <span class="icon-[tabler--bottle] size-3 text-primary"></span>
-                                                            <p class="text-xs font-medium text-primary">+ {{ $dish->sauce_name }}</p>
+                                                            <span class="icon-[tabler--bottle] size-4 text-emerald-600"></span>
+                                                            <p class="text-base font-medium text-emerald-600">+ {{ $dish->sauce_name }}</p>
                                                             @if($dish->sauce_weight_volume)
-                                                                <span class="text-xs text-base-content/40">({{ $dish->sauce_weight_volume }})</span>
+                                                                <span class="text-xs">({{ $dish->sauce_weight_volume }})</span>
                                                             @endif
                                                         </div>
                                                         @if($dish->sauce_calories || $dish->sauce_proteins || $dish->sauce_fats || $dish->sauce_carbohydrates)
-                                                            <div class="flex flex-wrap gap-1 text-xs">
+                                                            <div class="flex flex-wrap gap-1 text-base">
                                                                 @if($dish->sauce_calories)
-                                                                    <span class="badge badge-soft badge-info badge-xs">
+                                                                    <span class="badge badge-soft badge-info">
                                                                         {{ $dish->sauce_calories }} {{ __('frontend.calories') }}
                                                                     </span>
                                                                 @endif
                                                                 @if($dish->sauce_proteins)
-                                                                    <span class="badge badge-soft badge-success badge-xs">Б: {{ $dish->sauce_proteins }}{{ __('frontend.grams') }}</span>
+                                                                    <span class="badge badge-soft badge-success">Б: {{ $dish->sauce_proteins }}{{ __('frontend.grams') }}</span>
                                                                 @endif
                                                                 @if($dish->sauce_fats)
-                                                                    <span class="badge badge-soft badge-warning badge-xs">Ж: {{ $dish->sauce_fats }}{{ __('frontend.grams') }}</span>
+                                                                    <span class="badge badge-soft badge-warning">Ж: {{ $dish->sauce_fats }}{{ __('frontend.grams') }}</span>
                                                                 @endif
                                                                 @if($dish->sauce_carbohydrates)
-                                                                    <span class="badge badge-soft badge-error badge-xs">У: {{ $dish->sauce_carbohydrates }}{{ __('frontend.grams') }}</span>
+                                                                    <span class="badge badge-soft badge-error">У: {{ $dish->sauce_carbohydrates }}{{ __('frontend.grams') }}</span>
                                                                 @endif
                                                             </div>
                                                         @endif
@@ -189,13 +189,13 @@
                                                     <div class="mt-2 border-t border-base-content/10 pt-2">
                                                         <p class="text-xs font-semibold text-base-content mb-1">Итого с соусом:</p>
                                                         <div class="flex flex-wrap gap-1 text-xs">
-                                                            <span class="badge badge-info badge-sm">
+                                                            <span class="badge badge-info">
                                                                 <span class="icon-[tabler--flame] mr-1 size-3"></span>
                                                                 {{ ($dish->calories ?? 0) + ($dish->sauce_calories ?? 0) }} {{ __('frontend.calories') }}
                                                             </span>
-                                                            <span class="badge badge-success badge-sm">Б: {{ number_format(($dish->proteins ?? 0) + ($dish->sauce_proteins ?? 0), 1) }}{{ __('frontend.grams') }}</span>
-                                                            <span class="badge badge-warning badge-sm">Ж: {{ number_format(($dish->fats ?? 0) + ($dish->sauce_fats ?? 0), 1) }}{{ __('frontend.grams') }}</span>
-                                                            <span class="badge badge-error badge-sm">У: {{ number_format(($dish->carbohydrates ?? 0) + ($dish->sauce_carbohydrates ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-success">Б: {{ number_format(($dish->proteins ?? 0) + ($dish->sauce_proteins ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-warning">Ж: {{ number_format(($dish->fats ?? 0) + ($dish->sauce_fats ?? 0), 1) }}{{ __('frontend.grams') }}</span>
+                                                            <span class="badge badge-error">У: {{ number_format(($dish->carbohydrates ?? 0) + ($dish->sauce_carbohydrates ?? 0), 1) }}{{ __('frontend.grams') }}</span>
                                                         </div>
                                                     </div>
                                                 @endif
@@ -262,7 +262,7 @@
                 @if($drinks->isNotEmpty())
                     <div class="mt-12 border-t border-base-content/10 pt-8">
                         <h3 class="mb-6 flex items-center gap-2 text-2xl font-bold">
-                            <span class="icon-[tabler--cup] size-6 text-primary"></span>
+                            <span class="icon-[tabler--bottle] size-6 text-primary"></span>
                             Напитки
                         </h3>
                         
@@ -355,8 +355,8 @@
             <!-- Таб Конструктор -->
             <div id="constructor-content" class="hidden" role="tabpanel" aria-labelledby="constructor-tab">
                 <div x-data="bowlConstructor()">
-                    <div class="mb-6 text-center">
-                        <h3 class="text-3xl font-bold mb-2">{{ __('frontend.build_perfect_bowl') }}</h3>
+                    <div class="mt-3 mb-6 text-center">
+                        <h3 class="text-2xl font-bold mb-2">{{ __('frontend.build_perfect_bowl') }}</h3>
                         <p class="text-base-content/70">{{ __('frontend.build_perfect_bowl_desc') }}</p>
                     </div>
 
