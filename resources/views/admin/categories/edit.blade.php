@@ -37,6 +37,23 @@
                         @enderror
                     </div>
 
+                    <div>
+                        <label class="label-text" for="icon_class">Класс иконки</label>
+                        <input type="text" 
+                               name="icon_class" 
+                               placeholder="icon-[tabler--bowl-chopsticks]" 
+                               class="input @error('icon_class') input-error @enderror" 
+                               id="icon_class" 
+                               value="{{ old('icon_class', $category->icon_class) }}" />
+                        <span class="text-base-content/60 text-xs mt-1 block">
+                            Класс иконки Tabler Icons (например: icon-[tabler--bowl-chopsticks]). 
+                            <a href="https://tabler.io/icons" target="_blank" class="text-primary hover:underline">Смотреть иконки</a>
+                        </span>
+                        @error('icon_class')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     <!-- Переводы -->
                     <div class="space-y-4 border-t border-base-content/10 pt-4">
                         <h5 class="text-base-content text-base font-semibold">Переводы</h5>

@@ -25,6 +25,7 @@ class StoreDishCategoryRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:255'],
             'name_ru' => ['required', 'string', 'max:255'],
             'name_ka' => ['nullable', 'string', 'max:255'],
+            'icon_class' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:dish_categories,slug'],
             'description' => ['nullable', 'string'],
             'description_ru' => ['nullable', 'string'],

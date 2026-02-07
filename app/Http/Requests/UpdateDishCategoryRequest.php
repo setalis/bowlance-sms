@@ -26,6 +26,7 @@ class UpdateDishCategoryRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:255'],
             'name_ru' => ['required', 'string', 'max:255'],
             'name_ka' => ['nullable', 'string', 'max:255'],
+            'icon_class' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('dish_categories')->ignore($this->route('category'))],
             'description' => ['nullable', 'string'],
             'description_ru' => ['nullable', 'string'],

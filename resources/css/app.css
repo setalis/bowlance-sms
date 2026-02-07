@@ -46,3 +46,19 @@ li:not(.menu-title, .menu-disabled)
         }
     }
 }
+
+/* Стили для текста слайдера */
+.slider-text {
+    text-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.8),
+        0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.slider-text-strong {
+    text-shadow: 
+        -1px -1px 1px rgba(0, 0, 0, 0.8),
+        1px -1px 1px rgba(0, 0, 0, 0.8),
+        -1px 1px 1px rgba(0, 0, 0, 0.8),
+        1px 1px 1px rgba(0, 0, 0, 0.8),
+        0 3px 10px rgba(0, 0, 0, 0.9);
+}

@@ -257,7 +257,7 @@
                                     </template>
                                     <template x-if="item.type === 'bowl'">
                                         <div class="size-20 rounded-lg bg-primary/20 flex items-center justify-center">
-                                            <span class="icon-[tabler--tools-kitchen-2] size-8 text-primary"></span>
+                                            <img src="{{ asset('storage/constructor-products/bowl-constructor.jpg') }}" alt="Bowl" class="size-20 rounded-lg object-cover">
                                         </div>
                                     </template>
                                 </div>

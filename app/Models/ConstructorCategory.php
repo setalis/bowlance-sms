@@ -20,6 +20,7 @@ class ConstructorCategory extends Model
         'name',
         'name_ru',
         'name_ka',
+        'icon_class',
         'sort_order',
     ];
 

@@ -25,6 +25,7 @@ class UpdateConstructorCategoryRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:255'],
             'name_ru' => ['required', 'string', 'max:255'],
             'name_ka' => ['nullable', 'string', 'max:255'],
+            'icon_class' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['integer', 'min:0'],
         ];
     }

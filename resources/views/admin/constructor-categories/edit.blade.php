@@ -69,6 +69,23 @@
                     </div>
 
                     <div>
+                        <label class="label-text" for="icon_class">Класс иконки</label>
+                        <input type="text" 
+                               name="icon_class" 
+                               placeholder="icon-[tabler--tools-kitchen-2]" 
+                               class="input @error('icon_class') input-error @enderror" 
+                               id="icon_class" 
+                               value="{{ old('icon_class', $category->icon_class) }}" />
+                        <span class="text-base-content/60 text-xs mt-1 block">
+                            Класс иконки Tabler Icons (например: icon-[tabler--tools-kitchen-2]). 
+                            <a href="https://tabler.io/icons" target="_blank" class="text-primary hover:underline">Смотреть иконки</a>
+                        </span>
+                        @error('icon_class')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div>
                         <label class="label-text" for="sort_order">Сортировка</label>
                         <input type="number" 
                                name="sort_order" 

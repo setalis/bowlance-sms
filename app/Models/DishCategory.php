@@ -15,6 +15,7 @@ class DishCategory extends Model
         'name',
         'name_ru',
         'name_ka',
+        'icon_class',
         'slug',
         'description',
         'description_ru',

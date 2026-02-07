@@ -5,20 +5,36 @@
     <div data-carousel='{
         "loadingClasses": "opacity-0",
         "dotsItemClasses": "carousel-box carousel-active:bg-primary",
-        "isAutoPlay": true, "speed": 5000
+        "isAutoPlay": false, "speed": 7000
     }' class="relative w-full rounded-xl overflow-hidden shadow-lg">
-        <div class="carousel h-96">
+        <div class="carousel h-1/2 md:h-96">
             <div class="carousel-body h-full opacity-0">
                 <div class="carousel-slide active">
                     <div class="relative h-full w-full">
-                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&h=400&fit=crop" 
+                        <img src="{{ asset('storage/images/slider/slider-1-2.jpg') }}" 
                              alt="Боулы" 
-                             class="h-full w-full object-cover">
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/40">
-                            <div class="text-center text-white">
-                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">Bowlance</h2>
-                                <p class="text-xl sm:text-2xl">{{ __('frontend.tagline') }}</p>
-                            </div>
+                             class="h-full w-full object-cover md:hidden">
+                        <img src="{{ asset('storage/images/slider/slider-1-desktop.png') }}" 
+                             alt="Боулы" 
+                             class="h-full w-full object-cover hidden md:block">
+                        <!-- Градиентная подложка -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
+                        <!-- Текстовый блок без размытия -->
+                        <div class="absolute inset-0 flex flex-col items-top justify-start pt-10">
+                            <div class="text-left text-white max-w-4xl mx-4 px-6 md:px-20">
+                                <h2 class="mb-4 text-3xl font-black sm:text-3xl uppercase slider-text">Авторское меню</h2>
+                                <h3 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">by Nancy Topko</h3>
+                                <p class="text-base sm:text-2xl slider-text">Победитель Мастер Шеф Украина 15<br>Попробуй в Батуми!</p>
+                            </div>  
+                            
+                        </div>
+                        <div class="absolute bottom-[100px] md:bottom-[50px] left-0 right-0 flex justify-center">
+                            <a href="#menu-tab" 
+                               @click.prevent="document.getElementById('menu-tab').click(); setTimeout(() => document.getElementById('menu-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
+                               type="button" 
+                               class="border border-white text-white bg-black/20 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer">
+                                Посмотреть меню
+                            </a>                          
                         </div>
                     </div>
                 </div>
@@ -27,10 +43,13 @@
                         <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&h=400&fit=crop" 
                              alt="Свежие продукты" 
                              class="h-full w-full object-cover">
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/40">
-                            <div class="text-center text-white">
-                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">{{ __('frontend.fresh_products') }}</h2>
-                                <p class="text-xl sm:text-2xl">{{ __('frontend.fresh_products_desc') }}</p>
+                        <!-- Градиентная подложка -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
+                        <!-- Текстовый блок с размытием -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.fresh_products') }}</h2>
+                                <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.fresh_products_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -40,10 +59,13 @@
                         <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1200&h=400&fit=crop" 
                              alt="Собери сам" 
                              class="h-full w-full object-cover">
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/40">
-                            <div class="text-center text-white">
-                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl">{{ __('frontend.build_bowl') }}</h2>
-                                <p class="text-xl sm:text-2xl">{{ __('frontend.build_bowl_desc') }}</p>
+                        <!-- Градиентная подложка -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
+                        <!-- Текстовый блок с размытием -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.build_bowl') }}</h2>
+                                <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.build_bowl_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -101,7 +123,7 @@
                     @foreach($dishCategories as $category)
                         <div class="mb-10">
                             <h3 class="mb-6 flex items-center gap-2 text-2xl font-bold">
-                                <span class="icon-[tabler--bowl-chopsticks] size-6 text-emerald-600"></span>
+                                <span class="{{ $category->icon_class ?: 'icon-[tabler--bowl-chopsticks]' }} size-6 text-emerald-600"></span>
                                 {{ $category->name }}
                             </h3>
                             
@@ -122,7 +144,7 @@
                                                          class="h-full w-full object-cover rounded-t-2xl">
                                                 @endif
                                             </figure>
-                                            <div class="card-body p-3">
+                                            <div class="card-body px-6">
                                                 <h4 class="card-title text-lg">{{ $dish->name }}</h4>
                                                 
                                                 @if($dish->description)
@@ -269,7 +291,7 @@
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach($drinks as $drink)
                                 <div class="card hover:shadow-xl transition-shadow">
-                                    <figure class="h-48 overflow-hidden">
+                                    <figure class="h-84 overflow-hidden">
                                         @if($drink->image)
                                             <img src="{{ asset('storage/' . $drink->image) }}" 
                                                  alt="{{ $drink->name }}" 
@@ -373,7 +395,7 @@
                                      class="card cursor-pointer transition-all hover:shadow-xl hover:scale-105 min-h-48 border-2 border-dashed"
                                      :class="getCategoryProducts({{ $category->id }}).length > 0 ? 'border-primary bg-primary/5' : 'border-base-300 hover:border-primary/50'">
                                     <div class="card-body items-center justify-center p-4">
-                                        <span class="icon-[tabler--tools-kitchen-2] size-12 text-primary mb-2"></span>
+                                        <span class="{{ $category->icon_class ?: 'icon-[tabler--tools-kitchen-2]' }} size-12 text-primary mb-2"></span>
                                         <h4 class="text-lg font-bold text-center">{{ $category->name }}</h4>
                                         
                                         <!-- Выбранные продукты в категории -->
