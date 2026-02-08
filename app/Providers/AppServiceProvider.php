@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Гарантируем fallback-локаль для переводов (важно на хостинге после config:cache)
+        $this->app->setFallbackLocale(config('app.fallback_locale', 'ru'));
     }
 }

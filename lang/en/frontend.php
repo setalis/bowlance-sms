@@ -1,0 +1,103 @@
+<?php
+
+return [
+    // Header
+    'phone' => 'Phone',
+    'location' => 'Georgia, Batumi, 162/174 Parnavaz Mepe St',
+    'cart' => 'Cart',
+    'menu' => 'Menu',
+    'close' => 'Close',
+
+    // Main page
+    'tagline' => 'Healthy food fast and tasty',
+    'fresh_products' => 'Fresh products',
+    'fresh_products_desc' => 'Quality ingredients only',
+    'build_bowl' => 'Build your bowl',
+    'build_bowl_desc' => 'Choose ingredients to your taste',
+
+    // Tabs
+    'menu_tab' => 'Menu',
+    'constructor_tab' => 'Build yourself',
+
+    // Menu
+    'no_dishes_available' => 'No dishes available yet',
+    'no_dishes_in_category' => 'No dishes in this category yet',
+    'add_to_cart' => 'Add to cart',
+    'calories' => 'kcal',
+    'proteins' => 'P',
+    'fats' => 'F',
+    'carbs' => 'C',
+    'grams' => 'g',
+    'kbgu' => 'Dish (kcal/P/F/C)',
+
+    // Constructor
+    'build_perfect_bowl' => 'Build your perfect bowl',
+    'build_perfect_bowl_desc' => 'Choose products from each category and create a unique dish',
+    'constructor_unavailable' => 'Constructor temporarily unavailable',
+    'your_bowl' => 'Your bowl',
+    'clear' => 'Clear',
+    'select_products' => 'Select products from categories below',
+    'no_products_in_category' => 'No products in this category yet',
+    'selected' => 'Selected',
+    'add_bowl_to_cart' => 'Add bowl to cart',
+    'total' => 'Total',
+    'click_to_select' => 'Click to select',
+    'done' => 'Done',
+
+    // Cart
+    'cart_title' => 'Cart',
+    'items_single' => 'item',
+    'items_few' => 'items',
+    'items_many' => 'items',
+    'cart_empty' => 'Your cart is empty',
+    'cart_empty_desc' => 'Add dishes or build your bowl',
+    'remove' => 'Remove',
+    'ingredients' => 'ingredient',
+    'bowl_composition' => 'Bowl composition',
+    'clear_cart' => 'Clear cart',
+    'nutrition' => 'Nutrition',
+    'nutrition_calories' => 'Calories',
+    'nutrition_proteins' => 'Protein',
+    'nutrition_fats' => 'Fat',
+    'nutrition_carbs' => 'Carbs',
+    'total_price' => 'Total:',
+    'checkout' => 'Checkout',
+
+    // Checkout
+    'checkout_title' => 'Checkout',
+    'your_name' => 'Your name',
+    'email' => 'Email',
+    'delivery_address' => 'Delivery address',
+    'order_comment' => 'Order comment',
+    'name_placeholder' => 'John Doe',
+    'phone_placeholder' => '+995 555 123 456',
+    'email_placeholder' => 'email@example.com',
+    'address_placeholder' => 'Street, building, apartment',
+    'comment_placeholder' => 'Additional requests',
+    'total_to_pay' => 'Total to pay:',
+    'cancel' => 'Cancel',
+    'submit' => 'Submit',
+    'submitting' => 'Sending...',
+    'required' => '*',
+
+    // Order
+    'back_to_order' => 'Back to order',
+    'customer_info' => 'Customer info',
+    'customer_name' => 'Customer name',
+    'customer_phone' => 'Phone',
+    'customer_email' => 'Email',
+    'delivery_address_label' => 'Delivery address',
+    'comment_label' => 'Comment',
+    'order_items' => 'Order items',
+    'add_dish' => 'Dish',
+    'add_bowl' => 'Bowl',
+    'select_dish' => 'Select dish',
+    'quantity' => 'Quantity',
+    'bowl_products' => 'Built bowl',
+    'select_product' => 'Select...',
+    'selected_ingredients' => 'Selected ingredients:',
+    'add_items_hint' => 'Click "Dish" or "Bowl" to add items',
+    'order_status' => 'Order status',
+    'save_changes' => 'Save changes',
+    'cancel_action' => 'Cancel',
+];

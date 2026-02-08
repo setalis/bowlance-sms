@@ -26,9 +26,9 @@ class AdminUserSeeder extends Seeder
         // Создаем администратора
         $admin = User::create([
             'name' => 'Администратор',
-            'email' => 'admin@bowlance.fly',
-            'phone' => '+995555000000',
-            'password' => Hash::make('password'),
+            'email' => 'slavrtm@gmail.com',
+            'phone' => '+380507082864',
+            'password' => Hash::make('77788399'),
             'role' => UserRole::Admin,
             'email_verified_at' => now(),
         ]);
