@@ -200,12 +200,19 @@
             <!-- Header -->
             <div class="flex min-h-16 flex-none items-center justify-between border-b border-base-content/10 px-5">
                 <div class="py-5">
-                    <h3 class="font-bold text-lg">{{ __('frontend.cart_title') }}</h3>
+                    <h3 class="font-bold text-lg">{{ __('frontend.cart_title') }}: </h3>
                     <p class="text-sm text-base-content/60" x-show="$store.cart.totalItems > 0" x-cloak>
                         <span x-text="$store.cart.totalItems"></span> 
                         <span x-text="$store.cart.totalItems === 1 ? '{{ __('frontend.items_single') }}' : ($store.cart.totalItems < 5 ? '{{ __('frontend.items_few') }}' : '{{ __('frontend.items_many') }}')"></span>
                     </p>
                 </div>
+                <!-- Кнопка очистить корзину -->
+                <button type="button" 
+                        @click="$store.cart.clearCart()"
+                        class=" gap-2">
+                    <span class="icon-[tabler--trash] size-4"></span>
+                    {{ __('frontend.clear_cart') }}
+                </button>
                 <button
                     @click="$store.cart.isOpen = false"
                     type="button"
@@ -293,23 +300,23 @@
                                             <p class="text-xs font-medium text-base-content/70 mb-1">Блюдо:</p>
                                             <div class="flex flex-wrap gap-1 text-xs">
                                                 <template x-if="item.calories > 0">
-                                                    <span class="badge badge-outline badge-xs">
+                                                    <span class="badge badge-outline border-dashed badge-info badge-sm">
                                                         <span class="icon-[tabler--flame] mr-0.5 size-3"></span>
                                                         <span x-text="Math.round(item.calories)"></span> {{ __('frontend.calories') }}
                                                     </span>
                                                 </template>
                                                 <template x-if="item.proteins > 0">
-                                                    <span class="badge badge-outline badge-xs">
+                                                    <span class="badge badge-outline border-dashed badge-success badge-sm">
                                                         Б: <span x-text="item.proteins.toFixed(1)"></span>{{ __('frontend.grams') }}
                                                     </span>
                                                 </template>
                                                 <template x-if="item.fats > 0">
-                                                    <span class="badge badge-outline badge-xs">
+                                                    <span class="badge badge-outline border-dashed badge-warning badge-sm">
                                                         Ж: <span x-text="item.fats.toFixed(1)"></span>{{ __('frontend.grams') }}
                                                     </span>
                                                 </template>
                                                 <template x-if="item.carbs > 0">
-                                                    <span class="badge badge-outline badge-xs">
+                                                    <span class="badge badge-outline border-dashed badge-error badge-sm">
                                                         У: <span x-text="item.carbs.toFixed(1)"></span>{{ __('frontend.grams') }}
                                                     </span>
                                                 </template>

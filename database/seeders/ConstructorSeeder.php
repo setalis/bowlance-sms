@@ -13,24 +13,15 @@ class ConstructorSeeder extends Seeder
      */
     public function run(): void
     {
+        // Очищаем таблицы перед заполнением
+        ConstructorProduct::query()->delete();
+        ConstructorCategory::query()->delete();
+
         // 1. Гарнир, крупа
         $category1 = ConstructorCategory::create([
             'name_ru' => 'Гарнир, крупа',
             'name_ka' => 'გარნირი, ლობიოები',
-            'sort_order' => 1,
-        ]);
-
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
-            'name_ru' => 'Картофель запеченный',
-            'name_ka' => 'შემწვარი კარტოფილი',
-            'price' => 50.00,
-            'weight_volume' => '150 г',
-            'calories' => 110,
-            'proteins' => 2.5,
-            'fats' => 0.2,
-            'carbohydrates' => 25.0,
-            'fiber' => 2.2,
+            'icon_class' => 'icon-[tabler--grain] text-amber-700',
             'sort_order' => 1,
         ]);
 
@@ -38,88 +29,145 @@ class ConstructorSeeder extends Seeder
             'constructor_category_id' => $category1->id,
             'name_ru' => 'Гречка',
             'name_ka' => 'ქერი',
-            'price' => 45.00,
-            'weight_volume' => '150 г',
-            'calories' => 155,
-            'proteins' => 5.7,
-            'fats' => 1.5,
-            'carbohydrates' => 30.0,
-            'fiber' => 4.5,
+            'price' => 4.00,
+            'weight_volume' => '100 г',
+            'calories' => 92,
+            'proteins' => 3.4,
+            'fats' => 0.8,
+            'carbohydrates' => 18.0,
+            'fiber' => 0.0,
+            'sort_order' => 1,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category1->id,
+            'name_ru' => 'Рис белый',
+            'name_ka' => 'თეთრი ბრინჯი',
+            'price' => 4.00,
+            'weight_volume' => '100 г',
+            'calories' => 112,
+            'proteins' => 2.4,
+            'fats' => 0.3,
+            'carbohydrates' => 25.0,
+            'fiber' => 0.0,
             'sort_order' => 2,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category1->id,
-            'name_ru' => 'Рис бурый',
-            'name_ka' => 'ყავისფერი ბრინჯი',
-            'price' => 40.00,
-            'weight_volume' => '150 г',
-            'calories' => 165,
-            'proteins' => 3.5,
-            'fats' => 1.2,
-            'carbohydrates' => 34.0,
-            'fiber' => 1.8,
+            'name_ru' => 'Рис черный дикий',
+            'name_ka' => 'შავი ველური ბრინჯი',
+            'price' => 5.00,
+            'weight_volume' => '100 г',
+            'calories' => 101,
+            'proteins' => 4.0,
+            'fats' => 0.3,
+            'carbohydrates' => 21.0,
+            'fiber' => 0.0,
             'sort_order' => 3,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category1->id,
-            'name_ru' => 'Киноа',
-            'name_ka' => 'კინოა',
-            'price' => 55.00,
-            'weight_volume' => '150 г',
-            'calories' => 180,
-            'proteins' => 6.0,
-            'fats' => 2.8,
-            'carbohydrates' => 30.0,
-            'fiber' => 3.5,
+            'name_ru' => 'Рис бурый цельнозерновой',
+            'name_ka' => 'მთელი მარცვლოვანი ყავისფერი ბრინჯი',
+            'price' => 5.00,
+            'weight_volume' => '100 г',
+            'calories' => 120,
+            'proteins' => 2.7,
+            'fats' => 1.0,
+            'carbohydrates' => 24.0,
+            'fiber' => 0.0,
             'sort_order' => 4,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category1->id,
+            'name_ru' => 'Чечевица',
+            'name_ka' => 'ოსპი',
+            'price' => 4.00,
+            'weight_volume' => '100 г',
+            'calories' => 116,
+            'proteins' => 9.0,
+            'fats' => 0.4,
+            'carbohydrates' => 20.0,
+            'fiber' => 0.0,
+            'sort_order' => 5,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category1->id,
+            'name_ru' => 'Картофель запеченый',
+            'name_ka' => 'შემწვარი კარტოფილი',
+            'price' => 4.00,
+            'weight_volume' => '100 г',
+            'calories' => 140,
+            'proteins' => 3.2,
+            'fats' => 2.2,
+            'carbohydrates' => 27.0,
+            'fiber' => 0.0,
+            'sort_order' => 6,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category1->id,
+            'name_ru' => 'Батат',
+            'name_ka' => 'ბატატი',
+            'price' => 6.00,
+            'weight_volume' => '100 г',
+            'calories' => 128,
+            'proteins' => 1.7,
+            'fats' => 1.0,
+            'carbohydrates' => 22.0,
+            'fiber' => 0.0,
+            'sort_order' => 7,
         ]);
 
         // 2. Мясо, рыба, птица
         $category2 = ConstructorCategory::create([
             'name_ru' => 'Мясо, рыба, птица',
             'name_ka' => 'ხორცი, თევზი, ფრინველი',
+            'icon_class' => 'icon-[tabler--meat] text-red-600',
             'sort_order' => 2,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category2->id,
-            'name_ru' => 'Говядина (сирлоин)',
-            'name_ka' => 'საქონლის ხორცი (სირლოინი)',
-            'price' => 200.00,
-            'weight_volume' => '120 г',
-            'calories' => 250,
-            'proteins' => 26.0,
-            'fats' => 15.0,
-            'carbohydrates' => 0.0,
+            'name_ru' => 'Тунец татаки',
+            'name_ka' => 'ტუნა ტატაკი',
+            'price' => 17.00,
+            'weight_volume' => '45 г',
+            'calories' => 64,
+            'proteins' => 14.3,
+            'fats' => 0.3,
+            'carbohydrates' => 0.1,
             'fiber' => 0.0,
             'sort_order' => 1,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category2->id,
-            'name_ru' => 'Куриное филе',
-            'name_ka' => 'ქათმის ფილე',
-            'price' => 150.00,
-            'weight_volume' => '120 г',
-            'calories' => 165,
-            'proteins' => 31.0,
-            'fats' => 3.6,
-            'carbohydrates' => 0.0,
+            'name_ru' => 'Королевская креветка',
+            'name_ka' => 'სამეფო კრევეტი',
+            'price' => 12.00,
+            'weight_volume' => '50 г',
+            'calories' => 55,
+            'proteins' => 11.5,
+            'fats' => 1.5,
+            'carbohydrates' => 0.2,
             'fiber' => 0.0,
             'sort_order' => 2,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category2->id,
-            'name_ru' => 'Лосось',
-            'name_ka' => 'ორაგული',
-            'price' => 250.00,
-            'weight_volume' => '120 г',
-            'calories' => 230,
-            'proteins' => 25.0,
-            'fats' => 13.0,
+            'name_ru' => 'Норвежский лосось',
+            'name_ka' => 'ნორვეგიული ორაგული',
+            'price' => 15.00,
+            'weight_volume' => '45 г',
+            'calories' => 85,
+            'proteins' => 10.5,
+            'fats' => 4.5,
             'carbohydrates' => 0.0,
             'fiber' => 0.0,
             'sort_order' => 3,
@@ -127,85 +175,227 @@ class ConstructorSeeder extends Seeder
 
         ConstructorProduct::create([
             'constructor_category_id' => $category2->id,
-            'name_ru' => 'Индейка',
-            'name_ka' => 'ინდაური',
-            'price' => 160.00,
-            'weight_volume' => '120 г',
-            'calories' => 135,
-            'proteins' => 30.0,
-            'fats' => 1.0,
-            'carbohydrates' => 0.0,
+            'name_ru' => 'Куриное филе запеченое',
+            'name_ka' => 'შემწვარი ქათმის ფილე',
+            'price' => 12.00,
+            'weight_volume' => '80 г',
+            'calories' => 120,
+            'proteins' => 21.5,
+            'fats' => 1.2,
+            'carbohydrates' => 0.6,
             'fiber' => 0.0,
             'sort_order' => 4,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category2->id,
+            'name_ru' => 'Куриное филе жареное',
+            'name_ka' => 'შემწვარი ქათმის ფილე',
+            'price' => 12.00,
+            'weight_volume' => '80 г',
+            'calories' => 146,
+            'proteins' => 24.6,
+            'fats' => 3.5,
+            'carbohydrates' => 0.6,
+            'fiber' => 0.0,
+            'sort_order' => 5,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category2->id,
+            'name_ru' => 'Куриное бедро souvlaki',
+            'name_ka' => 'ქათმის ბარკალი souvlaki',
+            'price' => 10.00,
+            'weight_volume' => '90 г',
+            'calories' => 231,
+            'proteins' => 25.0,
+            'fats' => 14.0,
+            'carbohydrates' => 0.7,
+            'fiber' => 0.0,
+            'sort_order' => 6,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category2->id,
+            'name_ru' => 'Говядина tenderloin',
+            'name_ka' => 'საქონლის ხორცი tenderloin',
+            'price' => 19.00,
+            'weight_volume' => '50 г',
+            'calories' => 100,
+            'proteins' => 16.4,
+            'fats' => 3.5,
+            'carbohydrates' => 0.9,
+            'fiber' => 0.0,
+            'sort_order' => 7,
         ]);
 
         // 3. Овощи
         $category3 = ConstructorCategory::create([
             'name_ru' => 'Овощи',
             'name_ka' => 'ბოსტნეული',
+            'icon_class' => 'icon-[tabler--carrot] text-orange-500',
             'sort_order' => 3,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Черри запеченые',
+            'name_ka' => 'შემწვარი ჩერი',
+            'price' => 4.00,
+            'weight_volume' => '50 г',
+            'calories' => 8.5,
+            'proteins' => 0.45,
+            'fats' => 0.1,
+            'carbohydrates' => 2.0,
+            'fiber' => 0.0,
+            'sort_order' => 1,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Черри свежие',
+            'name_ka' => 'ახალი ჩერი',
+            'price' => 4.00,
+            'weight_volume' => '100 г',
+            'calories' => 18,
+            'proteins' => 0.9,
+            'fats' => 0.2,
+            'carbohydrates' => 3.9,
+            'fiber' => 0.0,
+            'sort_order' => 2,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Перец запеченый',
+            'name_ka' => 'შემწვარი წიწაკა',
+            'price' => 5.00,
+            'weight_volume' => '40 г',
+            'calories' => 11.6,
+            'proteins' => 0.6,
+            'fats' => 0.1,
+            'carbohydrates' => 2.4,
+            'fiber' => 0.0,
+            'sort_order' => 3,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Перец болгарский свежий',
+            'name_ka' => 'ახალი ბულგარული წიწაკა',
+            'price' => 5.50,
+            'weight_volume' => '100 г',
+            'calories' => 27,
+            'proteins' => 1.0,
+            'fats' => 0.2,
+            'carbohydrates' => 6.0,
+            'fiber' => 0.0,
+            'sort_order' => 4,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Броколи',
+            'name_ka' => 'ბროკოლი',
+            'price' => 5.00,
+            'weight_volume' => '50 г',
+            'calories' => 30,
+            'proteins' => 2.7,
+            'fats' => 0.4,
+            'carbohydrates' => 6.3,
+            'fiber' => 0.0,
+            'sort_order' => 5,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Цвет. капуста',
+            'name_ka' => 'ყვავილოვანი კომბოსტო',
+            'price' => 2.50,
+            'weight_volume' => '50 г',
+            'calories' => 30,
+            'proteins' => 2.0,
+            'fats' => 0.3,
+            'carbohydrates' => 6.2,
+            'fiber' => 0.0,
+            'sort_order' => 6,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Эдамаме',
+            'name_ka' => 'ედამამე',
+            'price' => 7.50,
+            'weight_volume' => '50 г',
+            'calories' => 60,
+            'proteins' => 6.1,
+            'fats' => 2.7,
+            'carbohydrates' => 4.8,
+            'fiber' => 0.0,
+            'sort_order' => 7,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Стручк. фасоль',
+            'name_ka' => 'სტრუქვოვანი ლობიო',
+            'price' => 7.50,
+            'weight_volume' => '50 г',
+            'calories' => 15,
+            'proteins' => 1.25,
+            'fats' => 0.1,
+            'carbohydrates' => 3.15,
+            'fiber' => 0.0,
+            'sort_order' => 8,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category3->id,
             'name_ru' => 'Огурец',
             'name_ka' => 'კიტრი',
-            'price' => 30.00,
-            'weight_volume' => '80 г',
-            'calories' => 12,
-            'proteins' => 0.6,
-            'fats' => 0.1,
-            'carbohydrates' => 2.2,
-            'fiber' => 0.5,
-            'sort_order' => 1,
-        ]);
-
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
-            'name_ru' => 'Помидор',
-            'name_ka' => 'პომიდორი',
-            'price' => 35.00,
-            'weight_volume' => '80 г',
-            'calories' => 14,
-            'proteins' => 0.7,
-            'fats' => 0.2,
-            'carbohydrates' => 2.6,
-            'fiber' => 0.9,
-            'sort_order' => 2,
-        ]);
-
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
-            'name_ru' => 'Перец болгарский',
-            'name_ka' => 'ბულგარული წიწაკა',
-            'price' => 40.00,
-            'weight_volume' => '80 г',
-            'calories' => 20,
-            'proteins' => 0.8,
-            'fats' => 0.2,
-            'carbohydrates' => 4.6,
-            'fiber' => 1.7,
-            'sort_order' => 3,
-        ]);
-
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
-            'name_ru' => 'Брокколи',
-            'name_ka' => 'ბროკოლი',
-            'price' => 45.00,
+            'price' => 5.50,
             'weight_volume' => '100 г',
-            'calories' => 34,
-            'proteins' => 2.8,
-            'fats' => 0.4,
-            'carbohydrates' => 7.0,
-            'fiber' => 2.6,
-            'sort_order' => 4,
+            'calories' => 15,
+            'proteins' => 0.7,
+            'fats' => 0.1,
+            'carbohydrates' => 3.6,
+            'fiber' => 0.0,
+            'sort_order' => 9,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Авокадо',
+            'name_ka' => 'ავოკადო',
+            'price' => 6.00,
+            'weight_volume' => '50 г',
+            'calories' => 80,
+            'proteins' => 1.0,
+            'fats' => 7.4,
+            'carbohydrates' => 4.3,
+            'fiber' => 0.0,
+            'sort_order' => 10,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category3->id,
+            'name_ru' => 'Морковь',
+            'name_ka' => 'სტაფილო',
+            'price' => 2.00,
+            'weight_volume' => '50 г',
+            'calories' => 20,
+            'proteins' => 0.45,
+            'fats' => 0.1,
+            'carbohydrates' => 4.8,
+            'fiber' => 0.0,
+            'sort_order' => 11,
         ]);
 
         // 4. Зелень
         $category4 = ConstructorCategory::create([
             'name_ru' => 'Зелень',
             'name_ka' => 'მწვანილი',
+            'icon_class' => 'icon-[tabler--leaf] text-green-600',
             'sort_order' => 4,
         ]);
 
@@ -213,13 +403,13 @@ class ConstructorSeeder extends Seeder
             'constructor_category_id' => $category4->id,
             'name_ru' => 'Укроп',
             'name_ka' => 'კამა',
-            'price' => 20.00,
-            'weight_volume' => '10 г',
-            'calories' => 4,
-            'proteins' => 0.3,
-            'fats' => 0.1,
-            'carbohydrates' => 0.7,
-            'fiber' => 0.2,
+            'price' => 1.00,
+            'weight_volume' => '5 г',
+            'calories' => 2,
+            'proteins' => 0.0,
+            'fats' => 0.0,
+            'carbohydrates' => 0.0,
+            'fiber' => 0.0,
             'sort_order' => 1,
         ]);
 
@@ -227,105 +417,198 @@ class ConstructorSeeder extends Seeder
             'constructor_category_id' => $category4->id,
             'name_ru' => 'Петрушка',
             'name_ka' => 'ოხრახუში',
-            'price' => 20.00,
-            'weight_volume' => '10 г',
-            'calories' => 4,
-            'proteins' => 0.3,
-            'fats' => 0.1,
-            'carbohydrates' => 0.6,
-            'fiber' => 0.3,
+            'price' => 1.00,
+            'weight_volume' => '5 г',
+            'calories' => 2,
+            'proteins' => 0.0,
+            'fats' => 0.0,
+            'carbohydrates' => 0.0,
+            'fiber' => 0.0,
             'sort_order' => 2,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category4->id,
-            'name_ru' => 'Базилик',
-            'name_ka' => 'რეჰანი',
-            'price' => 25.00,
+            'name_ru' => 'Руккола',
+            'name_ka' => 'რუკოლა',
+            'price' => 3.00,
             'weight_volume' => '10 г',
-            'calories' => 2,
-            'proteins' => 0.3,
-            'fats' => 0.1,
-            'carbohydrates' => 0.3,
-            'fiber' => 0.2,
+            'calories' => 2.5,
+            'proteins' => 0.0,
+            'fats' => 0.0,
+            'carbohydrates' => 0.0,
+            'fiber' => 0.0,
             'sort_order' => 3,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category4->id,
-            'name_ru' => 'Кинза',
-            'name_ka' => 'ქინძი',
-            'price' => 22.00,
+            'name_ru' => 'Зеленый лук',
+            'name_ka' => 'მწვანე ხახვი',
+            'price' => 1.00,
             'weight_volume' => '10 г',
-            'calories' => 2,
-            'proteins' => 0.2,
-            'fats' => 0.1,
-            'carbohydrates' => 0.4,
-            'fiber' => 0.3,
+            'calories' => 3,
+            'proteins' => 0.0,
+            'fats' => 0.0,
+            'carbohydrates' => 0.0,
+            'fiber' => 0.0,
             'sort_order' => 4,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category4->id,
+            'name_ru' => 'Микс салата (лола + айсберг)',
+            'name_ka' => 'სალათის მიქსი (ლოლა + აისბერგი)',
+            'price' => 5.50,
+            'weight_volume' => '50 г',
+            'calories' => 7,
+            'proteins' => 0.0,
+            'fats' => 0.0,
+            'carbohydrates' => 0.0,
+            'fiber' => 0.0,
+            'sort_order' => 5,
         ]);
 
         // 5. Соусы
         $category5 = ConstructorCategory::create([
             'name_ru' => 'Соусы',
             'name_ka' => 'სოუსები',
+            'icon_class' => 'icon-[tabler--droplet] text-amber-500',
             'sort_order' => 5,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category5->id,
-            'name_ru' => 'Ткемали',
-            'name_ka' => 'ტყემალი',
-            'price' => 50.00,
-            'weight_volume' => '30 мл',
-            'calories' => 35,
-            'proteins' => 0.5,
-            'fats' => 0.0,
-            'carbohydrates' => 8.0,
-            'fiber' => 0.5,
+            'name_ru' => 'Арахисовый соус',
+            'name_ka' => 'არაქისის სოუსი',
+            'price' => 3.00,
+            'weight_volume' => '40 г',
+            'calories' => 85,
+            'proteins' => 4.1,
+            'fats' => 7.6,
+            'carbohydrates' => 2.7,
+            'fiber' => 0.0,
             'sort_order' => 1,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category5->id,
-            'name_ru' => 'Тартар',
-            'name_ka' => 'ტარტარი',
-            'price' => 45.00,
-            'weight_volume' => '30 мл',
-            'calories' => 120,
-            'proteins' => 0.5,
-            'fats' => 12.0,
-            'carbohydrates' => 2.0,
-            'fiber' => 0.2,
+            'name_ru' => 'Hot honey sauce',
+            'name_ka' => 'Hot honey sauce',
+            'price' => 4.00,
+            'weight_volume' => '40 г',
+            'calories' => 86,
+            'proteins' => 0.08,
+            'fats' => 0.04,
+            'carbohydrates' => 21.7,
+            'fiber' => 0.0,
             'sort_order' => 2,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category5->id,
-            'name_ru' => 'Сырный соус',
-            'name_ka' => 'ყველის სოუსი',
-            'price' => 55.00,
-            'weight_volume' => '30 мл',
-            'calories' => 100,
-            'proteins' => 3.0,
-            'fats' => 8.0,
-            'carbohydrates' => 4.0,
+            'name_ru' => 'Медово - цитрусовый',
+            'name_ka' => 'თაფლიანი ციტრუსოვანი',
+            'price' => 3.00,
+            'weight_volume' => '40 г',
+            'calories' => 22,
+            'proteins' => 0.37,
+            'fats' => 0.09,
+            'carbohydrates' => 5.0,
             'fiber' => 0.0,
             'sort_order' => 3,
         ]);
 
         ConstructorProduct::create([
             'constructor_category_id' => $category5->id,
-            'name_ru' => 'Оливковое масло',
-            'name_ka' => 'ზეითუნის ზეთი',
-            'price' => 40.00,
-            'weight_volume' => '10 мл',
-            'calories' => 88,
-            'proteins' => 0.0,
-            'fats' => 10.0,
-            'carbohydrates' => 0.0,
+            'name_ru' => 'Дзадзики',
+            'name_ka' => 'ძაძიკი',
+            'price' => 4.00,
+            'weight_volume' => '40 г',
+            'calories' => 25,
+            'proteins' => 3.4,
+            'fats' => 1.1,
+            'carbohydrates' => 1.3,
             'fiber' => 0.0,
             'sort_order' => 4,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category5->id,
+            'name_ru' => 'Творожный',
+            'name_ka' => 'ყველის სოუსი',
+            'price' => 5.00,
+            'weight_volume' => '40 г',
+            'calories' => 38,
+            'proteins' => 3.4,
+            'fats' => 2.0,
+            'carbohydrates' => 1.4,
+            'fiber' => 0.0,
+            'sort_order' => 5,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category5->id,
+            'name_ru' => 'Манго-мята соус',
+            'name_ka' => 'მანგო-პიტნის სოუსი',
+            'price' => 5.00,
+            'weight_volume' => '40 г',
+            'calories' => 24,
+            'proteins' => 0.3,
+            'fats' => 0.1,
+            'carbohydrates' => 5.2,
+            'fiber' => 0.0,
+            'sort_order' => 6,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category5->id,
+            'name_ru' => 'Соевый',
+            'name_ka' => 'სოიოს სოუსი',
+            'price' => 2.00,
+            'weight_volume' => '40 г',
+            'calories' => 20,
+            'proteins' => 1.0,
+            'fats' => 0.0,
+            'carbohydrates' => 1.5,
+            'fiber' => 0.0,
+            'sort_order' => 7,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category5->id,
+            'name_ru' => 'Йогурт греческий 2% (пустой)',
+            'name_ka' => 'ბერძნული იოგურტი 2%',
+            'price' => 3.00,
+            'weight_volume' => '40 г',
+            'calories' => 29,
+            'proteins' => 3.6,
+            'fats' => 0.8,
+            'carbohydrates' => 1.4,
+            'fiber' => 0.0,
+            'sort_order' => 8,
+        ]);
+
+        // 6. Хлебо-булочные изделия
+        $category6 = ConstructorCategory::create([
+            'name_ru' => 'Хлебо-булочные изделия',
+            'name_ka' => 'საფუარებელი ნაწარმი',
+            'icon_class' => 'icon-[tabler--bread] text-amber-600',
+            'sort_order' => 6,
+        ]);
+
+        ConstructorProduct::create([
+            'constructor_category_id' => $category6->id,
+            'name_ru' => 'Чечевичный хлеб',
+            'name_ka' => 'ოსპის პური',
+            'price' => 3.00,
+            'weight_volume' => '60 г',
+            'calories' => 118,
+            'proteins' => 9.0,
+            'fats' => 3.3,
+            'carbohydrates' => 11.2,
+            'fiber' => 0.0,
+            'sort_order' => 1,
         ]);
     }
 }

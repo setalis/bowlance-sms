@@ -395,7 +395,7 @@
                                      class="card cursor-pointer transition-all hover:shadow-xl hover:scale-105 min-h-48 border-2 border-dashed"
                                      :class="getCategoryProducts({{ $category->id }}).length > 0 ? 'border-primary bg-primary/5' : 'border-base-300 hover:border-primary/50'">
                                     <div class="card-body items-center justify-center p-4">
-                                        <span class="{{ $category->icon_class ?: 'icon-[tabler--tools-kitchen-2]' }} size-12 text-primary mb-2"></span>
+                                        <span class="{{ $category->icon_class ?: 'icon-[tabler--tools-kitchen-2] text-primary' }} size-12 mb-2"></span>
                                         <h4 class="text-lg font-bold text-center">{{ $category->name }}</h4>
                                         
                                         <!-- Выбранные продукты в категории -->

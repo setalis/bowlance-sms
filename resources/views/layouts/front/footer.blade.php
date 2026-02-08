@@ -3,9 +3,10 @@
         <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
             <!-- О компании -->
             <div>
-                <div class="mb-4 flex items-center gap-2 text-2xl font-bold text-primary">
-                    <span class="icon-[tabler--bowl] size-7"></span>
-                    <span>Bowlance</span>
+                <div class="mb-4">
+                    <a href="{{ route('home') }}" class="inline-block">
+                        <img src="{{ asset('storage/images/logo.png') }}" alt="Bowlance" class="h-16">
+                    </a>
                 </div>
                 <p class="text-sm text-base-content/70">
                     Полезная еда быстро и вкусно. Собери свой идеальный боул или выбери из готового меню.
@@ -16,17 +17,17 @@
             <div>
                 <h3 class="mb-4 text-lg font-bold">Контакты</h3>
                 <div class="space-y-2 text-sm">
-                    <a href="tel:+995555123456" class="flex items-center gap-2 hover:text-primary">
+                    <a href="tel:+995500700877" class="flex items-center gap-2 hover:text-primary">
                         <span class="icon-[tabler--phone] size-4"></span>
-                        +995 555 123 456
+                        +995 500 700 877
                     </a>
                     <a href="mailto:info@bowlance.ge" class="flex items-center gap-2 hover:text-primary">
                         <span class="icon-[tabler--mail] size-4"></span>
                         info@bowlance.ge
                     </a>
-                    <div class="flex items-center gap-2">
-                        <span class="icon-[tabler--map-pin] size-4"></span>
-                        Тбилиси, Грузия
+                    <div class="flex items-start gap-2">
+                        <span class="icon-[tabler--map-pin] size-4 mt-0.5"></span>
+                        <span>{{ __('frontend.location') }}</span>
                     </div>
                 </div>
             </div>
@@ -35,7 +36,7 @@
             <div>
                 <h3 class="mb-4 text-lg font-bold">Мы в соцсетях</h3>
                 <div class="flex gap-3">
-                    <a href="https://instagram.com/bowlance" 
+                    <a href="https://instagram.com/bowlance.ge" 
                        target="_blank" 
                        class="btn btn-circle btn-ghost" 
                        aria-label="Instagram">
