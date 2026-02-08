@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ConstructorCategoryController;
 use App\Http\Controllers\Admin\ConstructorProductController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DishCategoryController;
 use App\Http\Controllers\Admin\DishController;
 use App\Http\Controllers\Admin\DrinkController;
@@ -45,9 +46,7 @@ Route::middleware('auth')->prefix('user')->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', function () {
-        return view('admin.dashboard', ['title' => 'Dashboard']);
-    })->name('dashboard');
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', DishCategoryController::class)->except(['show']);
     Route::resource('dishes', DishController::class)->except(['show']);

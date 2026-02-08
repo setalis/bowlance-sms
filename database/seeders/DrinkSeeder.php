@@ -20,7 +20,7 @@ class DrinkSeeder extends Seeder
                 'description' => 'Натуральная минеральная вода из Грузии',
                 'description_ru' => 'Натуральная минеральная вода из Грузии',
                 'description_ka' => 'ბუნებრივი მინერალური წყალი საქართველოდან',
-                'price' => 5.00,
+                'price' => 6.00,
                 'volume' => '500 мл',
                 'calories' => 0,
                 'proteins' => 0,
