@@ -1,4 +1,4 @@
-<header class="navbar h-18 fixed top-0 z-50">
+<header class="navbar h-20 fixed z-50 border-b border-base-content/10">
     <div class="container mx-auto flex items-center justify-between gap-6 md:gap-6">
         <!-- Логотип -->
         <div class="navbar-start">
@@ -13,17 +13,24 @@
         <div class="navbar-center hidden md:flex gap-2 md:gap-6 items-center">
 
             <!-- Телефон -->
-            <a href="tel:+995555123456" class="flex items-center justify-center" aria-label="{{ __('frontend.phone') }}">
-                <span class="icon-[tabler--phone] size-8 text-emerald-600"></span>
-                <span class="hidden md:block">+995 500 700 877</span>
+            <a href="tel:+995555123456" class="flex items-center justify-center gap-3" aria-label="{{ __('frontend.phone') }}">
+                <span class="icon-[tabler--phone] size-10 text-emerald-600 mr-3"></span>
+                <div class="flex flex-col">                    
+                    <span class="text-xs text-base-content/50">Заказать по телефону:</span>
+                    <span class="text-base font-bold">+995 500 700 877</span>
+                </div>
+                
             </a>     
-            <button type="button" class="flex items-center justify-center" aria-label="{{ __('frontend.location') }}">
-                <span class="icon-[tabler--live-view] bg-amber-700 size-8"></span>
-                <span class="ml-3 text-sm hidden md:block">{{ __('frontend.location') }}</span>
+            <button type="button" class="flex items-center justify-center gap-3" aria-label="{{ __('frontend.location') }}">
+                <span class="icon-[tabler--live-view] bg-amber-700 size-10"></span>
+                <div class="flex flex-col items-start">                    
+                    <span class="text-xs text-base-content/50">Пн-Вс 10:00-22:00</span>
+                    <span class="text-base font-bold">{{ __('frontend.location') }}</span>
+                </div>
             </button>
 
             <a href="https://instagram.com/bowlance.ge" target="_blank" class="flex items-center justify-center" aria-label="Instagram">
-                <span class="icon-[tabler--brand-instagram] size-8 bg-linear-65 from-pink-400 to-purple-500"></span>
+                <span class="icon-[tabler--brand-instagram] size-10 bg-linear-65 from-pink-400 to-purple-500"></span>
             </a>
         </div>
 
@@ -80,27 +87,9 @@
             
             <!-- Offcanvas Меню -->
 
-            <button type="button" class="w-full h-full flex items-center justify-center" aria-haspopup="dialog" aria-expanded="false" aria-controls="overlay-end-example" data-overlay="#overlay-end-example">
+            <button type="button" class="flex md:hidden items-center justify-center" aria-haspopup="dialog" aria-expanded="false" aria-controls="overlay-end-example" data-overlay="#overlay-end-example">
                 <span class="icon-[tabler--baseline-density-medium] size-5"></span>
             </button>
-
-            <div id="overlay-end-example" class="overlay overlay-open:translate-x-0 drawer drawer-end hidden" role="dialog" tabindex="-1">
-                <div class="drawer-header">
-                    <h3 class="drawer-title">Drawer Title</h3>
-                    <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#overlay-end-example">
-                    <span class="icon-[tabler--x] size-5"></span>
-                    </button>
-                </div>
-                <div class="drawer-body">
-                    <p>
-                    Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.
-                    </p>
-                </div>
-                <div class="drawer-footer">
-                    <button type="button" class="btn btn-soft btn-secondary" data-overlay="#overlay-end-example">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div>
 
             <!-- Корзина -->
             <button type="button" 
@@ -124,7 +113,7 @@
 <!-- Отступ для fixed header -->
 <div class="h-16"></div>
 
-<!-- Мобильное меню -->
+<!-- Мобильное меню
 <div id="mobileMenu" class="hs-overlay hs-overlay-open:translate-x-0 hidden translate-x-full fixed top-0 end-0 transition-all duration-300 transform h-full max-w-xs w-full z-[80] bg-base-100 border-s" role="dialog" tabindex="-1">
     <div class="flex flex-col h-full">
         <div class="flex justify-between items-center py-3 px-4 border-b">
@@ -163,7 +152,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 
 <!-- Offcanvas Корзина -->

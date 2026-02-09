@@ -24,8 +24,46 @@
     <!-- Header -->
     @include('layouts.front.header')
 
+    <!-- Offcanvas Drawer (вне header — иначе backdrop перекрывает контент) -->
+    <div id="overlay-end-example" class="overlay overlay-open:translate-x-0 drawer drawer-end hidden" role="dialog" tabindex="-1" aria-label="Меню">
+        <div class="drawer-header">
+            <h3 class="drawer-title">Bowlance</h3>
+            <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="{{ __('frontend.close') }}" data-overlay="#overlay-end-example">
+                <span class="icon-[tabler--x] size-5"></span>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <div class="flex flex-col gap-6">
+                <a href="tel:+995500700877" class="flex items-center justify-start gap-3" aria-label="{{ __('frontend.phone') }}">
+                    <span class="icon-[tabler--phone] size-10 text-emerald-600 mr-3"></span>
+                    <div class="flex flex-col">
+                        <span class="text-xs text-base-content/50">Заказать по телефону:</span>
+                        <span class="text-base font-bold">+995 500 700 877</span>
+                    </div>
+                </a>
+                <button type="button" class="flex items-center justify-center gap-3 w-full" aria-label="{{ __('frontend.location') }}">
+                    <span class="icon-[tabler--live-view] bg-amber-700 size-10 mr-3"></span>
+                    <div class="flex flex-col items-start">
+                        <span class="text-xs text-base-content/50 text-start">Пн-Вс 10:00-22:00</span>
+                        <span class="text-md font-bold text-start">{{ __('frontend.location') }}</span>
+                    </div>
+                </button>
+                <a href="https://instagram.com/bowlance.ge" target="_blank" rel="noopener" class="flex items-center justify-start gap-3" aria-label="Instagram">
+                    <span class="icon-[tabler--brand-instagram] size-10 bg-linear-65 from-pink-400 to-purple-500 mr-3"></span>
+                    <div class="flex flex-col items-start">
+                        <span class="text-xs text-base-content/50 text-start">Instagram</span>
+                        <span class="text-md font-bold text-start">bowlance.ge</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <button type="button" class="btn btn-soft btn-primary" data-overlay="#overlay-end-example">{{ __('frontend.close') }}</button>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6 max-w-7xl">
+    <main class="container mx-auto px-4 py-10 max-w-7xl">
         @yield('content')
     </main>
 
