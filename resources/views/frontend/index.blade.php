@@ -40,11 +40,14 @@
                 </div>
                 <div class="carousel-slide">
                     <div class="relative h-full w-full">
-                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&h=400&fit=crop" 
-                             alt="Свежие продукты" 
-                             class="h-full w-full object-cover">
+                    <img src="{{ asset('storage/images/slider/slider-2-1.jpg') }}" 
+                             alt="Боулы" 
+                             class="h-full w-full object-cover md:hidden">
+                        <img src="{{ asset('storage/images/slider/slider-2-desktop.png') }}" 
+                             alt="Боулы" 
+                             class="h-full w-full object-cover hidden md:block">
                         <!-- Градиентная подложка -->
-                        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
+                        <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div> -->
                         <!-- Текстовый блок с размытием -->
                         <div class="absolute inset-0 flex items-center justify-center">
                             <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">

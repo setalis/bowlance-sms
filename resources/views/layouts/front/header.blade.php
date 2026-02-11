@@ -93,12 +93,12 @@
 
             <!-- Корзина -->
             <button type="button" 
-                    class="btn btn-circle btn-success btn-sm gap-2 relative" 
+                    class="btn btn-circle btn-primary btn-sm gap-2 relative" 
                     aria-label="{{ __('frontend.cart') }}" 
                     @click="$store.cart.openDrawer()"
                     x-data>
                 <span class="icon-[tabler--shopping-cart] size-5"></span>
-                <span class="badge badge-secondary badge-sm absolute -top-1 -right-1" 
+                <span class="badge  badge-sm absolute -top-1 -right-1" 
                       x-show="$store.cart.totalItems > 0"
                       x-text="$store.cart.totalItems"
                       x-cloak></span>
