@@ -65,10 +65,18 @@
                         <!-- Градиентная подложка -->
                         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
                         <!-- Текстовый блок с размытием -->
-                        <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="absolute inset-0 flex items-center justify-center">                            
                             <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
                                 <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.build_bowl') }}</h2>
                                 <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.build_bowl_desc') }}</p>
+                                <div class="flex flex-col gap-2 mt-4">
+                                    <a href="#constructor-tab" 
+                                        @click.prevent="document.getElementById('constructor-tab').click(); setTimeout(() => document.getElementById('constructor-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
+                                        type="button" 
+                                        class="border border-white text-white bg-emerald-600 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer">
+                                        {{ __('frontend.build_bowl') }}
+                                    </a>         
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -117,6 +125,20 @@
         <!-- <div class="rounded-box bg-base-100 p-6 shadow-md"> -->
             <!-- Таб Меню -->
             <div id="menu-content" role="tabpanel" aria-labelledby="menu-tab" class="pt-6">
+                @if(!$dishCategories->isEmpty())
+                    <nav class="flex flex-wrap gap-2 mb-6 pb-4 border-b border-base-300" aria-label="{{ __('frontend.menu_tab') }}">
+                        @foreach($dishCategories as $category)
+                            <a href="#menu-category-{{ $category->id }}"
+                               @click.prevent="const el = document.querySelector($event.currentTarget.getAttribute('href')); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })"
+                               class="link link-hover text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline">
+                                {{ $category->name }}
+                            </a>
+                            @if(!$loop->last)
+                                <span class="text-base-content/40" aria-hidden="true">·</span>
+                            @endif
+                        @endforeach
+                    </nav>
+                @endif
                 @if($dishCategories->isEmpty())
                     <div class="text-center py-12">
                         <span class="icon-[tabler--shopping-bag-x] size-16 text-base-content/30 mb-4"></span>
@@ -124,7 +146,7 @@
                     </div>
                 @else
                     @foreach($dishCategories as $category)
-                        <div class="mb-10">
+                        <div id="menu-category-{{ $category->id }}" class="mb-10 scroll-mt-24">
                             <h3 class="mb-6 flex items-center gap-2 text-2xl font-bold">
                                 <span class="{{ $category->icon_class ?: 'icon-[tabler--bowl-chopsticks]' }} size-6 text-emerald-600"></span>
                                 {{ $category->name }}
