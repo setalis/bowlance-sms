@@ -10,7 +10,7 @@ export class PhoneVerification {
     /**
      * Отправить код верификации на телефон
      */
-    async sendCode(phone) {
+    async sendCode(phone, channel = 'sms') {
         try {
             // Нормализуем номер телефона
             phone = this.normalizePhone(phone);
@@ -22,7 +22,7 @@ export class PhoneVerification {
                     'X-CSRF-TOKEN': this.csrfToken,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ phone })
+                body: JSON.stringify({ phone, channel })
             });
 
             const data = await response.json();

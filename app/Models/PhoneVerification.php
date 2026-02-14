@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PhoneVerificationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,7 +13,10 @@ class PhoneVerification extends Model
     protected $fillable = [
         'phone',
         'request_id',
+        'channel',
+        'status',
         'code',
+        'metadata',
         'verified',
         'verified_at',
         'expires_at',
@@ -25,6 +29,8 @@ class PhoneVerification extends Model
             'verified' => 'boolean',
             'verified_at' => 'datetime',
             'expires_at' => 'datetime',
+            'metadata' => 'array',
+            'status' => 'string',
         ];
     }
 
@@ -43,6 +49,7 @@ class PhoneVerification extends Model
         $this->update([
             'verified' => true,
             'verified_at' => now(),
+            'status' => PhoneVerificationStatus::Verified->value,
         ]);
     }
 

@@ -110,7 +110,7 @@
             this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
         }
 
-        async sendCode(phone) {
+        async sendCode(phone, channel = 'sms') {
             try {
                 phone = this.normalizePhone(phone);
                 
@@ -121,7 +121,7 @@
                         'X-CSRF-TOKEN': this.csrfToken,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ phone })
+                    body: JSON.stringify({ phone, channel })
                 });
 
                 const data = await response.json();
@@ -225,6 +225,10 @@
             },
             
             phoneVerification: null,
+            verificationChannel: 'sms',
+            telegramUrl: null,
+            telegramOpenFailed: false,
+            statusPollingTimer: null,
             codeSent: false,
             sendingCode: false,
             verificationCode: '',
@@ -264,9 +268,15 @@
                 this.verificationError = '';
                 
                 try {
-                    const result = await this.phoneVerification.sendCode(this.formData.phone);
+                    const result = await this.phoneVerification.sendCode(this.formData.phone, this.verificationChannel);
                     this.codeSent = true;
                     this.verificationRequestId = result.request_id;
+
+                    if (this.verificationChannel === 'telegram') {
+                        this.telegramUrl = result.telegram_url;
+                        this.codeSent = true;
+                        this.startVerificationStatusPolling();
+                    }
                     
                     // Сохранить адрес в localStorage для гостей ДО верификации
                     if (!this.isAuthenticated && this.formData.deliveryType === 'delivery' && this.formData.address) {
@@ -274,7 +284,9 @@
                     }
                     
                     // Показываем тестовый код в режиме разработки
-                    if (result.test_mode && result.test_code) {
+                    if (this.verificationChannel === 'telegram') {
+                        this.$store.cart.showNotification('Откройте Telegram и подтвердите номер телефона', 'success');
+                    } else if (result.test_mode && result.test_code) {
                         this.$store.cart.showNotification(
                             `ТЕСТ: Код отправлен. Используйте: ${result.test_code}`, 
                             'success'
@@ -311,6 +323,50 @@
                 }
             },
             
+            openTelegramVerification() {
+                this.telegramOpenFailed = false;
+
+                if (!this.telegramUrl) {
+                    this.telegramOpenFailed = true;
+                    return;
+                }
+
+                window.open(this.telegramUrl, '_blank');
+            },
+
+            startVerificationStatusPolling() {
+                if (this.statusPollingTimer) {
+                    clearInterval(this.statusPollingTimer);
+                }
+
+                this.statusPollingTimer = setInterval(async () => {
+                    if (!this.verificationRequestId || this.phoneVerified) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/phone/verify/status?request_id=${encodeURIComponent(this.verificationRequestId)}`);
+                        const text = await response.text();
+                        let data = null;
+                        try {
+                            data = text ? JSON.parse(text) : null;
+                        } catch (_) {
+                            return;
+                        }
+                        if (!data || !data.success || !data.verified) {
+                            return;
+                        }
+                        this.phoneVerified = true;
+                        clearInterval(this.statusPollingTimer);
+                        this.statusPollingTimer = null;
+                        this.$store.cart.showNotification('Телефон подтвержден. Заказ принят. Вернитесь в форму заказа и выберите доставку.', 'success');
+                        this.step = 1;
+                    } catch (e) {
+                        console.error('Ошибка проверки статуса верификации', e);
+                    }
+                }, 2500);
+            },
+
             async resendCode() {
                 this.verificationCode = '';
                 this.verificationError = '';
@@ -353,10 +409,6 @@
                         this.resetForm();
                         this.open = false;
                         
-                        // Обновить страницу через 2 секунды, чтобы пользователь увидел авторизацию
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
                     }
                 } catch (error) {
                     // Check if it requires user confirmation for switching accounts
@@ -402,6 +454,13 @@
                 this.phoneVerified = false;
                 this.verificationRequestId = null;
                 this.verificationError = '';
+                this.telegramUrl = null;
+                this.telegramOpenFailed = false;
+                this.verificationChannel = 'sms';
+                if (this.statusPollingTimer) {
+                    clearInterval(this.statusPollingTimer);
+                    this.statusPollingTimer = null;
+                }
                 this.selectedAddressId = '';
                 this.selectedGuestAddressIndex = '';
                 if (this.phoneVerification) {

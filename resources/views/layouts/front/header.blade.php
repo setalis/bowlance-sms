@@ -750,15 +750,18 @@
                             </div>
 
                             <div class="space-y-4">
-                                <!-- Информация о номере -->
                                 <div class="alert">
                                     <span class="icon-[tabler--info-circle] size-5"></span>
                                     <div class="text-sm">
-                                        <p>На номер <strong x-text="formData.phone"></strong> будет отправлен код подтверждения</p>
+                                        <p>Выберите канал подтверждения для номера <strong x-text="formData.phone"></strong></p>
                                     </div>
                                 </div>
 
-                                <!-- Кнопка отправки кода -->
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" class="btn" :class="verificationChannel === 'sms' ? 'btn-primary' : 'btn-outline'" @click="verificationChannel = 'sms'">SMS</button>
+                                    <button type="button" class="btn" :class="verificationChannel === 'telegram' ? 'btn-primary' : 'btn-outline'" @click="verificationChannel = 'telegram'">Telegram</button>
+                                </div>
+
                                 <div x-show="!codeSent">
                                     <button type="button" 
                                             @click="sendVerificationCode()"
@@ -766,12 +769,20 @@
                                             :disabled="sendingCode">
                                         <span x-show="!sendingCode" class="icon-[tabler--send] size-5"></span>
                                         <span x-show="sendingCode" class="loading loading-spinner loading-sm"></span>
-                                        <span x-text="sendingCode ? 'Отправка...' : 'Отправить код'"></span>
+                                        <span x-text="sendingCode ? 'Отправка...' : (verificationChannel === 'telegram' ? 'Продолжить в Telegram' : 'Отправить код')"></span>
                                     </button>
                                 </div>
 
+                                <div x-show="codeSent && verificationChannel === 'telegram' && !phoneVerified" class="space-y-2">
+                                    <div class="alert alert-info">
+                                        <span>Подтвердите номер в Telegram-боте. После подтверждения вы автоматически вернетесь к форме заказа.</span>
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-full" @click="openTelegramVerification()">Открыть Telegram</button>
+                                    <a x-show="telegramUrl" :href="telegramUrl" target="_blank" class="btn btn-ghost w-full">Открыть через браузер</a>
+                                </div>
+
                                 <!-- Поле ввода кода -->
-                                <div x-show="codeSent && !phoneVerified">
+                                <div x-show="codeSent && verificationChannel === 'sms' && !phoneVerified">
                                     <label class="label">
                                         <span class="label-text">Введите 6-значный код <span class="text-error">*</span></span>
                                     </label>

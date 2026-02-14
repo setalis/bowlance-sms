@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\PhoneVerificationChannel;
+use App\Enums\PhoneVerificationStatus;
 use App\Models\PhoneVerification;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -53,6 +55,8 @@ class VonageVerifyService
                 PhoneVerification::create([
                     'phone' => $phone,
                     'request_id' => $data['request_id'],
+                    'channel' => PhoneVerificationChannel::Sms->value,
+                    'status' => PhoneVerificationStatus::Pending->value,
                     'expires_at' => now()->addMinutes(5),
                 ]);
 
@@ -188,6 +192,8 @@ class VonageVerifyService
         PhoneVerification::create([
             'phone' => $phone,
             'request_id' => $requestId,
+            'channel' => PhoneVerificationChannel::Sms->value,
+            'status' => PhoneVerificationStatus::Pending->value,
             'code' => $testCode, // Сохраняем тестовый код
             'expires_at' => now()->addMinutes(5),
         ]);

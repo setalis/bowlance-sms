@@ -101,4 +101,14 @@ return [
     'order_status' => 'Статус заказа',
     'save_changes' => 'Сохранить изменения',
     'cancel_action' => 'Отмена',
+
+    // Slider
+    'slider_1_title' => 'Авторское меню',
+    'slider_1_subtitle' => 'by Nancy Topko',
+    'slider_1_description' => 'Победитель Мастер Шеф Украина 15<br>Попробуй в Батуми!',
+    'slider_2_title' => 'Самовывоз -15%',
+    'slider_2_description' => 'Комфортный формат с приятной скидкой.',
+    'slider_2_description_2' => 'Удобная локация ',
+    'slider_3_title' => 'Собери свой боул',
+    'slider_3_description' => 'Выбери ингредиенты по вкусу',
 ];

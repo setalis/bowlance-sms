@@ -30,6 +30,27 @@ Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, '
 // Верификация телефона
 Route::post('/phone/verify/send', [\App\Http\Controllers\PhoneVerificationController::class, 'send'])->name('phone.verify.send');
 Route::post('/phone/verify/check', [\App\Http\Controllers\PhoneVerificationController::class, 'verify'])->name('phone.verify.check');
+Route::get('/phone/verify/status', [\App\Http\Controllers\PhoneVerificationController::class, 'status'])->name('phone.verify.status');
+Route::post('/phone/verify/telegram/callback', [\App\Http\Controllers\PhoneVerificationController::class, 'telegramCallback'])
+    ->middleware(\App\Http\Middleware\LogTelegramCallbackRequest::class)
+    ->name('phone.verify.telegram.callback');
+
+// Webhook для бота: сюда Telegram присылает обновления (сообщения пользователя). Обрабатываем /start TOKEN и верифицируем номер.
+Route::post('/phone/verify/telegram/webhook', \App\Http\Controllers\TelegramWebhookController::class)->name('phone.verify.telegram.webhook');
+// Проверка доступности: откройте в браузере — в storage/logs/laravel.log появится запись
+Route::get('/phone/verify/telegram/ping', function () {
+    \Illuminate\Support\Facades\Log::info('phone.verify.telegram.ping: callback URL reachable', [
+        'url' => request()->fullUrl(),
+        'time' => now()->toIso8601String(),
+    ]);
+    $webhookUrl = route('phone.verify.telegram.webhook');
+
+    return response()->json([
+        'reachable' => true,
+        'webhook_url' => $webhookUrl,
+        'message' => 'Вебхук настроен. Выполните: php artisan telegram:set-webhook',
+    ]);
+})->name('phone.verify.telegram.ping');
 Route::post('/phone/verify/cancel', [\App\Http\Controllers\PhoneVerificationController::class, 'cancel'])->name('phone.verify.cancel');
 
 // Публичные маршруты для заказов

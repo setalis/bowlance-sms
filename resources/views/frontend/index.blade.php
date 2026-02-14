@@ -51,8 +51,9 @@
                         <!-- Текстовый блок с размытием -->
                         <div class="absolute inset-0 flex items-center justify-center">
                             <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
-                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.fresh_products') }}</h2>
-                                <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.fresh_products_desc') }}</p>
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong text-warning">{{ __('frontend.slider_2_title') }}</h2>
+                                <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.slider_2_description') }}</p>
+                                <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.slider_2_description_2') }}</p>
                             </div>
                         </div>
                     </div>
@@ -69,7 +70,16 @@
                             <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
                                 <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.build_bowl') }}</h2>
                                 <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.build_bowl_desc') }}</p>
+                                <div class="flex flex-col gap-2 mt-4">
+                                    <a href="#constructor-tab" 
+                                        @click.prevent="document.getElementById('constructor-tab').click(); setTimeout(() => document.getElementById('constructor-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
+                                        type="button" 
+                                        class="border border-white text-white bg-emerald-600 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer">
+                                        {{ __('frontend.build_bowl') }}
+                                    </a>         
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
