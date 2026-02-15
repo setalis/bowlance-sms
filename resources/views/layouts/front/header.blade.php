@@ -113,46 +113,7 @@
 <!-- Отступ для fixed header -->
 <div class="h-16"></div>
 
-<!-- Мобильное меню
-<div id="mobileMenu" class="hs-overlay hs-overlay-open:translate-x-0 hidden translate-x-full fixed top-0 end-0 transition-all duration-300 transform h-full max-w-xs w-full z-[80] bg-base-100 border-s" role="dialog" tabindex="-1">
-    <div class="flex flex-col h-full">
-        <div class="flex justify-between items-center py-3 px-4 border-b">
-            <h3 class="font-bold text-lg">{{ __('frontend.menu') }}</h3>
-            <button type="button" class="btn btn-text btn-circle btn-sm" aria-label="{{ __('frontend.close') }}" data-hs-overlay="#mobileMenu">
-                <span class="icon-[tabler--x] size-5"></span>
-            </button>
-        </div>
-        <div class="p-4 overflow-y-auto">
-            <div class="flex flex-col gap-4">
-                @auth
-                    <a href="{{ route('cabinet.dashboard') }}" class="btn btn-outline gap-2">
-                        <span class="icon-[tabler--user] size-5"></span>
-                        <span>Личный кабинет</span>
-                    </a>
-                @else
-                    <a href="{{ route('cabinet.login') }}" class="btn btn-outline gap-2">
-                        <span class="icon-[tabler--user] size-5"></span>
-                        <span>Личный кабинет</span>
-                    </a>
-                @endauth
-                <a href="tel:+995555123456" class="btn btn-outline gap-2">
-                    <span class="icon-[tabler--phone] size-5"></span>
-                    <span>+995 555 123 456</span>
-                </a>
-                
-                <a href="https://instagram.com/bowlance" target="_blank" class="btn btn-outline gap-2">
-                    <span class="icon-[tabler--brand-instagram] size-5"></span>
-                    <span>Instagram</span>
-                </a>
-                
-                <button type="button" class="btn btn-outline gap-2">
-                    <span class="icon-[tabler--map-pin] size-5"></span>
-                    <span>{{ __('frontend.location') }}</span>
-                </button>
-            </div>
-        </div>
-    </div>
-</div> -->
+
 
 
 <!-- Offcanvas Корзина -->
@@ -520,23 +481,24 @@
                 <form @submit.prevent="submitOrder">
                     <div class="space-y-4">
                         <!-- Шаг 1: Основная информация -->
-                        <div x-show="step === 1">
+                        <div x-show="step === 1" class="space-y-3">
                             <!-- Имя -->
                             <div>
                                 <label class="label">
-                                    <span class="label-text">{{ __('frontend.your_name') }} <span class="text-error">*</span></span>
+                                    <span class="label-text font-bold">{{ __('frontend.your_name') }} <span class="text-error">*</span></span>
                                 </label>
                                 <input type="text" 
                                        x-model="formData.name" 
                                        class="input input-bordered w-full" 
                                        required
-                                       placeholder="{{ __('frontend.name_placeholder') }}">
+                                       placeholder="{{ __('frontend.name_placeholder') }}">                                 
                             </div>
+                            
 
                             <!-- Телефон -->
                             <div>
                                 <label class="label">
-                                    <span class="label-text">{{ __('frontend.phone') }} <span class="text-error">*</span></span>
+                                    <span class="label-text font-bold">{{ __('frontend.phone') }} <span class="text-error">*</span></span>
                                 </label>
                                 <input type="tel" 
                                        x-model="formData.phone" 
@@ -554,7 +516,7 @@
                             </div>
 
                             <!-- Email -->
-                            <div>
+                            <!-- <div>
                                 <label class="label">
                                     <span class="label-text">{{ __('frontend.email') }}</span>
                                 </label>
@@ -562,12 +524,12 @@
                                        x-model="formData.email" 
                                        class="input input-bordered w-full" 
                                        placeholder="{{ __('frontend.email_placeholder') }}">
-                            </div>
+                            </div> -->
 
                             <!-- Тип доставки -->
-                            <div>
-                                <label class="label">
-                                    <span class="label-text">Способ получения <span class="text-error">*</span></span>
+                            <div class="mt-4">
+                                <label class="label mb-2">
+                                    <span class="label-text font-bold mb-2">Способ получения <span class="text-error">*</span></span>
                                 </label>
                                 <div class="flex gap-4">
                                     <label class="flex items-center gap-2 cursor-pointer">
@@ -604,6 +566,7 @@
                                             <option :value="addr.id" x-text="addr.label + ': ' + addr.address"></option>
                                         </template>
                                     </select>
+                                    <span class="helper-text">Please write your full name</span>
                                 </div>
 
                                 <!-- Выбор сохраненного адреса для гостей -->
@@ -619,6 +582,7 @@
                                             <option :value="index" x-text="addr.address"></option>
                                         </template>
                                     </select>
+                                    <span class="helper-text">Please write your full name</span>
                                 </div>
 
                                 <!-- Основной адрес -->
@@ -688,7 +652,7 @@
                                 </div>
 
                                 <!-- Телефон получателя -->
-                                <div>
+                                <!-- <div>
                                     <label class="label">
                                         <span class="label-text">Телефон получателя</span>
                                     </label>
@@ -696,21 +660,21 @@
                                            x-model="formData.receiverPhone" 
                                            class="input input-bordered w-full" 
                                            placeholder="+995 555 12 34 56">
-                                </div>
+                                </div> -->
 
                                 <!-- Оставить у двери -->
-                                <div class="form-control">
+                                <!-- <div class="form-control">
                                     <label class="label cursor-pointer justify-start gap-3">
                                         <input type="checkbox" 
                                                x-model="formData.leaveAtDoor" 
                                                class="toggle toggle-primary">
                                         <span class="label-text">Оставить у двери</span>
                                     </label>
-                                </div>
+                                </div> -->
                             </div>
 
                             <!-- Комментарий -->
-                            <div>
+                            <!-- <div>
                                 <label class="label">
                                     <span class="label-text">{{ __('frontend.order_comment') }}</span>
                                 </label>
@@ -718,7 +682,7 @@
                                           class="textarea textarea-bordered w-full" 
                                           rows="2"
                                           placeholder="{{ __('frontend.comment_placeholder') }}"></textarea>
-                            </div>
+                            </div> -->
 
                             <!-- Итоговая сумма -->
                             <div class="rounded-lg bg-base-200 p-4">

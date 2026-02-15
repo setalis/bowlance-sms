@@ -43,16 +43,16 @@
                     <img src="{{ asset('storage/images/slider/slider-2-1.jpg') }}" 
                              alt="Боулы" 
                              class="h-full w-full object-cover md:hidden">
-                        <img src="{{ asset('storage/images/slider/slider-2-desktop.png') }}" 
+                        <img src="{{ asset('storage/images/slider/slider-2-1-desktop.jpg') }}" 
                              alt="Боулы" 
                              class="h-full w-full object-cover hidden md:block">
                         <!-- Градиентная подложка -->
                         <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div> -->
                         <!-- Текстовый блок с размытием -->
-                        <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="absolute inset-0 md:inset-20 flex items-center">
                             <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
-                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.fresh_products') }}</h2>
-                                <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.fresh_products_desc') }}</p>
+                                <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.slider_2_title') }}</h2>
+                                <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.slider_2_desc') }}</p>
                             </div>
                         </div>
                     </div>
