@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Discount;
 use App\Models\PhoneVerification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -537,4 +538,42 @@ it('не требует подтверждения если телефон пр�
 
     // Проверяем что пользователь остался тем же
     expect(auth()->id())->toBe($user->id);
+});
+
+it('применяет скидку за самовывоз при создании заказа', function () {
+    Discount::factory()->create([
+        'size' => 10,
+        'type' => \App\Enums\DiscountType::Percent,
+        'scope' => 'pickup',
+        'is_active' => true,
+    ]);
+
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 100,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/orders', $orderData);
+
+    $response->assertStatus(201);
+    $response->assertJsonPath('order.total', 90.0);
+
+    $order = \App\Models\Order::latest()->first();
+    expect((float) $order->subtotal)->toBe(100.0);
+    expect((float) $order->total)->toBe(90.0);
 });

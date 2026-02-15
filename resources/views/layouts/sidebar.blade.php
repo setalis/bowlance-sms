@@ -215,6 +215,39 @@
                     <!-- Section Divider -->
                     <li
                         class="text-base-content/50 before:bg-base-content/20 mt-2 p-2 text-xs uppercase before:absolute before:-start-3 before:top-1/2 before:h-0.5 before:w-2.5">
+                        Скидки и акции</li>
+
+                    <!-- Discounts Menu -->
+                    <li @class(['accordion-item', 'active' => request()->routeIs('admin.discounts.*')]) id="discounts-management">
+                        <button
+                            class="accordion-toggle accordion-item-active:bg-neutral/10 inline-flex w-full items-center p-2 text-start text-sm font-normal"
+                            aria-controls="discounts-management-collapse" aria-expanded="true">
+                            <span class="icon-[tabler--discount] size-4.5"></span>
+                            <span class="grow">Скидки</span>
+                            <span
+                                class="icon-[tabler--chevron-right] accordion-item-active:rotate-90 size-4.5 shrink-0 transition-transform duration-300 rtl:rotate-180"></span>
+                        </button>
+                        <div id="discounts-management-collapse"
+                            class="accordion-content mt-1 hidden w-full overflow-hidden transition-[height] duration-300"
+                            aria-labelledby="discounts-management" role="region" @if(request()->routeIs('admin.discounts.*')) style="display: block;" @endif>
+                            <ul class="space-y-1">
+                                <li>
+                                    <a href="{{ route('admin.discounts.index') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('admin.discounts.index')])>
+                                        <span>Все скидки</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.discounts.create') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('admin.discounts.create')])>
+                                        <span>Добавить скидку</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- Section Divider -->
+                    <li
+                        class="text-base-content/50 before:bg-base-content/20 mt-2 p-2 text-xs uppercase before:absolute before:-start-3 before:top-1/2 before:h-0.5 before:w-2.5">
                         Управление</li>
 
                     <!-- User Management Menu -->

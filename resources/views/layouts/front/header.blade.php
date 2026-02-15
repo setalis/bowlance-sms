@@ -684,12 +684,15 @@
                                           placeholder="{{ __('frontend.comment_placeholder') }}"></textarea>
                             </div> -->
 
-                            <!-- Итоговая сумма -->
+                            <!-- Итоговая сумма (с учётом скидки за самовывоз) -->
                             <div class="rounded-lg bg-base-200 p-4">
                                 <div class="flex items-center justify-between text-lg font-bold">
                                     <span>{{ __('frontend.total_to_pay') }}</span>
-                                    <span class="text-primary" x-text="$store.cart.totalPrice.toFixed(2) + ' ₾'"></span>
+                                    <span class="text-primary" x-text="totalToPay.toFixed(2) + ' ₾'"></span>
                                 </div>
+                                <p x-show="formData.deliveryType === 'pickup' && pickupDiscount" class="text-sm text-base-content/60 mt-1" x-cloak>
+                                    <span x-text="'Скидка за самовывоз применена'"></span>
+                                </p>
                             </div>
 
                             <!-- Кнопка далее -->

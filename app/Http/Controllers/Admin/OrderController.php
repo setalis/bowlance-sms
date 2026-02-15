@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\ConstructorProduct;
+use App\Models\Discount;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -140,6 +141,14 @@ class OrderController extends Controller
 
             $deliveryFee = 0;
             $total = $subtotal + $deliveryFee;
+
+            if ($validated['delivery_type'] === 'pickup') {
+                $pickupDiscount = Discount::forPickup()->first();
+                if ($pickupDiscount) {
+                    $discountAmount = $pickupDiscount->calculateDiscountAmount((float) $subtotal);
+                    $total = max(0, round($subtotal - $discountAmount + $deliveryFee, 2));
+                }
+            }
 
             // Создание заказа
             $order = Order::create([
@@ -315,6 +324,14 @@ class OrderController extends Controller
 
             $deliveryFee = $order->delivery_fee;
             $total = $subtotal + $deliveryFee;
+
+            if ($validated['delivery_type'] === 'pickup') {
+                $pickupDiscount = Discount::forPickup()->first();
+                if ($pickupDiscount) {
+                    $discountAmount = $pickupDiscount->calculateDiscountAmount((float) $subtotal);
+                    $total = max(0, round($subtotal - $discountAmount + $deliveryFee, 2));
+                }
+            }
 
             // Обновление заказа
             $newStatus = OrderStatus::from($validated['status']);

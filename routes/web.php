@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ConstructorCategoryController;
 use App\Http\Controllers\Admin\ConstructorProductController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\DishCategoryController;
 use App\Http\Controllers\Admin\DishController;
 use App\Http\Controllers\Admin\DrinkController;
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('drinks', DrinkController::class)->except(['show']);
     Route::resource('constructor-categories', ConstructorCategoryController::class)->except(['show']);
     Route::resource('constructor-products', ConstructorProductController::class)->except(['show']);
+    Route::resource('discounts', DiscountController::class)->except(['show']);
     Route::resource('users', UserController::class);
 
     // Заказы

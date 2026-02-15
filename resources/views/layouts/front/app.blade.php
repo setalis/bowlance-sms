@@ -208,6 +208,7 @@
             open: false,
             loading: false,
             step: 1,
+            pickupDiscount: @json($pickupDiscount ? ['size' => (float) $pickupDiscount->size, 'type' => $pickupDiscount->type->value] : null),
             formData: {
                 name: '',
                 phone: '',
@@ -421,6 +422,21 @@
                 if (!this.loading) {
                     this.closeModal();
                 }
+            },
+            
+            get totalToPay() {
+                const base = this.$store.cart.totalPrice;
+                if (this.formData.deliveryType !== 'pickup' || !this.pickupDiscount) {
+                    return base;
+                }
+                const d = this.pickupDiscount;
+                let discount = 0;
+                if (d.type === 'percent') {
+                    discount = base * (d.size / 100);
+                } else {
+                    discount = Math.min(parseFloat(d.size), base);
+                }
+                return Math.max(0, Math.round((base - discount) * 100) / 100);
             },
             
             // Методы для работы с адресами

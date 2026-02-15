@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
 use App\Http\Requests\StoreOrderRequest;
+use App\Models\Discount;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
@@ -64,6 +65,14 @@ class OrderController extends Controller
 
             $deliveryFee = 0;
             $total = $subtotal + $deliveryFee;
+
+            if (($request->delivery_type ?? 'delivery') === 'pickup') {
+                $pickupDiscount = Discount::forPickup()->first();
+                if ($pickupDiscount) {
+                    $discountAmount = $pickupDiscount->calculateDiscountAmount((float) $subtotal);
+                    $total = max(0, round($subtotal - $discountAmount + $deliveryFee, 2));
+                }
+            }
 
             $order = Order::create([
                 'user_id' => $user->id,
