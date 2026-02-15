@@ -100,23 +100,25 @@
     <div class="mt-8">
         <nav class="tabs tabs-bordered" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
             <button type="button" 
-                    class="tab w-full h-14 text-lg active-tab:tab-active active" 
+                    class="tab w-full h-16 text-base md:text-lg active-tab:tab-active active" 
                     id="menu-tab" 
                     data-tab="#menu-content" 
                     aria-controls="menu-content" 
                     role="tab" 
                     aria-selected="true">
-                <span class="icon-[tabler--checkup-list] mr-2 size-5"></span>
+                <!-- <span class="icon-[tabler--checkup-list] mr-2 size-5"></span> -->
+                <img src="{{ asset('storage/images/menu-icon.png') }}" alt="Меню" class="size-10 mr-2 md:mr-4">
                 {{ __('frontend.menu_tab') }}
             </button>
             <button type="button" 
-                    class="tab w-full h-14 text-base md:text-lg font-medium active-tab:tab-active" 
+                    class="tab w-full h-16 text-base md:text-lg font-medium active-tab:tab-active" 
                     id="constructor-tab" 
                     data-tab="#constructor-content" 
                     aria-controls="constructor-content" 
                     role="tab" 
                     aria-selected="false">
-                <span class="icon-[tabler--category-plus] mr-2 size-5"></span>
+                <!-- <span class="icon-[tabler--category-plus] mr-2 size-5"></span> -->
+                <img src="{{ asset('storage/images/constructor-icon.png') }}" alt="Конструктор" class="size-10 mr-2 md:mr-4">
                 {{ __('frontend.constructor_tab') }}
             </button>
         </nav>
@@ -126,16 +128,17 @@
             <!-- Таб Меню -->
             <div id="menu-content" role="tabpanel" aria-labelledby="menu-tab" class="pt-6">
                 @if(!$dishCategories->isEmpty())
-                    <nav class="flex flex-wrap gap-2 mb-6 pb-4 border-b border-base-300" aria-label="{{ __('frontend.menu_tab') }}">
+                    @php
+                        $categoryBadgeColors = ['badge-primary', 'badge-success', 'badge-info', 'badge-warning', 'badge-error'];
+                    @endphp
+                    <nav class="flex flex-wrap gap-2 mb-6 pb-4 border-b border-gray-200" aria-label="{{ __('frontend.menu_tab') }}">
                         @foreach($dishCategories as $category)
                             <a href="#menu-category-{{ $category->id }}"
                                @click.prevent="const el = document.querySelector($event.currentTarget.getAttribute('href')); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })"
-                               class="link link-hover text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline">
+                               class="badge badge-soft {{ $categoryBadgeColors[$loop->index % count($categoryBadgeColors)] }} badge-lg gap-1.5 hover:opacity-90 transition-opacity cursor-pointer no-underline">
+                                <span class="{{ $category->icon_class ?: 'icon-[tabler--bowl-chopsticks]' }} size-4"></span>
                                 {{ $category->name }}
                             </a>
-                            @if(!$loop->last)
-                                <span class="text-base-content/40" aria-hidden="true">·</span>
-                            @endif
                         @endforeach
                     </nav>
                 @endif
@@ -402,7 +405,7 @@
             <!-- Таб Конструктор -->
             <div id="constructor-content" class="hidden" role="tabpanel" aria-labelledby="constructor-tab">
                 <div x-data="bowlConstructor()">
-                    <div class="mt-3 mb-6 text-center">
+                    <div class="mt-8 mb-6 text-center">
                         <h3 class="text-2xl font-bold mb-2">{{ __('frontend.build_perfect_bowl') }}</h3>
                         <p class="text-base-content/70">{{ __('frontend.build_perfect_bowl_desc') }}</p>
                     </div>
