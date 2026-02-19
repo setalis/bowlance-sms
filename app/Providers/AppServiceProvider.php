@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Discount;
+use App\Services\WoltDriveService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +26,20 @@ class AppServiceProvider extends ServiceProvider
         // Гарантируем fallback-локаль для переводов (важно на хостинге после config:cache)
         $this->app->setFallbackLocale(config('app.fallback_locale', 'ru'));
 
-        View::share('pickupDiscount', Schema::hasTable('discounts') ? Discount::forPickup()->first() : null);
+        View::share('pickupDiscount', $this->getPickupDiscount());
+        View::share('woltDeliveryEnabled', $this->app->make(WoltDriveService::class)->isEnabled());
+    }
+
+    protected function getPickupDiscount(): ?Discount
+    {
+        try {
+            if (! Schema::hasTable('discounts')) {
+                return null;
+            }
+
+            return Discount::forPickup()->first();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

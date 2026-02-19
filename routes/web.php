@@ -37,6 +37,9 @@ Route::post('/phone/verify/cancel', [\App\Http\Controllers\PhoneVerificationCont
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
+// Оценка доставки Wolt по адресу (для формы заказа)
+Route::post('/wolt/delivery-estimate', \App\Http\Controllers\WoltDeliveryEstimateController::class)->name('wolt.delivery-estimate');
+
 // API для управления адресами (требует авторизации)
 Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/addresses', [UserAddressController::class, 'index'])->name('user.addresses.index');

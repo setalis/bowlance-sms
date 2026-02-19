@@ -212,12 +212,19 @@ export function initCart() {
 
             try {
                 // Подготовка данных заказа
+                const deliveryType = customerData.deliveryType ?? customerData.delivery_type ?? 'delivery';
+                const deliveryCity = (customerData.deliveryCity ?? customerData.delivery_city ?? '').toString().trim() || null;
+                const deliveryStreet = (customerData.deliveryStreet ?? customerData.delivery_street ?? '').toString().trim() || null;
+                const deliveryHouse = (customerData.deliveryHouse ?? customerData.delivery_house ?? '').toString().trim() || null;
+
                 const orderData = {
                     customer_name: customerData.name,
                     customer_phone: customerData.phone,
                     customer_email: customerData.email || null,
-                    delivery_type: customerData.deliveryType || 'delivery',
-                    delivery_address: customerData.address || null,
+                    delivery_type: deliveryType,
+                    delivery_city: deliveryCity,
+                    delivery_street: deliveryStreet,
+                    delivery_house: deliveryHouse,
                     entrance: customerData.entrance || null,
                     floor: customerData.floor || null,
                     apartment: customerData.apartment || null,
