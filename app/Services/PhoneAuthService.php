@@ -11,48 +11,46 @@ use Illuminate\Support\Str;
 class PhoneAuthService
 {
     /**
-     * Find existing user by phone or create a new one
+     * Find existing user by phone or create a new one.
+     * Phone is normalized (Georgia +995); existing user's name is never overwritten.
      */
     public function findOrCreateUser(string $phone, ?string $email, ?string $name): User
     {
-        // Normalize phone (remove + sign for internal use)
-        $normalizedPhone = ltrim($phone, '+');
+        $normalizedPhone = PhoneNormalizer::normalize(trim($phone));
+        if ($normalizedPhone === '') {
+            $normalizedPhone = trim($phone);
+        }
 
-        // Try to find existing user by phone
-        $user = User::where('phone', $phone)->first();
+        $user = User::where('phone', $normalizedPhone)->first();
 
         if ($user) {
             Log::info('Existing user found by phone', [
                 'user_id' => $user->id,
-                'phone' => $phone,
+                'phone' => $normalizedPhone,
             ]);
 
             return $user;
         }
 
-        // Generate email if not provided
+        $digitsOnly = preg_replace('/\D/', '', $normalizedPhone) ?: $normalizedPhone;
         if (empty($email)) {
-            $email = $normalizedPhone.'@bowlance.ge';
+            $email = $digitsOnly.'@bowlance.ge';
         }
 
-        // Generate random secure password
         $password = Str::random(32);
+        $userName = $name ?: 'Клиент '.$normalizedPhone;
 
-        // Use provided name or generate default
-        $userName = $name ?: 'Клиент '.$phone;
-
-        // Create new user
         $user = User::create([
             'name' => $userName,
             'email' => $email,
-            'phone' => $phone,
+            'phone' => $normalizedPhone,
             'password' => $password,
             'role' => UserRole::User,
         ]);
 
         Log::info('New user created via phone verification', [
             'user_id' => $user->id,
-            'phone' => $phone,
+            'phone' => $normalizedPhone,
             'email' => $email,
         ]);
 
@@ -77,7 +75,6 @@ class PhoneAuthService
      */
     public function shouldReauthenticate(?int $currentUserId, string $phone): array
     {
-        // If no one is logged in, no need to re-authenticate
         if (! $currentUserId) {
             return [
                 'should_reauth' => false,
@@ -85,8 +82,8 @@ class PhoneAuthService
             ];
         }
 
-        // Find user by phone
-        $targetUser = User::where('phone', $phone)->first();
+        $normalizedPhone = PhoneNormalizer::normalize(trim($phone));
+        $targetUser = User::where('phone', $normalizedPhone)->first();
 
         // If no user exists with this phone, no conflict
         if (! $targetUser) {

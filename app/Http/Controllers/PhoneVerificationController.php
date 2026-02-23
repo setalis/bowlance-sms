@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\PhoneNormalizer;
 use App\Services\VonageVerifyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class PhoneVerificationController extends Controller
     public function send(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|regex:/^\+?[1-9]\d{1,14}$/',
+            'phone' => ['required', 'string', 'max:30', 'regex:/^[\d\s+\-()]+$/'],
         ], [
             'phone.required' => 'Необходимо указать номер телефона',
             'phone.regex' => 'Неверный формат номера телефона',
@@ -29,11 +30,13 @@ class PhoneVerificationController extends Controller
             ], 422);
         }
 
-        $phone = $request->phone;
+        $phone = PhoneNormalizer::normalize(trim($request->phone));
 
-        // Нормализуем номер телефона
-        if (! str_starts_with($phone, '+')) {
-            $phone = '+'.ltrim($phone, '0');
+        if ($phone === '' || ! preg_match('/^\+995\d{9}$/', $phone)) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['phone' => ['Неверный формат номера. Ожидается грузинский номер (+995 5XX XXX XXX).']],
+            ], 422);
         }
 
         $result = $this->verifyService->sendVerificationCode($phone);

@@ -369,6 +369,42 @@ it('авторизует существующего пользователя п�
     expect($order->user_id)->toBe($existingUser->id);
 });
 
+it('находит существующего пользователя при разном формате номера и не перезаписывает имя', function () {
+    $existingUser = \App\Models\User::factory()->create([
+        'phone' => '+995555123456',
+        'name' => 'Имя в БД',
+        'email' => 'existing@example.com',
+    ]);
+
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Имя из формы',
+        'customer_phone' => '995 555 123 456',
+        'delivery_type' => 'pickup',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Боул',
+                'price' => 10,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/orders', $orderData);
+
+    $response->assertStatus(201);
+    expect(\App\Models\User::count())->toBe(1);
+    expect(auth()->id())->toBe($existingUser->id);
+    $existingUser->refresh();
+    expect($existingUser->name)->toBe('Имя в БД');
+});
+
 it('генерирует email-заглушку если email не указан при создании пользователя', function () {
     $verification = PhoneVerification::factory()->verified()->create([
         'phone' => '+995555123456',
@@ -571,7 +607,7 @@ it('применяет скидку за самовывоз при создан�
     $response = $this->postJson('/orders', $orderData);
 
     $response->assertStatus(201);
-    $response->assertJsonPath('order.total', 90.0);
+    expect((float) $response->json('order.total'))->toBe(90.0);
 
     $order = \App\Models\Order::latest()->first();
     expect((float) $order->subtotal)->toBe(100.0);

@@ -114,18 +114,14 @@ export class PhoneVerification {
     }
 
     /**
-     * Нормализовать номер телефона
+     * Нормализовать номер телефона (Грузия +995)
      */
     normalizePhone(phone) {
-        // Убираем все нецифровые символы кроме +
-        phone = phone.replace(/[^\d+]/g, '');
-        
-        // Если номер не начинается с +, добавляем +
-        if (!phone.startsWith('+')) {
-            phone = '+' + phone.replace(/^0+/, '');
-        }
-        
-        return phone;
+        let digits = (phone || '').replace(/\D/g, '');
+        if (!digits) return '';
+        if (digits.length === 9 && digits[0] === '5') digits = '995' + digits;
+        else if (digits.length === 10 && digits[0] === '0') digits = '995' + digits.slice(1);
+        return '+' + digits;
     }
 
     /**

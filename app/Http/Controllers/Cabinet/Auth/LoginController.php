@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cabinet\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\PhoneVerification;
 use App\Services\PhoneAuthService;
+use App\Services\PhoneNormalizer;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -47,10 +48,11 @@ class LoginController extends Controller
         $this->ensureIsNotRateLimited($request);
 
         try {
-            // Проверяем верификацию телефона
+            $normalizedPhone = PhoneNormalizer::normalize(trim((string) $request->phone));
+
             $verification = PhoneVerification::where('request_id', $request->request_id)
                 ->where('verified', true)
-                ->where('phone', $request->phone)
+                ->where('phone', $normalizedPhone)
                 ->first();
 
             if (! $verification) {
@@ -64,11 +66,10 @@ class LoginController extends Controller
 
             RateLimiter::clear($this->throttleKey($request));
 
-            // Находим или создаем пользователя
             $user = $this->phoneAuthService->findOrCreateUser(
-                $request->phone,
-                null, // email не обязателен
-                null  // имя установится автоматически
+                $normalizedPhone,
+                null,
+                null
             );
 
             // Авторизуем пользователя

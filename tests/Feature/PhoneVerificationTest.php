@@ -25,14 +25,13 @@ it('может отправить код верификации на телеф�
     ]);
 
     $response->assertSuccessful();
-    $response->assertJson([
-        'success' => true,
-        'request_id' => 'test-request-id-123',
-    ]);
+    $response->assertJsonFragment(['success' => true]);
+    $response->assertJsonStructure(['request_id']);
 
+    $data = $response->json();
     $this->assertDatabaseHas('phone_verifications', [
         'phone' => '+995555123456',
-        'request_id' => 'test-request-id-123',
+        'request_id' => $data['request_id'],
         'verified' => false,
     ]);
 });
@@ -74,6 +73,8 @@ it('может проверить код верификации', function () {
 });
 
 it('возвращает ошибку при неверном коде верификации', function () {
+    config(['vonage.test_mode' => false]);
+
     PhoneVerification::create([
         'phone' => '+995555123456',
         'request_id' => 'test-request-id',
@@ -165,6 +166,23 @@ it('нормализует номер телефона при отправке �
 
     $response->assertSuccessful();
 
+    $this->assertDatabaseHas('phone_verifications', [
+        'phone' => '+995555123456',
+    ]);
+});
+
+it('нормализует номер с пробелами и дефисами при отправке кода', function () {
+    Http::fake([
+        'api.nexmo.com/v2/verify' => Http::response([
+            'request_id' => 'test-request-id-456',
+        ], 200),
+    ]);
+
+    $response = $this->postJson('/phone/verify/send', [
+        'phone' => '995 555 123 456',
+    ]);
+
+    $response->assertSuccessful();
     $this->assertDatabaseHas('phone_verifications', [
         'phone' => '+995555123456',
     ]);

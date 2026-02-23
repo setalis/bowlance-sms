@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
 use App\Services\PhoneAuthService;
+use App\Services\PhoneNormalizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -23,8 +24,10 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
+            $normalizedPhone = PhoneNormalizer::normalize(trim((string) $request->customer_phone));
             $verification = PhoneVerification::where('request_id', $request->verification_request_id)
                 ->where('verified', true)
+                ->where('phone', $normalizedPhone)
                 ->first();
 
             // Check if we need to re-authenticate (user switching scenario)
@@ -77,7 +80,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => $user->id,
                 'customer_name' => $request->customer_name,
-                'customer_phone' => $request->customer_phone,
+                'customer_phone' => $normalizedPhone,
                 'customer_email' => $request->customer_email,
                 'delivery_type' => $request->delivery_type ?? 'delivery',
                 'delivery_address' => $request->delivery_address,

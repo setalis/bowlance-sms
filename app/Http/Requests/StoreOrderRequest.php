@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\PhoneVerification;
+use App\Services\PhoneNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreOrderRequest extends FormRequest
@@ -56,8 +57,9 @@ class StoreOrderRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            $normalizedPhone = PhoneNormalizer::normalize(trim((string) $this->customer_phone));
             $verification = PhoneVerification::where('request_id', $this->verification_request_id)
-                ->where('phone', $this->customer_phone)
+                ->where('phone', $normalizedPhone)
                 ->first();
 
             if (! $verification || ! $verification->verified) {

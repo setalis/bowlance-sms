@@ -181,11 +181,11 @@
         }
 
         normalizePhone(phone) {
-            phone = phone.replace(/[^\d+]/g, '');
-            if (!phone.startsWith('+')) {
-                phone = '+' + phone.replace(/^0+/, '');
-            }
-            return phone;
+            let digits = (phone || '').replace(/\D/g, '');
+            if (!digits) return '';
+            if (digits.length === 9 && digits[0] === '5') digits = '995' + digits;
+            else if (digits.length === 10 && digits[0] === '0') digits = '995' + digits.slice(1);
+            return '+' + digits;
         }
 
         getRequestId() {
