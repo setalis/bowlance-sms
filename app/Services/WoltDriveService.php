@@ -63,7 +63,10 @@ class WoltDriveService
 
         $promiseId = Arr::get($promise, 'id');
         $payload = $this->buildVenuefulDeliveryPayload($order, $promise);
-        $response = $this->request()->post("/v1/venues/{$venueId}/deliveries", $payload);
+        $path = "/v1/venues/{$venueId}/deliveries";
+        $this->logWoltRequest('POST', $path, $payload);
+        $response = $this->request()->post($path, $payload);
+        $this->logWoltResponse($path, $response->status(), $response->body(), $response->successful());
 
         if (! $response->successful()) {
             Log::warning('Wolt Drive create venueful delivery failed', [
@@ -147,7 +150,10 @@ class WoltDriveService
             );
         }
 
-        $response = $this->request()->post("/v1/venues/{$venueId}/shipment-promises", $payload);
+        $path = "/v1/venues/{$venueId}/shipment-promises";
+        $this->logWoltRequest('POST', $path, $payload);
+        $response = $this->request()->post($path, $payload);
+        $this->logWoltResponse($path, $response->status(), $response->body(), $response->successful());
 
         if (! $response->successful()) {
             Log::warning('Wolt Drive shipment promise failed', [
@@ -219,7 +225,10 @@ class WoltDriveService
     {
         $merchantId = config('wolt.drive.merchant_id');
         $payload = $this->buildVenuelessDeliveryPayload($order);
-        $response = $this->request()->post("/merchants/{$merchantId}/delivery-order", $payload);
+        $path = "/merchants/{$merchantId}/delivery-order";
+        $this->logWoltRequest('POST', $path, $payload);
+        $response = $this->request()->post($path, $payload);
+        $this->logWoltResponse($path, $response->status(), $response->body(), $response->successful());
 
         if (! $response->successful()) {
             Log::warning('Wolt Drive create venueless delivery failed', [
@@ -453,7 +462,9 @@ class WoltDriveService
             ? '/v1/venues/'.config('wolt.drive.venue_id').'/deliveries/'.$order->wolt_delivery_id
             : '/v1/deliveries/'.$order->wolt_delivery_id;
 
+        $this->logWoltRequest('GET', $path, null);
         $response = $this->request()->get($path);
+        $this->logWoltResponse($path, $response->status(), $response->body(), $response->successful());
 
         if (! $response->successful()) {
             Log::warning('Wolt Drive fetch delivery failed', [
@@ -494,8 +505,10 @@ class WoltDriveService
             }
         }
         $payload = $this->buildShipmentPromisePayload($deliveryAddress, $minPrepMinutes, $parcels);
-
-        $response = $this->request()->post("/v1/venues/{$venueId}/shipment-promises", $payload);
+        $path = "/v1/venues/{$venueId}/shipment-promises";
+        $this->logWoltRequest('POST', $path, $payload);
+        $response = $this->request()->post($path, $payload);
+        $this->logWoltResponse($path, $response->status(), $response->body(), $response->successful());
 
         if (! $response->successful()) {
             Log::warning('Wolt Drive shipment promise failed', [
@@ -518,5 +531,27 @@ class WoltDriveService
             ->asJson()
             ->timeout(15)
             ->withToken((string) config('wolt.drive.token'));
+    }
+
+    protected function logWoltRequest(string $method, string $path, ?array $payload = null): void
+    {
+        Log::info('[WoltDrive] Request', [
+            'method' => $method,
+            'path' => $path,
+            'payload' => $payload,
+        ]);
+    }
+
+    protected function logWoltResponse(string $path, int $status, string $body, bool $ok): void
+    {
+        $level = $ok ? 'info' : 'warning';
+        $decoded = json_decode($body, true);
+        Log::log($level, '[WoltDrive] Response', [
+            'path' => $path,
+            'status' => $status,
+            'ok' => $ok,
+            'body_raw' => strlen($body) > 2000 ? substr($body, 0, 2000).'...' : $body,
+            'body' => $decoded !== null ? $decoded : $body,
+        ]);
     }
 }
