@@ -21,6 +21,9 @@ class Order extends Model
         'customer_email',
         'delivery_type',
         'delivery_address',
+        'delivery_city',
+        'delivery_street',
+        'delivery_house',
         'entrance',
         'floor',
         'apartment',
@@ -38,6 +41,10 @@ class Order extends Model
         'confirmed_at',
         'completed_at',
         'cancelled_at',
+        'wolt_delivery_id',
+        'wolt_status',
+        'wolt_tracking_url',
+        'wolt_last_payload',
     ];
 
     protected function casts(): array
@@ -54,6 +61,7 @@ class Order extends Model
             'confirmed_at' => 'datetime',
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'wolt_last_payload' => 'array',
         ];
     }
 

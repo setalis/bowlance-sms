@@ -16,8 +16,16 @@ export function initCart() {
             }
         },
 
+        isOrdersEnabled() {
+            return typeof window !== 'undefined' && window.siteOrdersEnabled === true;
+        },
+
         // Добавить блюдо в корзину
         addDish(dish) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             const existingItem = this.items.find(item => item.type === 'dish' && item.id === dish.id);
             
             if (existingItem) {
@@ -50,6 +58,10 @@ export function initCart() {
 
         // Добавить напиток в корзину
         addDrink(drink) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             const existingItem = this.items.find(item => item.type === 'drink' && item.id === drink.id);
             
             if (existingItem) {
@@ -76,6 +88,10 @@ export function initCart() {
 
         // Добавить собранный боул в корзину
         addBowl(products) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             if (!products || products.length === 0) {
                 this.showNotification('Выберите продукты для боула', 'error');
                 return;
@@ -189,6 +205,10 @@ export function initCart() {
 
         // Открыть drawer
         openDrawer() {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             this.isOpen = true;
         },
 
@@ -199,6 +219,10 @@ export function initCart() {
 
         // Оформить заказ
         async checkout(customerData) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return false;
+            }
             if (this.items.length === 0) {
                 this.showNotification('Корзина пуста', 'error');
                 return false;
@@ -212,12 +236,19 @@ export function initCart() {
 
             try {
                 // Подготовка данных заказа
+                const deliveryType = customerData.deliveryType ?? customerData.delivery_type ?? 'delivery';
+                const deliveryCity = (customerData.deliveryCity ?? customerData.delivery_city ?? '').toString().trim() || null;
+                const deliveryStreet = (customerData.deliveryStreet ?? customerData.delivery_street ?? '').toString().trim() || null;
+                const deliveryHouse = (customerData.deliveryHouse ?? customerData.delivery_house ?? '').toString().trim() || null;
+
                 const orderData = {
                     customer_name: customerData.name,
                     customer_phone: customerData.phone,
                     customer_email: customerData.email || null,
-                    delivery_type: customerData.deliveryType || 'delivery',
-                    delivery_address: customerData.address || null,
+                    delivery_type: deliveryType,
+                    delivery_city: deliveryCity,
+                    delivery_street: deliveryStreet,
+                    delivery_house: deliveryHouse,
                     entrance: customerData.entrance || null,
                     floor: customerData.floor || null,
                     apartment: customerData.apartment || null,

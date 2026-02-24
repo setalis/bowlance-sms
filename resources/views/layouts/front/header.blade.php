@@ -1,4 +1,4 @@
-<header class="navbar h-20 fixed z-50 border-b border-base-content/10">
+<header class="navbar h-20 fixed z-50 border-b border-base-content/10 {{ !$siteOrdersEnabled ? 'top-14' : 'top-0' }}">
     <div class="container mx-auto flex items-center justify-between gap-6 md:gap-6">
         <!-- Логотип -->
         <div class="navbar-start">
@@ -91,18 +91,20 @@
                 <span class="icon-[tabler--baseline-density-medium] size-5"></span>
             </button>
 
-            <!-- Корзина -->
-            <button type="button" 
-                    class="btn btn-circle btn-primary btn-sm gap-2 relative" 
-                    aria-label="{{ __('frontend.cart') }}" 
-                    @click="$store.cart.openDrawer()"
-                    x-data>
-                <span class="icon-[tabler--shopping-cart] size-5"></span>
-                <span class="badge  badge-sm absolute -top-1 -right-1" 
-                      x-show="$store.cart.totalItems > 0"
-                      x-text="$store.cart.totalItems"
-                      x-cloak></span>
-            </button>
+            <!-- Корзина (скрыта при техработах) -->
+            @if($siteOrdersEnabled)
+                <button type="button"
+                        class="btn btn-circle btn-primary btn-sm gap-2 relative"
+                        aria-label="{{ __('frontend.cart') }}"
+                        @click="$store.cart.openDrawer()"
+                        x-data>
+                    <span class="icon-[tabler--shopping-cart] size-5"></span>
+                    <span class="badge  badge-sm absolute -top-1 -right-1"
+                          x-show="$store.cart.totalItems > 0"
+                          x-text="$store.cart.totalItems"
+                          x-cloak></span>
+                </button>
+            @endif
 
 
             
@@ -110,8 +112,8 @@
     </div>
 </header>
 
-<!-- Отступ для fixed header -->
-<div class="h-16"></div>
+<!-- Отступ для fixed header (учитываем баннер техработ при его показе) -->
+<div class="{{ $siteOrdersEnabled ? 'h-16' : 'h-[8.5rem]' }}"></div>
 
 
 
@@ -423,14 +425,18 @@
                 <span class="text-2xl font-bold text-primary" x-text="$store.cart.totalPrice.toFixed(2) + ' ₾'"></span>
             </div>
 
-            <!-- Кнопка оформления -->
-            <button type="button" 
-                    class="btn btn-primary w-full gap-2"
-                    :disabled="$store.cart.items.length === 0"
-                    @click="$dispatch('open-checkout-modal')">
-                <span class="icon-[tabler--check] size-5"></span>
-                {{ __('frontend.checkout') }}
-            </button>
+            <!-- Кнопка оформления (недоступна при техработах) -->
+            @if($siteOrdersEnabled)
+                <button type="button"
+                        class="btn btn-primary w-full gap-2"
+                        :disabled="$store.cart.items.length === 0"
+                        @click="$dispatch('open-checkout-modal')">
+                    <span class="icon-[tabler--check] size-5"></span>
+                    {{ __('frontend.checkout') }}
+                </button>
+            @else
+                <p class="text-warning text-center text-sm font-medium">{{ __('frontend.orders_unavailable') }}</p>
+            @endif
                 </div>
             </div>
             <!-- END Footer -->
@@ -533,33 +539,47 @@
                                 </label>
                                 <div class="flex gap-4">
                                     <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" 
-                                               x-model="formData.deliveryType" 
-                                               value="delivery" 
-                                               name="delivery_type" 
-                                               class="radio radio-primary">
+                                        <input type="radio"
+                                               x-model="formData.deliveryType"
+                                               value="delivery"
+                                               name="delivery_type"
+                                               class="radio radio-primary"
+                                               @change="fetchWoltEstimate()">
                                         <span>Доставка</span>
                                     </label>
                                     <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" 
-                                               x-model="formData.deliveryType" 
-                                               value="pickup" 
-                                               name="delivery_type" 
-                                               class="radio radio-primary">
+                                        <input type="radio"
+                                               x-model="formData.deliveryType"
+                                               value="pickup"
+                                               name="delivery_type"
+                                               class="radio radio-primary"
+                                               @change="woltEstimate = { loading: false, available: null, fee: null, eta_minutes: null, message: null }">
                                         <span>Самовывоз</span>
                                     </label>
+                                </div>
+                                <!-- Доставка через Wolt (всегда видно при выборе доставки) -->
+                                <div x-show="formData.deliveryType === 'delivery'"
+                                     x-cloak
+                                     class="mt-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-3">
+                                    <p class="text-sm font-medium text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
+                                        <span class="icon-[tabler--truck-delivery] size-5"></span>
+                                        Доставка через Wolt
+                                    </p>
+                                    <p class="text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">
+                                        После оформления откроется страница отслеживания заказа.
+                                    </p>
                                 </div>
                             </div>
 
                             <!-- Детали доставки -->
-                            <div x-show="formData.deliveryType === 'delivery'" class="space-y-4">
+                            <div x-show="formData.deliveryType === 'delivery'" class="space-y-4" x-cloak>
                                 <!-- Выбор сохраненного адреса для авторизованных -->
                                 <div x-show="isAuthenticated && savedAddresses.length > 0">
                                     <label class="label">
                                         <span class="label-text">Выберите сохраненный адрес</span>
                                     </label>
-                                    <select x-model="selectedAddressId" 
-                                            @change="loadAddress()"
+                                    <select x-model="selectedAddressId"
+                                            @change="loadAddress(); fetchWoltEstimate()"
                                             class="select select-bordered w-full">
                                         <option value="">Ввести новый адрес</option>
                                         <template x-for="addr in savedAddresses" :key="addr.id">
@@ -574,8 +594,8 @@
                                     <label class="label">
                                         <span class="label-text">Выберите сохраненный адрес</span>
                                     </label>
-                                    <select x-model="selectedGuestAddressIndex" 
-                                            @change="loadGuestAddress()"
+                                    <select x-model="selectedGuestAddressIndex"
+                                            @change="loadGuestAddress(); fetchWoltEstimate()"
                                             class="select select-bordered w-full">
                                         <option value="">Ввести новый адрес</option>
                                         <template x-for="(addr, index) in guestAddresses" :key="index">
@@ -585,16 +605,61 @@
                                     <span class="helper-text">Please write your full name</span>
                                 </div>
 
-                                <!-- Основной адрес -->
-                                <div>
-                                    <label class="label">
-                                        <span class="label-text">{{ __('frontend.delivery_address') }}</span>
-                                    </label>
-                                    <input type="text" 
-                                           x-model="formData.address" 
-                                           class="input input-bordered w-full" 
-                                           placeholder="{{ __('frontend.address_placeholder') }}">
+                                <!-- Адрес: город, улица, дом -->
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div>
+                                        <label class="label">
+                                            <span class="label-text">Город <span class="text-error">*</span></span>
+                                        </label>
+                                        <input type="text"
+                                               x-model="formData.deliveryCity"
+                                               class="input input-bordered w-full"
+                                               placeholder="Батуми"
+                                               @input.debounce.500ms="fetchWoltEstimate()"
+                                               @change="fetchWoltEstimate()">
+                                    </div>
+                                    <div>
+                                        <label class="label">
+                                            <span class="label-text">Улица <span class="text-error">*</span></span>
+                                        </label>
+                                        <input type="text"
+                                               x-model="formData.deliveryStreet"
+                                               class="input input-bordered w-full"
+                                               placeholder="ул. Парнаваз Мепе"
+                                               @input.debounce.500ms="fetchWoltEstimate()"
+                                               @change="fetchWoltEstimate()">
+                                    </div>
+                                    <div>
+                                        <label class="label">
+                                            <span class="label-text">Дом</span>
+                                        </label>
+                                        <input type="text"
+                                               x-model="formData.deliveryHouse"
+                                               class="input input-bordered w-full"
+                                               placeholder="162/174"
+                                               @input.debounce.500ms="fetchWoltEstimate()"
+                                               @change="fetchWoltEstimate()">
+                                    </div>
                                 </div>
+                                <!-- Оценка доставки Wolt по адресу -->
+                                <template x-if="woltDeliveryEnabled && formData.deliveryCity.trim() && formData.deliveryStreet.trim()">
+                                    <div class="mt-2 text-sm">
+                                        <span x-show="woltEstimate.loading" class="text-base-content/60">Проверяем доступность доставки…</span>
+                                        <template x-if="!woltEstimate.loading && woltEstimate.available === true">
+                                            <p class="text-emerald-700 dark:text-emerald-300">
+                                                <span x-show="woltEstimate.fee">Доставка: <span x-text="woltEstimate.fee ? (woltEstimate.fee.amount.toFixed(2) + ' ₾') : ''"></span></span>
+                                                <span x-show="woltEstimate.eta_minutes" x-text="' · ~' + woltEstimate.eta_minutes + ' мин'"></span>
+                                            </p>
+                                        </template>
+                                        <p x-show="!woltEstimate.loading && woltEstimate.available === false && woltEstimate.message"
+                                           class="text-amber-700 dark:text-amber-300"
+                                           x-text="woltEstimate.message"></p>
+                                        <p x-show="!woltEstimate.loading && woltEstimate.available === false"
+                                           class="text-base-content/60 text-xs mt-1">
+                                            Можно оформить заказ — доставка подтвердится при оформлении.
+                                        </p>
+                                    </div>
+                                </template>
 
                                 <!-- Подъезд и Этаж -->
                                 <div class="grid grid-cols-2 gap-3">

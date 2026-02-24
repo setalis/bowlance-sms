@@ -250,6 +250,14 @@
                         class="text-base-content/50 before:bg-base-content/20 mt-2 p-2 text-xs uppercase before:absolute before:-start-3 before:top-1/2 before:h-0.5 before:w-2.5">
                         Управление</li>
 
+                    <!-- Parameters -->
+                    <li>
+                        <a href="{{ route('admin.parameters.index') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('admin.parameters.*')])>
+                            <span class="icon-[tabler--settings] size-4.5"></span>
+                            <span class="grow">Параметры</span>
+                        </a>
+                    </li>
+
                     <!-- User Management Menu -->
                     <li @class(['accordion-item', 'active' => request()->routeIs('admin.users.*')]) id="user-management">
                         <button

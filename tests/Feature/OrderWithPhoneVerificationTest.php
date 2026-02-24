@@ -3,6 +3,7 @@
 use App\Models\Discount;
 use App\Models\PhoneVerification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
@@ -612,4 +613,85 @@ it('применяет скидку за самовывоз при создан�
     $order = \App\Models\Order::latest()->first();
     expect((float) $order->subtotal)->toBe(100.0);
     expect((float) $order->total)->toBe(90.0);
+});
+
+it('создаёт доставку в Wolt Drive для заказа с доставкой', function () {
+    $baseUrl = 'https://daas-public-api.development.dev.woltapi.com';
+    $venueId = 'test-venue-id';
+    config()->set('wolt.drive.enabled', true);
+    config()->set('wolt.drive.base_url', $baseUrl);
+    config()->set('wolt.drive.token', 'test-token');
+    config()->set('wolt.drive.mode', 'venueful');
+    config()->set('wolt.drive.venue_id', $venueId);
+    config()->set('wolt.drive.pickup.name', 'Bowlance Test');
+    config()->set('wolt.drive.pickup.phone', '+995500000001');
+    config()->set('wolt.drive.pickup.address', 'Tbilisi, Test 1');
+    config()->set('wolt.drive.pickup.lat', 41.6938);
+    config()->set('wolt.drive.pickup.lng', 44.8015);
+
+    $promiseResponse = [
+        'id' => 'promise-123',
+        'is_binding' => true,
+        'dropoff' => [
+            'location' => [
+                'formatted_address' => 'ул. Тестовая, 123',
+                'coordinates' => ['lat' => 41.7, 'lon' => 44.8],
+            ],
+        ],
+        'price' => ['amount' => 500, 'currency' => 'GEL'],
+    ];
+
+    Http::fake([
+        $baseUrl.'/v1/venues/'.$venueId.'/shipment-promises' => Http::response($promiseResponse, 200),
+        $baseUrl.'/v1/venues/'.$venueId.'/deliveries' => Http::response([
+            'id' => 'wolt-delivery-123',
+            'status' => 'INFO_RECEIVED',
+            'tracking' => [
+                'url' => 'https://tracking.wolt.test/123',
+            ],
+        ], 201),
+    ]);
+
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'customer_email' => 'test@example.com',
+        'delivery_type' => 'delivery',
+        'delivery_address' => 'ул. Тестовая, 123',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 15.50,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/orders', $orderData);
+
+    $response->assertStatus(201)
+        ->assertJsonPath('order.wolt_delivery_id', 'wolt-delivery-123')
+        ->assertJsonPath('order.wolt_tracking_url', 'https://tracking.wolt.test/123');
+
+    Http::assertSent(function ($request) {
+        $url = $request->url();
+
+        return ($url === 'https://daas-public-api.development.dev.woltapi.com/v1/venues/test-venue-id/shipment-promises'
+                || $url === 'https://daas-public-api.development.dev.woltapi.com/v1/venues/test-venue-id/deliveries')
+            && $request->method() === 'POST'
+            && $request->hasHeader('Authorization', 'Bearer test-token');
+    });
+
+    $this->assertDatabaseHas('orders', [
+        'wolt_delivery_id' => 'wolt-delivery-123',
+        'wolt_status' => 'INFO_RECEIVED',
+        'wolt_tracking_url' => 'https://tracking.wolt.test/123',
+    ]);
 });

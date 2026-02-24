@@ -8,19 +8,29 @@ use App\Models\Discount;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
+use App\Models\Setting;
 use App\Services\PhoneAuthService;
 use App\Services\PhoneNormalizer;
+use App\Services\WoltDriveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     public function __construct(
-        protected PhoneAuthService $phoneAuthService
+        protected PhoneAuthService $phoneAuthService,
+        protected WoltDriveService $woltDriveService
     ) {}
 
     public function store(StoreOrderRequest $request): JsonResponse
     {
+        if (! Setting::get('orders_enabled', true)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('frontend.orders_disabled_message'),
+            ], 503);
+        }
+
         try {
             DB::beginTransaction();
 
@@ -77,13 +87,24 @@ class OrderController extends Controller
                 }
             }
 
+            $deliveryAddress = $request->delivery_address;
+            if ($request->delivery_type === 'delivery' && $request->filled('delivery_city') && $request->filled('delivery_street')) {
+                $deliveryAddress = trim(implode(', ', array_filter([
+                    $request->delivery_city,
+                    trim($request->delivery_street.($request->filled('delivery_house') ? ' '.$request->delivery_house : '')),
+                ])));
+            }
+
             $order = Order::create([
                 'user_id' => $user->id,
                 'customer_name' => $request->customer_name,
                 'customer_phone' => $normalizedPhone,
                 'customer_email' => $request->customer_email,
                 'delivery_type' => $request->delivery_type ?? 'delivery',
-                'delivery_address' => $request->delivery_address,
+                'delivery_address' => $deliveryAddress,
+                'delivery_city' => $request->delivery_city,
+                'delivery_street' => $request->delivery_street,
+                'delivery_house' => $request->delivery_house,
                 'entrance' => $request->entrance,
                 'floor' => $request->floor,
                 'apartment' => $request->apartment,
@@ -118,16 +139,16 @@ class OrderController extends Controller
             }
 
             // Автосохранение адреса для авторизованных пользователей
-            if (auth()->check() && $request->delivery_type === 'delivery' && $request->delivery_address) {
+            if (auth()->check() && $request->delivery_type === 'delivery' && $deliveryAddress) {
                 $addressExists = auth()->user()->addresses()
-                    ->where('address', $request->delivery_address)
+                    ->where('address', $deliveryAddress)
                     ->exists();
 
                 if (! $addressExists) {
                     $addressCount = auth()->user()->addresses()->count();
                     auth()->user()->addresses()->create([
                         'label' => 'Адрес '.($addressCount + 1),
-                        'address' => $request->delivery_address,
+                        'address' => $deliveryAddress,
                         'entrance' => $request->entrance,
                         'floor' => $request->floor,
                         'apartment' => $request->apartment,
@@ -142,6 +163,9 @@ class OrderController extends Controller
 
             DB::commit();
 
+            $this->woltDriveService->createDeliveryForOrder($order->fresh('items'));
+            $order->refresh();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Заказ успешно создан',
@@ -150,6 +174,9 @@ class OrderController extends Controller
                     'order_number' => $order->order_number,
                     'total' => $order->total,
                     'status' => $order->status->label(),
+                    'delivery_type' => $order->delivery_type?->value,
+                    'wolt_delivery_id' => $order->wolt_delivery_id,
+                    'wolt_tracking_url' => $order->wolt_tracking_url,
                 ],
             ], 201);
         } catch (\Exception $e) {

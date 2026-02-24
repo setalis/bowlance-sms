@@ -195,6 +195,47 @@
                     </div>
                 </div>
             </div>
+
+            @if($order->delivery_type?->value === 'delivery')
+                <!-- Доставка Wolt -->
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4 flex items-center gap-2">
+                            <span class="icon-[tabler--truck-delivery] size-5"></span>
+                            Доставка Wolt
+                        </h2>
+                        @if($order->wolt_delivery_id)
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-success">Создан в Wolt</span>
+                                    @if($order->wolt_status)
+                                        <span class="badge badge-outline badge-sm">{{ $order->wolt_status }}</span>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-xs text-base-content/60 mb-1">ID доставки</p>
+                                    <p class="font-mono text-sm break-all">{{ $order->wolt_delivery_id }}</p>
+                                </div>
+                                @if($order->wolt_tracking_url)
+                                    <div>
+                                        <a href="{{ $order->wolt_tracking_url }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm gap-2">
+                                            <span class="icon-[tabler--external-link] size-4"></span>
+                                            Открыть отслеживание
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <div class="space-y-2">
+                                <span class="badge badge-warning">Доставка в Wolt не создана</span>
+                                <p class="text-sm text-base-content/70">
+                                    Заказ оформлен с доставкой, но заявка в Wolt не была создана (ошибка API или адрес). Проверьте логи или свяжитесь с клиентом для уточнения доставки.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 @endsection

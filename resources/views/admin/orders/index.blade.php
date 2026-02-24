@@ -58,6 +58,7 @@
                                 <th>Телефон</th>
                                 <th>Сумма</th>
                                 <th>Статус</th>
+                                <th>Wolt</th>
                                 <th>Дата</th>
                                 <th class="text-right">Действия</th>
                             </tr>
@@ -77,6 +78,17 @@
                                         <span class="badge badge-{{ $order->status->color() }}">
                                             {{ $order->status->label() }}
                                         </span>
+                                    </td>
+                                    <td>
+                                        @if($order->delivery_type?->value === 'delivery')
+                                            @if($order->wolt_delivery_id)
+                                                <span class="badge badge-success badge-sm" title="Доставка создана в Wolt">Wolt ✓</span>
+                                            @else
+                                                <span class="badge badge-warning badge-sm" title="Доставка в Wolt не создана">Wolt —</span>
+                                            @endif
+                                        @else
+                                            <span class="text-base-content/40">—</span>
+                                        @endif
                                     </td>
                                     <td>{{ $order->created_at->format('d.m.Y H:i') }}</td>
                                     <td class="text-right">

@@ -20,7 +20,10 @@ class StoreOrderRequest extends FormRequest
             'customer_phone' => 'required|string|max:20',
             'customer_email' => 'nullable|email|max:255',
             'delivery_type' => 'required|in:delivery,pickup',
-            'delivery_address' => 'required_if:delivery_type,delivery|nullable|string|max:1000',
+            'delivery_address' => 'nullable|string|max:1000',
+            'delivery_city' => 'required_if:delivery_type,delivery|nullable|string|max:255',
+            'delivery_street' => 'required_if:delivery_type,delivery|nullable|string|max:500',
+            'delivery_house' => 'nullable|string|max:50',
             'comment' => 'nullable|string|max:1000',
             'verification_request_id' => 'required|string',
             'confirm_switch_user' => 'nullable|boolean',
@@ -46,8 +49,9 @@ class StoreOrderRequest extends FormRequest
             'customer_email.email' => 'Неверный формат email',
             'delivery_type.required' => 'Необходимо выбрать способ получения',
             'delivery_type.in' => 'Неверный способ получения',
-            'delivery_address.required_if' => 'Необходимо указать адрес доставки',
             'delivery_address.max' => 'Адрес доставки слишком длинный',
+            'delivery_city.required_if' => 'Укажите город',
+            'delivery_street.required_if' => 'Укажите улицу и дом',
             'verification_request_id.required' => 'Требуется верификация номера телефона',
             'items.required' => 'Корзина не может быть пустой',
             'items.min' => 'Необходимо добавить хотя бы один товар',
@@ -62,19 +66,53 @@ class StoreOrderRequest extends FormRequest
                 ->where('phone', $normalizedPhone)
                 ->first();
 
-            if (! $verification || ! $verification->verified) {
+            if (! $verification) {
                 $validator->errors()->add(
                     'customer_phone',
                     'Номер телефона не прошёл верификацию'
                 );
+
+                return;
             }
 
-            if ($verification && $verification->isExpired()) {
+            $normalizedRequest = $this->normalizePhone($this->customer_phone);
+            $normalizedStored = $this->normalizePhone($verification->phone);
+            if ($normalizedRequest !== $normalizedStored) {
+                $validator->errors()->add(
+                    'customer_phone',
+                    'Номер телефона не прошёл верификацию'
+                );
+
+                return;
+            }
+
+            if (! $verification->verified) {
+                $validator->errors()->add(
+                    'customer_phone',
+                    'Номер телефона не прошёл верификацию'
+                );
+
+                return;
+            }
+
+            if ($verification->isExpired()) {
                 $validator->errors()->add(
                     'customer_phone',
                     'Срок действия верификации истёк. Запросите код повторно'
                 );
             }
         });
+    }
+
+    /**
+     * Нормализация номера до канонического вида (+ и только цифры), как при отправке кода.
+     */
+    protected function normalizePhone(?string $phone): string
+    {
+        $phone = (string) $phone;
+        $digits = preg_replace('/[^\d]/', '', $phone);
+        $digits = ltrim($digits, '0');
+
+        return $digits !== '' ? '+'.$digits : '';
     }
 }

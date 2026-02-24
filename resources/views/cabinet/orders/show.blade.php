@@ -78,6 +78,33 @@
         </div>
 
         <div class="space-y-6">
+            @if($order->delivery_type?->value === 'delivery')
+                <div class="card border-emerald-200 dark:border-emerald-800">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4 flex items-center gap-2">
+                            <span class="icon-[tabler--truck-delivery] size-5 text-emerald-600"></span>
+                            Доставка Wolt
+                        </h2>
+                        @if($order->wolt_tracking_url)
+                            <p class="text-sm text-base-content/70 mb-4">
+                                Доставка создана в Wolt. Вы можете отслеживать статус и местоположение курьера по ссылке ниже.
+                            </p>
+                            <a href="{{ $order->wolt_tracking_url }}" target="_blank" rel="noopener" class="btn btn-primary w-full gap-2">
+                                <span class="icon-[tabler--external-link] size-4"></span>
+                                Открыть отслеживание в Wolt
+                            </a>
+                            @if($order->wolt_delivery_id)
+                                <p class="mt-3 text-xs text-base-content/50">ID доставки: {{ $order->wolt_delivery_id }}</p>
+                            @endif
+                        @else
+                            <p class="text-sm text-base-content/70">
+                                Доставка по этому заказу в Wolt не была создана автоматически. С вами могут связаться для уточнения доставки.
+                            </p>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <div class="card">
                 <div class="card-body">
                     <h2 class="card-title mb-4">Статус заказа</h2>

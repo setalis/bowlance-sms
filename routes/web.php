@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DishCategoryController;
 use App\Http\Controllers\Admin\DishController;
 use App\Http\Controllers\Admin\DrinkController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\ParameterController;
 use App\Http\Controllers\Cabinet\AddressController as CabinetAddressController;
 use App\Http\Controllers\Cabinet\Auth\LoginController as CabinetLoginController;
 use App\Http\Controllers\Cabinet\DashboardController;
@@ -37,6 +38,9 @@ Route::post('/phone/verify/cancel', [\App\Http\Controllers\PhoneVerificationCont
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
+// Оценка доставки Wolt по адресу (для формы заказа)
+Route::post('/wolt/delivery-estimate', \App\Http\Controllers\WoltDeliveryEstimateController::class)->name('wolt.delivery-estimate');
+
 // API для управления адресами (требует авторизации)
 Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/addresses', [UserAddressController::class, 'index'])->name('user.addresses.index');
@@ -61,6 +65,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('orders', AdminOrderController::class)->except(['show']);
     Route::get('orders/{order}/details', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+    Route::get('parameters', [ParameterController::class, 'index'])->name('parameters.index');
+    Route::put('parameters', [ParameterController::class, 'update'])->name('parameters.update');
 });
 
 // Backward compatibility redirect

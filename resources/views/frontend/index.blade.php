@@ -266,8 +266,8 @@
                                                             <span class="text-xl font-bold">{{ number_format($dish->price, 2) }} ₾</span>
                                                         @endif
                                                     </div>
-                                                    <button type="button" 
-                                                            class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-0 gap-2"
+                                                    <button type="button"
+                                                            class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-0 gap-2 {{ !$siteOrdersEnabled ? 'opacity-50 cursor-not-allowed' : '' }}"
                                                             x-data
                                                             @click="
                                                                 $store.cart.addDish({
@@ -376,8 +376,8 @@
                                                     <span class="text-xl font-bold">{{ number_format($drink->price, 2) }} ₾</span>
                                                 @endif
                                             </div>
-                                            <button type="button" 
-                                                    class="btn btn-primary btn-sm gap-2"
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm gap-2 {{ !$siteOrdersEnabled ? 'opacity-50 cursor-not-allowed' : '' }}"
                                                     x-data
                                                     @click="
                                                         $store.cart.addDrink({
@@ -502,8 +502,8 @@
                                         </div>
                                     </div>
                                     
-                                    <button type="button" 
-                                            class="btn btn-primary w-full mt-4 gap-2"
+                                    <button type="button"
+                                            class="btn btn-primary w-full mt-4 gap-2 {{ !$siteOrdersEnabled ? 'opacity-50 cursor-not-allowed' : '' }}"
                                             :disabled="selectedProducts.length === 0"
                                             @click="addBowlToCart()">
                                         <span class="icon-[tabler--shopping-cart-plus] size-5"></span>

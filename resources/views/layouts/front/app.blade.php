@@ -20,7 +20,16 @@
     
 </head>
 
-<body class="" x-data>
+<body class="" x-data data-orders-enabled="{{ $siteOrdersEnabled ? '1' : '0' }}">
+    <script>
+        window.siteOrdersEnabled = @json($siteOrdersEnabled);
+        window.ordersUnavailableMessage = @json(__('frontend.orders_unavailable'));
+    </script>
+    @if(!$siteOrdersEnabled)
+        <div class="fixed top-0 left-0 right-0 z-[60] min-h-14 bg-warning/95 text-warning-content py-2 px-3 text-center text-sm font-medium shadow-md flex items-center justify-center" role="alert">
+            <span>{{ __('frontend.maintenance_banner') }}</span>
+        </div>
+    @endif
     <!-- Header -->
     @include('layouts.front.header')
 
@@ -214,7 +223,9 @@
                 phone: '',
                 email: '',
                 deliveryType: 'delivery',
-                address: '',
+                deliveryCity: '',
+                deliveryStreet: '',
+                deliveryHouse: '',
                 entrance: '',
                 floor: '',
                 apartment: '',
@@ -240,6 +251,11 @@
             selectedAddressId: '',
             selectedGuestAddressIndex: '',
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+
+            // Wolt: оценка доставки по адресу
+            woltDeliveryEnabled: @json($woltDeliveryEnabled ?? false),
+            woltEstimate: { loading: false, available: null, fee: null, eta_minutes: null, message: null },
+            woltEstimateTimeout: null,
             
             async init() {
                 this.phoneVerification = new PhoneVerification();
@@ -251,10 +267,59 @@
                     this.loadGuestAddresses();
                 }
             },
+
+            fetchWoltEstimate() {
+                if (!this.woltDeliveryEnabled || this.formData.deliveryType !== 'delivery') {
+                    this.woltEstimate = { loading: false, available: null, fee: null, eta_minutes: null, message: null };
+                    return;
+                }
+                const city = (this.formData.deliveryCity || '').trim();
+                const street = (this.formData.deliveryStreet || '').trim();
+                if (city.length < 2 || street.length < 2) {
+                    this.woltEstimate = { loading: false, available: null, fee: null, eta_minutes: null, message: null };
+                    return;
+                }
+                if (this.woltEstimateTimeout) clearTimeout(this.woltEstimateTimeout);
+                this.woltEstimateTimeout = setTimeout(async () => {
+                    this.woltEstimate.loading = true;
+                    this.woltEstimate.available = null;
+                    this.woltEstimate.fee = null;
+                    this.woltEstimate.eta_minutes = null;
+                    this.woltEstimate.message = null;
+                    try {
+                        const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+                        const body = {
+                            delivery_city: city,
+                            delivery_street: street,
+                            delivery_house: (this.formData.deliveryHouse || '').trim()
+                        };
+                        const res = await fetch('/wolt/delivery-estimate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                            body: JSON.stringify(body)
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.woltEstimate.available = data.available;
+                            this.woltEstimate.fee = data.fee || null;
+                            this.woltEstimate.eta_minutes = data.eta_minutes ?? null;
+                            this.woltEstimate.message = data.message || null;
+                        }
+                    } catch (e) {
+                        this.woltEstimate.message = 'Не удалось проверить адрес';
+                    } finally {
+                        this.woltEstimate.loading = false;
+                    }
+                }, 400);
+            },
             
             goToVerification() {
                 if (!this.formData.name || !this.formData.phone) {
                     this.$store.cart.showNotification('Заполните имя и телефон', 'error');
+                    return;
+                }
+                if (this.formData.deliveryType === 'delivery' && (!this.formData.deliveryCity?.trim() || !this.formData.deliveryStreet?.trim())) {
+                    this.$store.cart.showNotification('Укажите город и улицу', 'error');
                     return;
                 }
                 this.step = 2;
@@ -270,7 +335,7 @@
                     this.verificationRequestId = result.request_id;
                     
                     // Сохранить адрес в localStorage для гостей ДО верификации
-                    if (!this.isAuthenticated && this.formData.deliveryType === 'delivery' && this.formData.address) {
+                    if (!this.isAuthenticated && this.formData.deliveryType === 'delivery' && (this.formData.deliveryCity || this.formData.deliveryStreet)) {
                         this.saveGuestAddress();
                     }
                     
@@ -340,16 +405,25 @@
                     const orderData = {
                         ...this.formData,
                         verification_request_id: this.verificationRequestId,
-                        confirm_switch_user: this.formData.confirm_switch_user || false
+                        confirm_switch_user: this.formData.confirm_switch_user || false,
+                        // Явно передаём адрес доставки при отправке (поля могут не попадать в spread при скрытом шаге 1)
+                        deliveryCity: (this.formData.deliveryCity || '').trim(),
+                        deliveryStreet: (this.formData.deliveryStreet || '').trim(),
+                        deliveryHouse: (this.formData.deliveryHouse || '').trim()
                     };
                     
                     const order = await this.$store.cart.checkout(orderData);
                     
                     if (order) {
-                        this.$store.cart.showNotification(
-                            `Заказ ${order.order_number} успешно оформлен!`,
-                            'success'
-                        );
+                        const msg = order.wolt_tracking_url
+                            ? `Заказ ${order.order_number} оформлен. Отслеживание доставки открыто во вкладке.`
+                            : (order.delivery_type === 'delivery'
+                                ? `Заказ ${order.order_number} оформлен. Доставка будет уточнена — с вами могут связаться.`
+                                : `Заказ ${order.order_number} успешно оформлен!`);
+                        this.$store.cart.showNotification(msg, 'success');
+                        if (order.wolt_tracking_url) {
+                            window.open(order.wolt_tracking_url, '_blank', 'noopener');
+                        }
                         
                         this.resetForm();
                         this.open = false;
@@ -387,7 +461,9 @@
                     phone: '',
                     email: '',
                     deliveryType: 'delivery',
-                    address: '',
+                    deliveryCity: '',
+                    deliveryStreet: '',
+                    deliveryHouse: '',
                     entrance: '',
                     floor: '',
                     apartment: '',
@@ -461,8 +537,14 @@
                 if (this.selectedAddressId) {
                     const addr = this.savedAddresses.find(a => a.id == this.selectedAddressId);
                     if (addr) {
-                        // Загрузить все поля адреса
-                        this.formData.address = addr.address || '';
+                        // Сохранённый адрес может быть одной строкой или с полями city, street, house
+                        this.formData.deliveryCity = addr.delivery_city || addr.city || '';
+                        this.formData.deliveryStreet = addr.delivery_street || addr.street || addr.address || '';
+                        this.formData.deliveryHouse = addr.delivery_house || addr.house || '';
+                        if (!this.formData.deliveryCity && !this.formData.deliveryStreet && addr.address) {
+                            this.formData.deliveryStreet = addr.address;
+                            this.formData.deliveryCity = 'Batumi';
+                        }
                         this.formData.entrance = addr.entrance || '';
                         this.formData.floor = addr.floor || '';
                         this.formData.apartment = addr.apartment || '';
@@ -472,8 +554,9 @@
                         this.formData.leaveAtDoor = addr.leave_at_door || false;
                     }
                 } else {
-                    // Очистить, если выбрано "новый адрес"
-                    this.formData.address = '';
+                    this.formData.deliveryCity = '';
+                    this.formData.deliveryStreet = '';
+                    this.formData.deliveryHouse = '';
                     this.formData.entrance = '';
                     this.formData.floor = '';
                     this.formData.apartment = '';
@@ -503,7 +586,13 @@
             loadGuestAddress() {
                 if (this.selectedGuestAddressIndex !== '' && this.guestAddresses[this.selectedGuestAddressIndex]) {
                     const addr = this.guestAddresses[this.selectedGuestAddressIndex];
-                    this.formData.address = addr.address || '';
+                    this.formData.deliveryCity = addr.deliveryCity || addr.city || '';
+                    this.formData.deliveryStreet = addr.deliveryStreet || addr.street || addr.address || '';
+                    this.formData.deliveryHouse = addr.deliveryHouse || addr.house || '';
+                    if (!this.formData.deliveryCity && !this.formData.deliveryStreet && addr.address) {
+                        this.formData.deliveryStreet = addr.address;
+                        this.formData.deliveryCity = 'Batumi';
+                    }
                     this.formData.entrance = addr.entrance || '';
                     this.formData.floor = addr.floor || '';
                     this.formData.apartment = addr.apartment || '';
@@ -512,8 +601,9 @@
                     this.formData.receiverPhone = addr.receiverPhone || '';
                     this.formData.leaveAtDoor = addr.leaveAtDoor || false;
                 } else {
-                    // Очистить все поля если выбрано "Ввести новый адрес"
-                    this.formData.address = '';
+                    this.formData.deliveryCity = '';
+                    this.formData.deliveryStreet = '';
+                    this.formData.deliveryHouse = '';
                     this.formData.entrance = '';
                     this.formData.floor = '';
                     this.formData.apartment = '';
@@ -526,9 +616,12 @@
             
             saveGuestAddress() {
                 try {
-                    // Создать объект адреса
+                    const key = [this.formData.deliveryCity, this.formData.deliveryStreet, this.formData.deliveryHouse].filter(Boolean).join(', ');
                     const addressObj = {
-                        address: this.formData.address,
+                        deliveryCity: this.formData.deliveryCity,
+                        deliveryStreet: this.formData.deliveryStreet,
+                        deliveryHouse: this.formData.deliveryHouse,
+                        address: key,
                         entrance: this.formData.entrance,
                         floor: this.formData.floor,
                         apartment: this.formData.apartment,
@@ -544,8 +637,7 @@
                         addresses = JSON.parse(stored);
                     }
                     
-                    // Удалить дубликаты по адресу и добавить в начало
-                    addresses = addresses.filter(a => a.address !== addressObj.address);
+                    addresses = addresses.filter(a => (a.deliveryCity !== addressObj.deliveryCity || a.deliveryStreet !== addressObj.deliveryStreet || a.deliveryHouse !== addressObj.deliveryHouse));
                     addresses.unshift(addressObj);
                     
                     // Хранить максимум 5 последних адресов

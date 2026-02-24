@@ -1,0 +1,181 @@
+# Wolt Drive интеграция в Bowlance (пошагово для новичка)
+
+Этот документ объясняет **простыми словами**, как в проекте работает интеграция с Wolt Drive, что нужно настроить и как проверить, что всё работает.
+
+---
+
+## 1) Что вообще делает интеграция
+
+Когда клиент создаёт заказ с типом доставки `delivery`, система:
+
+1. Сохраняет заказ в нашей БД.
+2. После успешного коммита пытается создать доставку в Wolt Drive через API.
+3. Если Wolt вернул успех — сохраняет в заказе:
+   - `wolt_delivery_id`
+   - `wolt_status`
+   - `wolt_tracking_url`
+   - `wolt_last_payload` (сырой ответ Wolt)
+4. Если Wolt недоступен/ошибка API — заказ всё равно создан, а ошибка пишется в лог.
+
+Идея: **бизнес-процесс оформления заказа не должен ломаться** из-за внешнего сервиса.
+
+---
+
+## 2) Где лежит логика (карта файлов)
+
+- `config/wolt.php` — конфигурация интеграции.
+- `.env.example` — какие env-переменные нужно задать.
+- `app/Services/WoltDriveService.php` — HTTP-клиент и методы интеграции.
+- `app/Http/Controllers/OrderController.php` — точка вызова интеграции после создания заказа.
+- `database/migrations/2026_02_14_000001_add_wolt_fields_to_orders_table.php` — поля Wolt в таблице `orders`.
+- `app/Models/Order.php` — fillable/casts для новых полей.
+- `tests/Feature/OrderWithPhoneVerificationTest.php` — пример теста с `Http::fake()`.
+
+---
+
+## 3) Настройка окружения (ENV)
+
+Скопируйте значения из `.env.example` в свой `.env` и заполните.
+
+### Режим Venueful (рекомендуется)
+
+Заведения заранее настраиваются в системе Wolt. Сначала запрашивается shipment promise (проверка адреса и цена/время), затем создаётся доставка.
+
+```env
+WOLT_DRIVE_ENABLED=true
+WOLT_DRIVE_BASE_URL=https://daas-public-api.development.dev.woltapi.com
+WOLT_DRIVE_TOKEN=ваш_токен_из_wolt
+WOLT_DRIVE_MODE=venueful
+WOLT_DRIVE_VENUE_ID=ваш_venue_id_от_wolt
+WOLT_DRIVE_CURRENCY=GEL
+WOLT_DRIVE_MIN_PREP_MINUTES=15
+WOLT_DRIVE_PICKUP_NAME="Bowlance"
+WOLT_DRIVE_PICKUP_PHONE=+995...
+WOLT_DRIVE_PICKUP_ADDRESS="Tbilisi, ..."
+WOLT_DRIVE_PICKUP_LAT=41.6938
+WOLT_DRIVE_PICKUP_LNG=44.8015
+WOLT_DRIVE_SUPPORT_EMAIL=support@example.com
+```
+
+### Режим Venueless
+
+Мерчант передаёт данные точки забора с каждым заказом. Подходит при большом числе точек с малым объёмом.
+
+```env
+WOLT_DRIVE_MODE=venueless
+WOLT_DRIVE_MERCHANT_ID=ваш_merchant_id_от_wolt
+# + все WOLT_DRIVE_PICKUP_* и токен, как выше
+```
+
+### Зачем каждое поле
+
+- `WOLT_DRIVE_ENABLED` — включить/выключить интеграцию без деплоя.
+- `WOLT_DRIVE_BASE_URL` — базовый адрес API Wolt Drive.
+- `WOLT_DRIVE_TOKEN` — авторизация Bearer token.
+- `WOLT_DRIVE_MODE` — `venueful` (shipment-promises + deliveries) или `venueless` (delivery-order).
+- `WOLT_DRIVE_VENUE_ID` — ID площадки в Wolt (для venueful).
+- `WOLT_DRIVE_MERCHANT_ID` — ID мерчанта в Wolt (для venueless).
+- `WOLT_DRIVE_PICKUP_*` — откуда курьер забирает заказ (ваша точка/кухня).
+- `WOLT_DRIVE_SUPPORT_*` — контакты поддержки для клиента в трекинге Wolt.
+
+> Если `enabled=false` или токен пустой — интеграция не будет вызываться.
+
+---
+
+## 4) Как устроен сервис `WoltDriveService`
+
+### 4.1 `isEnabled()`
+Проверяет два условия:
+- интеграция включена,
+- задан токен.
+
+Если одно из условий не выполнено — внешние запросы не отправляются.
+
+### 4.2 `createDeliveryForOrder(Order $order)`
+Основной метод создания доставки:
+- пропускает заказ, если это не `delivery`,
+- **Venueful**: запрашивает shipment promise (`POST /v1/venues/{venueId}/shipment-promises`), затем создаёт доставку (`POST /v1/venues/{venueId}/deliveries`) с ID promise.
+- **Venueless**: создаёт доставку одним запросом `POST /merchants/{merchantId}/delivery-order` с полными данными pickup/dropoff.
+- на успехе сохраняет wolt-поля в заказ,
+- на ошибке пишет warning в лог и возвращает `null`.
+
+### 4.3 `refreshDeliveryStatus(Order $order)`
+Метод для обновления статуса по уже созданной доставке:
+- вызывает GET доставки (для venueful — по пути с venue_id),
+- обновляет `wolt_status`, `wolt_tracking_url`, `wolt_last_payload`.
+
+Готов к подключению в cron/job или по кнопке в админке.
+
+### 4.4 `getShipmentPromise(...)` (venueful)
+Проверка доступности доставки и получение ориентировочной цены/времени по адресу. Можно вызывать до оформления заказа, чтобы показать клиенту стоимость и ETA.
+
+---
+
+## 5) Когда вызывается интеграция при создании заказа
+
+В `OrderController@store` порядок такой:
+
+1. Создаётся заказ и позиции в транзакции.
+2. Выполняется `DB::commit()`.
+3. Вызывается `$this->woltDriveService->createDeliveryForOrder(...)`.
+4. Возвращается JSON клиенту, включая `wolt_delivery_id` и `wolt_tracking_url` (если есть).
+
+Почему после commit: чтобы в Wolt отправлялись только реально сохранённые заказы.
+
+---
+
+## 6) Что хранится в БД
+
+В `orders` добавлены поля:
+- `wolt_delivery_id` — ID доставки во внешней системе.
+- `wolt_status` — статус доставки из Wolt.
+- `wolt_tracking_url` — ссылка на трекинг.
+- `wolt_last_payload` — последний ответ API (JSON).
+
+Также добавлен индекс по `wolt_delivery_id`.
+
+---
+
+## 7) Как протестировать (без реального Wolt)
+
+В тесте используется `Http::fake()`:
+- мы подменяем ответ `POST /v1/deliveries`,
+- создаём заказ через `/orders`,
+- проверяем, что:
+  - API вернул `wolt_delivery_id` и `wolt_tracking_url`,
+  - в БД эти поля сохранились,
+  - HTTP-запрос реально был отправлен с Bearer токеном.
+
+Это правильный подход для unit/feature тестов интеграций: быстро и без зависимости от внешней сети.
+
+---
+
+## 8) Типичные ошибки новичков
+
+1. **Забыли включить флаг** `WOLT_DRIVE_ENABLED=true`.
+2. Не указали `WOLT_DRIVE_TOKEN`.
+3. Передали пустые `pickup` данные.
+4. Ожидают, что интеграция сработает для `pickup`-заказов (она срабатывает только для `delivery`).
+5. Думают, что ошибка Wolt должна ронять заказ — здесь сделано наоборот специально.
+
+---
+
+## 9) Что можно улучшить дальше
+
+1. Вынести создание доставки в `Queue Job`, чтобы не ждать Wolt в HTTP-запросе клиента.
+2. Добавить webhook endpoint от Wolt для push-обновления статусов.
+3. Сделать маппинг статусов Wolt -> внутренние статусы заказа.
+4. Добавить retry/backoff и дедупликацию вызовов.
+5. Добавить админ-экран со статусом и кнопкой "обновить статус из Wolt".
+
+---
+
+## 10) Чеклист запуска в проде
+
+- [ ] Заполнены все `WOLT_DRIVE_*` переменные.
+- [ ] Применена миграция `orders`.
+- [ ] Проверены логи на sandbox заказе.
+- [ ] Убедились, что при ошибке Wolt заказ всё равно создаётся.
+- [ ] Протестировали корректность адреса, телефона и tracking URL.
+
+Если кратко: интеграция уже встроена в процесс заказа и безопасна к ошибкам внешнего API, осталось только корректно настроить ENV и при желании развить асинхронную обработку.

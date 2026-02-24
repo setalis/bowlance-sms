@@ -41,6 +41,11 @@
                                     </td>
                                     <td>{{ $order->created_at->format('d.m.Y H:i') }}</td>
                                     <td class="text-right">
+                                        @if($order->wolt_tracking_url)
+                                            <a href="{{ $order->wolt_tracking_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-ghost" title="Отслеживание доставки">
+                                                <span class="icon-[tabler--truck-delivery] size-4"></span>
+                                            </a>
+                                        @endif
                                         <a href="{{ route('cabinet.orders.show', $order) }}" class="btn btn-sm btn-ghost" title="Просмотр">
                                             <span class="icon-[tabler--eye] size-4"></span>
                                         </a>
