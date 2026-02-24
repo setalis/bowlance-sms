@@ -1,4 +1,4 @@
-<header class="navbar h-20 fixed z-50 border-b border-base-content/10">
+<header class="navbar h-20 fixed z-50 border-b border-base-content/10 {{ !$siteOrdersEnabled ? 'top-14' : 'top-0' }}">
     <div class="container mx-auto flex items-center justify-between gap-6 md:gap-6">
         <!-- Логотип -->
         <div class="navbar-start">
@@ -91,18 +91,20 @@
                 <span class="icon-[tabler--baseline-density-medium] size-5"></span>
             </button>
 
-            <!-- Корзина -->
-            <button type="button" 
-                    class="btn btn-circle btn-primary btn-sm gap-2 relative" 
-                    aria-label="{{ __('frontend.cart') }}" 
-                    @click="$store.cart.openDrawer()"
-                    x-data>
-                <span class="icon-[tabler--shopping-cart] size-5"></span>
-                <span class="badge  badge-sm absolute -top-1 -right-1" 
-                      x-show="$store.cart.totalItems > 0"
-                      x-text="$store.cart.totalItems"
-                      x-cloak></span>
-            </button>
+            <!-- Корзина (скрыта при техработах) -->
+            @if($siteOrdersEnabled)
+                <button type="button"
+                        class="btn btn-circle btn-primary btn-sm gap-2 relative"
+                        aria-label="{{ __('frontend.cart') }}"
+                        @click="$store.cart.openDrawer()"
+                        x-data>
+                    <span class="icon-[tabler--shopping-cart] size-5"></span>
+                    <span class="badge  badge-sm absolute -top-1 -right-1"
+                          x-show="$store.cart.totalItems > 0"
+                          x-text="$store.cart.totalItems"
+                          x-cloak></span>
+                </button>
+            @endif
 
 
             
@@ -110,8 +112,8 @@
     </div>
 </header>
 
-<!-- Отступ для fixed header -->
-<div class="h-16"></div>
+<!-- Отступ для fixed header (учитываем баннер техработ при его показе) -->
+<div class="{{ $siteOrdersEnabled ? 'h-16' : 'h-[8.5rem]' }}"></div>
 
 
 
@@ -423,14 +425,18 @@
                 <span class="text-2xl font-bold text-primary" x-text="$store.cart.totalPrice.toFixed(2) + ' ₾'"></span>
             </div>
 
-            <!-- Кнопка оформления -->
-            <button type="button" 
-                    class="btn btn-primary w-full gap-2"
-                    :disabled="$store.cart.items.length === 0"
-                    @click="$dispatch('open-checkout-modal')">
-                <span class="icon-[tabler--check] size-5"></span>
-                {{ __('frontend.checkout') }}
-            </button>
+            <!-- Кнопка оформления (недоступна при техработах) -->
+            @if($siteOrdersEnabled)
+                <button type="button"
+                        class="btn btn-primary w-full gap-2"
+                        :disabled="$store.cart.items.length === 0"
+                        @click="$dispatch('open-checkout-modal')">
+                    <span class="icon-[tabler--check] size-5"></span>
+                    {{ __('frontend.checkout') }}
+                </button>
+            @else
+                <p class="text-warning text-center text-sm font-medium">{{ __('frontend.orders_unavailable') }}</p>
+            @endif
                 </div>
             </div>
             <!-- END Footer -->

@@ -8,6 +8,7 @@ use App\Models\Discount;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
+use App\Models\Setting;
 use App\Services\PhoneAuthService;
 use App\Services\WoltDriveService;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,13 @@ class OrderController extends Controller
 
     public function store(StoreOrderRequest $request): JsonResponse
     {
+        if (! Setting::get('orders_enabled', true)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('frontend.orders_disabled_message'),
+            ], 503);
+        }
+
         try {
             DB::beginTransaction();
 

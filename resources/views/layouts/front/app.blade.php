@@ -20,7 +20,16 @@
     
 </head>
 
-<body class="" x-data>
+<body class="" x-data data-orders-enabled="{{ $siteOrdersEnabled ? '1' : '0' }}">
+    <script>
+        window.siteOrdersEnabled = @json($siteOrdersEnabled);
+        window.ordersUnavailableMessage = @json(__('frontend.orders_unavailable'));
+    </script>
+    @if(!$siteOrdersEnabled)
+        <div class="fixed top-0 left-0 right-0 z-[60] min-h-14 bg-warning/95 text-warning-content py-2 px-3 text-center text-sm font-medium shadow-md flex items-center justify-center" role="alert">
+            <span>{{ __('frontend.maintenance_banner') }}</span>
+        </div>
+    @endif
     <!-- Header -->
     @include('layouts.front.header')
 

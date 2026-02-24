@@ -100,4 +100,9 @@ return [
     'order_status' => 'Order status',
     'save_changes' => 'Save changes',
     'cancel_action' => 'Cancel',
+
+    // Maintenance
+    'maintenance_banner' => 'Technical maintenance in progress. Orders are temporarily unavailable.',
+    'orders_disabled_message' => 'Ordering is temporarily suspended. Technical maintenance in progress.',
+    'orders_unavailable' => 'Orders temporarily unavailable',
 ];

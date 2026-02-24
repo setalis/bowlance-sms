@@ -16,8 +16,16 @@ export function initCart() {
             }
         },
 
+        isOrdersEnabled() {
+            return typeof window !== 'undefined' && window.siteOrdersEnabled === true;
+        },
+
         // Добавить блюдо в корзину
         addDish(dish) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             const existingItem = this.items.find(item => item.type === 'dish' && item.id === dish.id);
             
             if (existingItem) {
@@ -50,6 +58,10 @@ export function initCart() {
 
         // Добавить напиток в корзину
         addDrink(drink) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             const existingItem = this.items.find(item => item.type === 'drink' && item.id === drink.id);
             
             if (existingItem) {
@@ -76,6 +88,10 @@ export function initCart() {
 
         // Добавить собранный боул в корзину
         addBowl(products) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             if (!products || products.length === 0) {
                 this.showNotification('Выберите продукты для боула', 'error');
                 return;
@@ -189,6 +205,10 @@ export function initCart() {
 
         // Открыть drawer
         openDrawer() {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return;
+            }
             this.isOpen = true;
         },
 
@@ -199,6 +219,10 @@ export function initCart() {
 
         // Оформить заказ
         async checkout(customerData) {
+            if (!this.isOrdersEnabled()) {
+                this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
+                return false;
+            }
             if (this.items.length === 0) {
                 this.showNotification('Корзина пуста', 'error');
                 return false;

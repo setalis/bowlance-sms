@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Discount;
+use App\Models\Setting;
 use App\Services\WoltDriveService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -28,6 +29,20 @@ class AppServiceProvider extends ServiceProvider
 
         View::share('pickupDiscount', $this->getPickupDiscount());
         View::share('woltDeliveryEnabled', $this->app->make(WoltDriveService::class)->isEnabled());
+        View::share('siteOrdersEnabled', $this->getSiteOrdersEnabled());
+    }
+
+    protected function getSiteOrdersEnabled(): bool
+    {
+        try {
+            if (! Schema::hasTable('settings')) {
+                return true;
+            }
+
+            return (bool) Setting::get('orders_enabled', true);
+        } catch (\Throwable) {
+            return true;
+        }
     }
 
     protected function getPickupDiscount(): ?Discount
