@@ -20,6 +20,12 @@ return [
          * Если в адресе нет запятой, используется этот город, а строка — как street.
          */
         'default_delivery_city' => env('WOLT_DRIVE_DEFAULT_CITY', 'Batumi'),
+        /*
+         * Список известных городов для разбора адреса из одной строки (delivery_address).
+         * Если в строке два фрагмента через запятую, фрагмент из этого списка считается городом.
+         * Например: при known_cities = ['Batumi','Tbilisi'] и "ул. Руставели 5, Batumi" получится city=Batumi, street=ул. Руставели 5.
+         */
+        'known_cities' => array_filter(array_map('trim', explode(',', env('WOLT_DRIVE_KNOWN_CITIES', 'Batumi,Tbilisi')))),
         'pickup' => [
             'name' => env('WOLT_DRIVE_PICKUP_NAME', env('APP_NAME', 'Bowlance')),
             'phone' => env('WOLT_DRIVE_PICKUP_PHONE'),

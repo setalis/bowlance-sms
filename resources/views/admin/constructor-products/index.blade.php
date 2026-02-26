@@ -31,7 +31,7 @@
                             <th>Цена</th>
                             <th>Вес/Объем</th>
                             <th>Калории</th>
-                            <th>Сортировка</th>
+                            <!-- <th>Сортировка</th> -->
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -74,7 +74,7 @@
                                 </td>
                                 <td>{{ $product->weight_volume ?? '—' }}</td>
                                 <td>{{ $product->calories ? $product->calories . ' ккал' : '—' }}</td>
-                                <td>{{ $product->sort_order }}</td>
+                                <!-- <td>{{ $product->sort_order }}</td> -->
                                 <td>
                                     <div class="flex gap-2">
                                         <a href="{{ route('admin.constructor-products.edit', $product) }}" 
