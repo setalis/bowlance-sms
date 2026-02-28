@@ -117,3 +117,30 @@ it('displays products with nutritional information', function () {
     $response->assertSee('Курица');
     $response->assertSee('165');
 });
+
+it('contains quantity management JS functions for bowl constructor', function () {
+    ConstructorCategory::factory()->create(['name_ru' => 'Базы']);
+
+    $response = $this->get('/');
+
+    $response->assertSuccessful();
+    $response->assertSee('decreaseProduct');
+    $response->assertSee('getProductQuantity');
+    $response->assertSee('toggleProduct');
+});
+
+it('contains quantity controls in modal product cards', function () {
+    $category = ConstructorCategory::factory()->create(['name_ru' => 'Базы']);
+
+    ConstructorProduct::factory()->create([
+        'constructor_category_id' => $category->id,
+        'name_ru' => 'Рис',
+        'price' => 3.00,
+    ]);
+
+    $response = $this->get('/');
+
+    $response->assertSuccessful();
+    $response->assertSee('icon-[tabler--minus]', false);
+    $response->assertSee('icon-[tabler--plus]', false);
+});

@@ -579,6 +579,47 @@ it('применяет скидку за самовывоз при создан�
     expect((float) $order->total)->toBe(90.0);
 });
 
+it('корректно рассчитывает сумму боула с продуктами в количестве больше 1', function () {
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Авторский боул',
+                'price' => 30.00,
+                'quantity' => 2,
+                'calories' => 600,
+                'products' => [
+                    ['id' => 10, 'name' => 'Рис', 'price' => 5.00, 'quantity' => 2, 'calories' => 200],
+                    ['id' => 11, 'name' => 'Курица', 'price' => 10.00, 'quantity' => 1, 'calories' => 165],
+                ],
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/orders', $orderData);
+
+    $response->assertStatus(201);
+
+    $order = \App\Models\Order::latest()->first();
+    expect((float) $order->subtotal)->toBe(60.0);
+    expect((float) $order->total)->toBe(60.0);
+
+    $item = $order->items->first();
+    expect($item->quantity)->toBe(2);
+    expect($item->bowl_products)->not->toBeEmpty();
+    expect($item->bowl_products[0]['name'])->toBe('Рис');
+    expect($item->bowl_products[0]['quantity'])->toBe(2);
+});
+
 it('создаёт доставку в Wolt Drive для заказа с доставкой', function () {
     $baseUrl = 'https://daas-public-api.development.dev.woltapi.com';
     $venueId = 'test-venue-id';

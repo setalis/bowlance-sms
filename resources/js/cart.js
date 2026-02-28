@@ -98,11 +98,11 @@ export function initCart() {
             }
 
             const bowlId = Date.now();
-            const totalPrice = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
-            const totalCalories = products.reduce((sum, p) => sum + (p.calories || 0), 0);
-            const totalProteins = products.reduce((sum, p) => sum + (p.proteins || 0), 0);
-            const totalFats = products.reduce((sum, p) => sum + (p.fats || 0), 0);
-            const totalCarbs = products.reduce((sum, p) => sum + (p.carbs || 0), 0);
+            const totalPrice = products.reduce((sum, p) => sum + parseFloat(p.price) * (p.quantity || 1), 0);
+            const totalCalories = products.reduce((sum, p) => sum + (p.calories || 0) * (p.quantity || 1), 0);
+            const totalProteins = products.reduce((sum, p) => sum + (p.proteins || 0) * (p.quantity || 1), 0);
+            const totalFats = products.reduce((sum, p) => sum + (p.fats || 0) * (p.quantity || 1), 0);
+            const totalCarbs = products.reduce((sum, p) => sum + (p.carbs || 0) * (p.quantity || 1), 0);
 
             this.items.push({
                 type: 'bowl',

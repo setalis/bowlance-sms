@@ -436,16 +436,24 @@
                                                     <div class="flex items-center gap-2 bg-base-100 rounded-lg p-2 text-sm">
                                                         <img :src="product.image || 'https://via.placeholder.com/40'" 
                                                              :alt="product.name" 
-                                                             class="size-8 rounded object-cover">
+                                                             class="size-8 rounded object-cover shrink-0">
                                                         <div class="flex-1 min-w-0">
                                                             <p class="font-medium truncate text-xs" x-text="product.name"></p>
-                                                            <p class="text-xs text-primary font-bold" x-text="product.price + ' ₾'"></p>
+                                                            <p class="text-xs text-primary font-bold" x-text="(product.price * product.quantity).toFixed(2) + ' ₾'"></p>
                                                         </div>
-                                                        <button type="button" 
-                                                                @click.stop="removeProduct(product.id)" 
-                                                                class="btn btn-ghost btn-circle btn-xs">
-                                                            <span class="icon-[tabler--x] size-3"></span>
-                                                        </button>
+                                                        <div class="flex items-center gap-1 shrink-0" @click.stop>
+                                                            <button type="button"
+                                                                    @click.stop="decreaseProduct(product.id)"
+                                                                    class="size-6 rounded-full bg-red-500 hover:bg-red-600 active:scale-90 text-white flex items-center justify-center transition-all shadow-sm">
+                                                                <span class="icon-[tabler--minus] size-2.5"></span>
+                                                            </button>
+                                                            <span class="text-xs font-black min-w-4 text-center tabular-nums" x-text="product.quantity"></span>
+                                                            <button type="button"
+                                                                    @click.stop="toggleProduct(product)"
+                                                                    class="size-6 rounded-full bg-emerald-500 hover:bg-emerald-600 active:scale-90 text-white flex items-center justify-center transition-all shadow-sm">
+                                                                <span class="icon-[tabler--plus] size-2.5"></span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </template>
                                             </div>
@@ -583,9 +591,35 @@
                                                                      alt="{{ $product->name }}" 
                                                                      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                                             @endif
+                                                            <!-- Оверлей с контролами количества -->
                                                             <div x-show="isSelected({{ $product->id }})" 
-                                                                 class="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                                                                <span class="icon-[tabler--check] size-10 text-white bg-primary rounded-full p-1"></span>
+                                                                 class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end justify-center pb-3">
+                                                                <div class="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-full px-1.5 py-1 shadow-2xl border border-white/50"
+                                                                     @click.stop>
+                                                                    <button type="button"
+                                                                            @click.stop="decreaseProduct({{ $product->id }})"
+                                                                            class="size-7 rounded-full bg-red-500 hover:bg-red-600 active:scale-90 text-white flex items-center justify-center transition-all shadow-sm">
+                                                                        <span class="icon-[tabler--minus] size-3.5"></span>
+                                                                    </button>
+                                                                    <span class="text-sm font-black min-w-5 text-center text-gray-800 tabular-nums" 
+                                                                          x-text="getProductQuantity({{ $product->id }})"></span>
+                                                                    <button type="button"
+                                                                            @click.stop="toggleProduct({
+                                                                                id: {{ $product->id }},
+                                                                                name: '{{ addslashes($product->name) }}',
+                                                                                price: {{ $product->price }},
+                                                                                categoryId: {{ $category->id }},
+                                                                                category: '{{ addslashes($category->name) }}',
+                                                                                image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
+                                                                                calories: {{ $product->calories ?? 0 }},
+                                                                                proteins: {{ $product->proteins ?? 0 }},
+                                                                                fats: {{ $product->fats ?? 0 }},
+                                                                                carbs: {{ $product->carbohydrates ?? 0 }}
+                                                                            })"
+                                                                            class="size-7 rounded-full bg-emerald-500 hover:bg-emerald-600 active:scale-90 text-white flex items-center justify-center transition-all shadow-sm">
+                                                                        <span class="icon-[tabler--plus] size-3.5"></span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </figure>
                                                         <div class="card-body p-3">
@@ -595,7 +629,6 @@
                                                                 <p class="text-xs text-base-content/50">{{ $product->weight_volume }}</p>
                                                             @endif
                                                             
-                                                            <!-- Пищевая ценность -->
                                                             @if($product->calories || $product->proteins || $product->fats || $product->carbohydrates)
                                                                 <div class="mt-1 flex flex-wrap gap-1 text-xs">
                                                                     @if($product->calories)
@@ -607,8 +640,8 @@
                                                             <div class="mt-2 flex items-center justify-between">
                                                                 <span class="text-base font-bold">{{ number_format($product->price, 2) }} ₾</span>
                                                                 <span x-show="isSelected({{ $product->id }})" 
-                                                                      class="badge badge-primary badge-sm">
-                                                                    {{ __('frontend.selected') }}
+                                                                      class="badge badge-primary badge-sm"
+                                                                      x-text="'×' + getProductQuantity({{ $product->id }})">
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -653,22 +686,39 @@ function bowlConstructor() {
         },
         
         toggleProduct(product) {
-            const index = this.selectedProducts.findIndex(p => p.id === product.id);
-            if (index === -1) {
-                this.selectedProducts.push(product);
+            const existing = this.selectedProducts.find(p => p.id === product.id);
+            if (!existing) {
+                this.selectedProducts.push({ ...product, quantity: 1 });
             } else {
-                this.selectedProducts.splice(index, 1);
+                existing.quantity++;
             }
         },
-        
+
+        decreaseProduct(id) {
+            const existing = this.selectedProducts.find(p => p.id === id);
+            if (!existing) {
+                return;
+            }
+            if (existing.quantity > 1) {
+                existing.quantity--;
+            } else {
+                this.selectedProducts = this.selectedProducts.filter(p => p.id !== id);
+            }
+        },
+
         removeProduct(id) {
             this.selectedProducts = this.selectedProducts.filter(p => p.id !== id);
         },
-        
+
         isSelected(id) {
             return this.selectedProducts.some(p => p.id === id);
         },
-        
+
+        getProductQuantity(id) {
+            const product = this.selectedProducts.find(p => p.id === id);
+            return product ? product.quantity : 0;
+        },
+
         getCategoryProducts(categoryId) {
             return this.selectedProducts.filter(p => p.categoryId === categoryId);
         },
@@ -682,26 +732,21 @@ function bowlConstructor() {
                 return;
             }
             
-            // Добавляем боул в корзину через Alpine store
             this.$store.cart.addBowl(this.selectedProducts);
-            
-            // Очищаем выбранные продукты
             this.clearBowl();
-            
-            // Открываем drawer корзины
             this.$store.cart.openDrawer();
         },
         
         get totalPrice() {
-            return this.selectedProducts.reduce((sum, p) => sum + parseFloat(p.price), 0);
+            return this.selectedProducts.reduce((sum, p) => sum + parseFloat(p.price) * (p.quantity || 1), 0);
         },
         
         get totalNutrition() {
             return {
-                calories: this.selectedProducts.reduce((sum, p) => sum + (p.calories || 0), 0),
-                proteins: this.selectedProducts.reduce((sum, p) => sum + (p.proteins || 0), 0).toFixed(1),
-                fats: this.selectedProducts.reduce((sum, p) => sum + (p.fats || 0), 0).toFixed(1),
-                carbs: this.selectedProducts.reduce((sum, p) => sum + (p.carbs || 0), 0).toFixed(1)
+                calories: this.selectedProducts.reduce((sum, p) => sum + (p.calories || 0) * (p.quantity || 1), 0),
+                proteins: this.selectedProducts.reduce((sum, p) => sum + (p.proteins || 0) * (p.quantity || 1), 0).toFixed(1),
+                fats: this.selectedProducts.reduce((sum, p) => sum + (p.fats || 0) * (p.quantity || 1), 0).toFixed(1),
+                carbs: this.selectedProducts.reduce((sum, p) => sum + (p.carbs || 0) * (p.quantity || 1), 0).toFixed(1)
             };
         }
     }
