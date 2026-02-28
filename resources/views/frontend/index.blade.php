@@ -163,16 +163,16 @@
                             @else
                                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                     @foreach($category->dishes as $dish)
-                                        <div class="border border-emerald-600/20 rounded-2xl hover:shadow-md transition-shadow">
+                                        <div class="group relative overflow-hidden rounded-2xl border border-emerald-600/20 bg-base-100 hover:border-emerald-500/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                                             <figure class="h-76 overflow-hidden">
                                                 @if($dish->image)
                                                     <img src="{{ asset('storage/' . $dish->image) }}" 
                                                          alt="{{ $dish->name }}" 
-                                                         class="h-full w-full object-cover rounded-t-2xl">
+                                                         class="h-full w-full object-cover rounded-t-2xl transition-transform duration-500 group-hover:scale-105">
                                                 @else
                                                     <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop" 
                                                          alt="{{ $dish->name }}" 
-                                                         class="h-full w-full object-cover rounded-t-2xl">
+                                                         class="h-full w-full object-cover rounded-t-2xl transition-transform duration-500 group-hover:scale-105">
                                                 @endif
                                             </figure>
                                             <div class="card-body px-6">
@@ -321,16 +321,16 @@
                         
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach($drinks as $drink)
-                                <div class="card hover:shadow-xl transition-shadow">
+                                <div class="group relative overflow-hidden rounded-2xl border border-base-200 bg-base-100 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                                     <figure class="h-84 overflow-hidden">
                                         @if($drink->image)
                                             <img src="{{ asset('storage/' . $drink->image) }}" 
                                                  alt="{{ $drink->name }}" 
-                                                 class="h-full w-full object-cover">
+                                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                         @else
                                             <img src="https://images.unsplash.com/photo-1437418747212-8d9709afab22?w=400&h=300&fit=crop" 
                                                  alt="{{ $drink->name }}" 
-                                                 class="h-full w-full object-cover">
+                                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                         @endif
                                     </figure>
                                     <div class="card-body">
@@ -571,17 +571,17 @@
                                                         fats: {{ $product->fats ?? 0 }},
                                                         carbs: {{ $product->carbohydrates ?? 0 }}
                                                     })"
-                                                         class="card bg-base-200 cursor-pointer transition-all hover:shadow-lg hover:bg-base-300"
+                                                         class="group relative overflow-hidden rounded-xl bg-base-200 cursor-pointer transition-all duration-300 hover:shadow-lg hover:ring-2 hover:ring-emerald-500/40 hover:-translate-y-0.5"
                                                          :class="{ 'ring-2 ring-primary bg-primary/10': isSelected({{ $product->id }}) }">
                                                         <figure class="h-32 overflow-hidden relative">
                                                             @if($product->image)
                                                                 <img src="{{ asset('storage/' . $product->image) }}" 
                                                                      alt="{{ $product->name }}" 
-                                                                     class="h-full w-full object-cover">
+                                                                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                                             @else
                                                                 <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=150&fit=crop" 
                                                                      alt="{{ $product->name }}" 
-                                                                     class="h-full w-full object-cover">
+                                                                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                                             @endif
                                                             <div x-show="isSelected({{ $product->id }})" 
                                                                  class="absolute inset-0 bg-primary/30 flex items-center justify-center">
