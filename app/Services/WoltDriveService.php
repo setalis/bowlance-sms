@@ -51,11 +51,16 @@ class WoltDriveService
     protected function createVenuefulDelivery(Order $order): ?array
     {
         $venueId = config('wolt.drive.venue_id');
-        $promise = $this->requestShipmentPromise($order, $venueId);
+        $requestContext = $this->getShipmentPromiseRequestContext($order);
+        $promise = $this->requestShipmentPromiseWithPayload($order, $venueId, $requestContext['payload']);
         if ($promise === null || ! Arr::get($promise, 'is_binding')) {
             Log::warning('Wolt Drive shipment promise missing or non-binding', [
                 'order_id' => $order->id,
                 'promise' => $promise,
+                'is_binding' => $promise !== null ? Arr::get($promise, 'is_binding') : null,
+                'request_street' => $requestContext['payload']['street'] ?? null,
+                'request_city' => $requestContext['payload']['city'] ?? null,
+                'address_source' => $requestContext['address_source'],
             ]);
 
             return null;
@@ -84,21 +89,43 @@ class WoltDriveService
 
     /**
      * Parse delivery address into street + city for Wolt API (binding promise requires street + city).
+     * Preferred format: "city, street". With config wolt.drive.known_cities, also accepts "street, city"
+     * when the second part matches a known city.
      * See https://developer.wolt.com/docs/wolt-drive/endpoints
+     *
+     * @return array{street: string, city: string}
      */
     protected function parseAddressForWolt(string $address): array
     {
         $address = trim($address);
         $defaultCity = (string) config('wolt.drive.default_delivery_city', 'Batumi');
+        $knownCities = config('wolt.drive.known_cities', []);
 
         if (str_contains($address, ',')) {
             $parts = array_map('trim', explode(',', $address, 2));
-            $city = $parts[0] !== '' ? $parts[0] : $defaultCity;
-            $street = $parts[1] ?? $address;
+            $first = $parts[0] ?? '';
+            $second = $parts[1] ?? '';
+
+            if ($first !== '' && $second !== '') {
+                $firstIsCity = in_array($first, $knownCities, true);
+                $secondIsCity = in_array($second, $knownCities, true);
+                if ($secondIsCity && ! $firstIsCity) {
+                    return [
+                        'street' => $first,
+                        'city' => $second,
+                    ];
+                }
+                if ($firstIsCity && ! $secondIsCity) {
+                    return [
+                        'street' => $second,
+                        'city' => $first,
+                    ];
+                }
+            }
 
             return [
-                'street' => $street !== '' ? $street : $address,
-                'city' => $city,
+                'street' => $second !== '' ? $second : $address,
+                'city' => $first !== '' ? $first : $defaultCity,
             ];
         }
 
@@ -127,7 +154,12 @@ class WoltDriveService
         return $payload;
     }
 
-    protected function requestShipmentPromise(Order $order, string $venueId): ?array
+    /**
+     * Build shipment promise request payload and address source for an order (for logging).
+     *
+     * @return array{payload: array<string, mixed>, address_source: 'explicit'|'fallback'}
+     */
+    protected function getShipmentPromiseRequestContext(Order $order): array
     {
         $minPrep = (int) config('wolt.drive.min_preparation_time_minutes', 15);
         $parcels = $this->buildParcelsForEstimate($order);
@@ -142,14 +174,26 @@ class WoltDriveService
             if ($parcels !== []) {
                 $payload['parcels'] = $parcels;
             }
-        } else {
-            $payload = $this->buildShipmentPromisePayload(
-                $order->delivery_address ?? '',
-                $minPrep,
-                $parcels !== [] ? $parcels : null
-            );
+
+            return ['payload' => $payload, 'address_source' => 'explicit'];
         }
 
+        $deliveryAddress = $order->delivery_address ?? '';
+        Log::warning('Wolt Drive using fallback address parsing (delivery_address only)', [
+            'order_id' => $order->id,
+            'delivery_address' => $deliveryAddress,
+        ]);
+        $payload = $this->buildShipmentPromisePayload(
+            $deliveryAddress,
+            $minPrep,
+            $parcels !== [] ? $parcels : null
+        );
+
+        return ['payload' => $payload, 'address_source' => 'fallback'];
+    }
+
+    protected function requestShipmentPromiseWithPayload(Order $order, string $venueId, array $payload): ?array
+    {
         $path = "/v1/venues/{$venueId}/shipment-promises";
         $this->logWoltRequest('POST', $path, $payload);
         $response = $this->request()->post($path, $payload);
