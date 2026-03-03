@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Services\VonageVerifyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
