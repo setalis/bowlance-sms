@@ -33,6 +33,12 @@ Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, '
 Route::post('/phone/verify/send', [\App\Http\Controllers\PhoneVerificationController::class, 'send'])->name('phone.verify.send');
 Route::post('/phone/verify/check', [\App\Http\Controllers\PhoneVerificationController::class, 'verify'])->name('phone.verify.check');
 Route::post('/phone/verify/cancel', [\App\Http\Controllers\PhoneVerificationController::class, 'cancel'])->name('phone.verify.cancel');
+Route::post('/phone/verify/telegram/start', [\App\Http\Controllers\PhoneVerificationController::class, 'telegramStart'])->name('phone.verify.telegram.start');
+
+// Telegram webhook (без CSRF)
+Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramBotController::class, 'webhook'])
+    ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+    ->name('telegram.webhook');
 
 // Публичные маршруты для заказов
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');

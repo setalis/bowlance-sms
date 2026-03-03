@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\PhoneVerification;
+use App\Services\TelegramVerifyService;
 use App\Services\VonageVerifyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -9,7 +12,8 @@ use Illuminate\Support\Facades\Validator;
 class PhoneVerificationController extends Controller
 {
     public function __construct(
-        protected VonageVerifyService $verifyService
+        protected VonageVerifyService $verifyService,
+        protected TelegramVerifyService $telegramService
     ) {}
 
     public function send(Request $request): JsonResponse
@@ -51,6 +55,38 @@ class PhoneVerificationController extends Controller
         ], 500);
     }
 
+    public function telegramStart(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string|regex:/^\+?[1-9]\d{1,14}$/',
+        ], [
+            'phone.required' => 'Необходимо указать номер телефона',
+            'phone.regex' => 'Неверный формат номера телефона',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $phone = $request->phone;
+
+        if (! str_starts_with($phone, '+')) {
+            $phone = '+'.ltrim($phone, '0');
+        }
+
+        $result = $this->telegramService->initiateVerification($phone);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Перейдите в Telegram для подтверждения номера',
+            'request_id' => $result['request_id'],
+            'telegram_link' => $result['telegram_link'],
+        ]);
+    }
+
     public function verify(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -75,6 +111,13 @@ class PhoneVerificationController extends Controller
         );
 
         if ($result['success']) {
+            // Отправить подтверждение в Telegram, если верификация шла через бота
+            $verification = PhoneVerification::where('request_id', $request->request_id)->first();
+
+            if ($verification && $verification->channel === 'telegram' && $verification->telegram_chat_id) {
+                $this->telegramService->sendConfirmationMessage((int) $verification->telegram_chat_id);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => $result['message'],

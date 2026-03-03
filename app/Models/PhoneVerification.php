@@ -11,7 +11,10 @@ class PhoneVerification extends Model
 
     protected $fillable = [
         'phone',
+        'channel',
         'request_id',
+        'telegram_token',
+        'telegram_chat_id',
         'code',
         'verified',
         'verified_at',

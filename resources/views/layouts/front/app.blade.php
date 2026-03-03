@@ -237,6 +237,7 @@
             },
             
             phoneVerification: null,
+            verificationMethod: 'sms',
             codeSent: false,
             sendingCode: false,
             verificationCode: '',
@@ -244,6 +245,8 @@
             phoneVerified: false,
             verificationRequestId: null,
             verificationError: '',
+            telegramLink: null,
+            telegramStarted: false,
             
             // Адреса
             savedAddresses: [],
@@ -381,8 +384,58 @@
                 this.verificationCode = '';
                 this.verificationError = '';
                 this.codeSent = false;
+                this.telegramLink = null;
+                this.telegramStarted = false;
                 this.phoneVerification.reset();
-                await this.sendVerificationCode();
+                if (this.verificationMethod === 'telegram') {
+                    await this.startTelegramVerification();
+                } else {
+                    await this.sendVerificationCode();
+                }
+            },
+
+            async startTelegramVerification() {
+                this.sendingCode = true;
+                this.verificationError = '';
+
+                try {
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+                    const phone = this.phoneVerification.normalizePhone(this.formData.phone);
+
+                    const response = await fetch('/phone/verify/telegram/start', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ phone })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Не удалось создать ссылку Telegram');
+                    }
+
+                    this.verificationRequestId = data.request_id;
+                    this.telegramLink = data.telegram_link;
+                    this.telegramStarted = true;
+                    this.codeSent = true;
+
+                    // Сохранить адрес в localStorage для гостей
+                    if (!this.isAuthenticated && this.formData.deliveryType === 'delivery' && (this.formData.deliveryCity || this.formData.deliveryStreet)) {
+                        this.saveGuestAddress();
+                    }
+
+                    window.open(data.telegram_link, '_blank', 'noopener,noreferrer');
+                    this.$store.cart.showNotification('Открыт Telegram — нажмите кнопку и введите код', 'success');
+                } catch (error) {
+                    this.verificationError = error.message;
+                    this.$store.cart.showNotification(error.message, 'error');
+                } finally {
+                    this.sendingCode = false;
+                }
             },
             
             orderError: '',
@@ -474,11 +527,14 @@
                     comment: ''
                 };
                 this.step = 1;
+                this.verificationMethod = 'sms';
                 this.codeSent = false;
                 this.verificationCode = '';
                 this.phoneVerified = false;
                 this.verificationRequestId = null;
                 this.verificationError = '';
+                this.telegramLink = null;
+                this.telegramStarted = false;
                 this.selectedAddressId = '';
                 this.selectedGuestAddressIndex = '';
                 if (this.phoneVerification) {

@@ -786,20 +786,75 @@
                                 <div class="alert">
                                     <span class="icon-[tabler--info-circle] size-5"></span>
                                     <div class="text-sm">
-                                        <p>На номер <strong x-text="formData.phone"></strong> будет отправлен код подтверждения</p>
+                                        <p>Подтвердите номер <strong x-text="formData.phone"></strong></p>
                                     </div>
                                 </div>
 
-                                <!-- Кнопка отправки кода -->
+                                <!-- Выбор метода верификации -->
                                 <div x-show="!codeSent">
-                                    <button type="button" 
+                                    <p class="text-sm font-medium mb-2">Способ получения кода:</p>
+                                    <div class="join w-full">
+                                        <button type="button"
+                                                class="btn join-item flex-1 gap-2"
+                                                :class="verificationMethod === 'sms' ? 'btn-primary' : 'btn-outline'"
+                                                @click="verificationMethod = 'sms'">
+                                            <span class="icon-[tabler--message] size-4"></span>
+                                            SMS
+                                        </button>
+                                        <button type="button"
+                                                class="btn join-item flex-1 gap-2"
+                                                :class="verificationMethod === 'telegram' ? 'btn-primary' : 'btn-outline'"
+                                                @click="verificationMethod = 'telegram'">
+                                            <span class="icon-[tabler--brand-telegram] size-4"></span>
+                                            Telegram
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Кнопка отправки SMS-кода -->
+                                <div x-show="!codeSent && verificationMethod === 'sms'">
+                                    <button type="button"
                                             @click="sendVerificationCode()"
                                             class="btn btn-primary w-full gap-2"
                                             :disabled="sendingCode">
                                         <span x-show="!sendingCode" class="icon-[tabler--send] size-5"></span>
                                         <span x-show="sendingCode" class="loading loading-spinner loading-sm"></span>
-                                        <span x-text="sendingCode ? 'Отправка...' : 'Отправить код'"></span>
+                                        <span x-text="sendingCode ? 'Отправка...' : 'Отправить SMS-код'"></span>
                                     </button>
+                                </div>
+
+                                <!-- Кнопка открыть Telegram -->
+                                <div x-show="!codeSent && verificationMethod === 'telegram'">
+                                    <div class="rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 p-3 mb-3">
+                                        <p class="text-sm text-sky-800 dark:text-sky-200 flex items-center gap-2">
+                                            <span class="icon-[tabler--brand-telegram] size-5"></span>
+                                            <span>Откроется Telegram-бот. Нажмите кнопку в боте, получите код и введите его здесь.</span>
+                                        </p>
+                                    </div>
+                                    <button type="button"
+                                            @click="startTelegramVerification()"
+                                            class="btn btn-primary w-full gap-2"
+                                            :disabled="sendingCode">
+                                        <span x-show="!sendingCode" class="icon-[tabler--brand-telegram] size-5"></span>
+                                        <span x-show="sendingCode" class="loading loading-spinner loading-sm"></span>
+                                        <span x-text="sendingCode ? 'Открытие...' : 'Открыть Telegram'"></span>
+                                    </button>
+                                </div>
+
+                                <!-- Повторно открыть Telegram (если кнопка уже нажата) -->
+                                <div x-show="codeSent && !phoneVerified && verificationMethod === 'telegram' && telegramLink">
+                                    <div class="rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 p-3">
+                                        <p class="text-sm text-sky-800 dark:text-sky-200 mb-2">
+                                            Получите код в Telegram-боте и введите его ниже.
+                                        </p>
+                                        <a :href="telegramLink"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="btn btn-sm btn-outline gap-2 w-full">
+                                            <span class="icon-[tabler--brand-telegram] size-4"></span>
+                                            Открыть Telegram снова
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <!-- Поле ввода кода -->
@@ -834,7 +889,7 @@
                                     <button type="button" 
                                             @click="resendCode()"
                                             class="btn btn-ghost btn-sm w-full mt-2">
-                                        Отправить код повторно
+                                        <span x-text="verificationMethod === 'telegram' ? 'Запросить новый код' : 'Отправить код повторно'"></span>
                                     </button>
                                 </div>
 
