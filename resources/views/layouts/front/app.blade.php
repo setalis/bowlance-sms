@@ -419,6 +419,7 @@
                     }
 
                     this.verificationRequestId = data.request_id;
+                    this.phoneVerification.requestId = data.request_id;
                     this.telegramLink = data.telegram_link;
                     this.telegramStarted = true;
                     this.codeSent = true;
