@@ -146,6 +146,9 @@ class OrderController extends Controller
                     auth()->user()->addresses()->create([
                         'label' => 'Адрес '.($addressCount + 1),
                         'address' => $deliveryAddress,
+                        'delivery_city' => $request->delivery_city,
+                        'delivery_street' => $request->delivery_street,
+                        'delivery_house' => $request->delivery_house,
                         'entrance' => $request->entrance,
                         'floor' => $request->floor,
                         'apartment' => $request->apartment,

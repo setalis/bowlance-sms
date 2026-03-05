@@ -648,13 +648,13 @@
                 if (this.selectedAddressId) {
                     const addr = this.savedAddresses.find(a => a.id == this.selectedAddressId);
                     if (addr) {
-                        // Сохранённый адрес может быть одной строкой или с полями city, street, house
-                        this.formData.deliveryCity = addr.delivery_city || addr.city || '';
-                        this.formData.deliveryStreet = addr.delivery_street || addr.street || addr.address || '';
-                        this.formData.deliveryHouse = addr.delivery_house || addr.house || '';
+                        this.formData.deliveryCity = addr.delivery_city || '';
+                        this.formData.deliveryStreet = addr.delivery_street || '';
+                        this.formData.deliveryHouse = addr.delivery_house || '';
+                        // Обратная совместимость: старые адреса хранятся одной строкой в addr.address
                         if (!this.formData.deliveryCity && !this.formData.deliveryStreet && addr.address) {
-                            this.formData.deliveryStreet = addr.address;
                             this.formData.deliveryCity = 'Batumi';
+                            this.formData.deliveryStreet = addr.address;
                         }
                         this.formData.entrance = addr.entrance || '';
                         this.formData.floor = addr.floor || '';

@@ -24,6 +24,9 @@ class StoreUserAddressRequest extends FormRequest
         return [
             'label' => 'required|string|max:50',
             'address' => 'required|string|max:500',
+            'delivery_city' => 'nullable|string|max:100',
+            'delivery_street' => 'nullable|string|max:255',
+            'delivery_house' => 'nullable|string|max:50',
             'entrance' => 'nullable|string|max:10',
             'floor' => 'nullable|string|max:10',
             'apartment' => 'nullable|string|max:10',
