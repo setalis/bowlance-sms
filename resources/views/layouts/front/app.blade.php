@@ -262,6 +262,14 @@
             
             async init() {
                 this.phoneVerification = new PhoneVerification();
+
+                // Восстановить состояние Telegram-верификации после возврата из Telegram
+                // (Safari на iOS перезагружает вкладку при возврате из другого приложения)
+                const saved = this.restoreTelegramSession();
+                if (saved) {
+                    this.open = true;
+                    this.step = 2;
+                }
                 
                 // Загрузить адреса
                 if (this.isAuthenticated) {
@@ -269,6 +277,46 @@
                 } else {
                     this.loadGuestAddresses();
                 }
+            },
+
+            saveTelegramSession() {
+                try {
+                    sessionStorage.setItem('tg_verify', JSON.stringify({
+                        requestId: this.verificationRequestId,
+                        telegramLink: this.telegramLink,
+                        phone: this.formData.phone,
+                        method: this.verificationMethod,
+                    }));
+                } catch (e) {}
+            },
+
+            restoreTelegramSession() {
+                try {
+                    const raw = sessionStorage.getItem('tg_verify');
+                    if (!raw) {
+                        return false;
+                    }
+                    const data = JSON.parse(raw);
+                    if (!data.requestId) {
+                        return false;
+                    }
+                    this.verificationRequestId = data.requestId;
+                    this.phoneVerification.requestId = data.requestId;
+                    this.telegramLink = data.telegramLink;
+                    this.verificationMethod = data.method || 'telegram';
+                    this.formData.phone = data.phone || '';
+                    this.telegramStarted = true;
+                    this.codeSent = true;
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            },
+
+            clearTelegramSession() {
+                try {
+                    sessionStorage.removeItem('tg_verify');
+                } catch (e) {}
             },
 
             fetchWoltEstimate() {
@@ -371,6 +419,7 @@
                 try {
                     await this.phoneVerification.verifyCode(this.verificationCode);
                     this.phoneVerified = true;
+                    this.clearTelegramSession();
                     this.$store.cart.showNotification('Номер успешно верифицирован!', 'success');
                 } catch (error) {
                     this.verificationError = error.message;
@@ -423,6 +472,10 @@
                     this.telegramLink = data.telegram_link;
                     this.telegramStarted = true;
                     this.codeSent = true;
+
+                    // Сохранить состояние в sessionStorage — на случай перезагрузки вкладки
+                    // (Safari на iOS перезагружает фоновые вкладки при переходе в другое приложение)
+                    this.saveTelegramSession();
 
                     // Сохранить адрес в localStorage для гостей
                     if (!this.isAuthenticated && this.formData.deliveryType === 'delivery' && (this.formData.deliveryCity || this.formData.deliveryStreet)) {
@@ -536,6 +589,7 @@
                 this.verificationError = '';
                 this.telegramLink = null;
                 this.telegramStarted = false;
+                this.clearTelegramSession();
                 this.selectedAddressId = '';
                 this.selectedGuestAddressIndex = '';
                 if (this.phoneVerification) {
