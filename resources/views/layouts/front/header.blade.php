@@ -783,7 +783,7 @@
 
                             <div class="space-y-4">
                                 <!-- Информация о номере -->
-                                <div class="alert">
+                                <div class="alert" x-show="verificationMethod !== 'callback'">
                                     <span class="icon-[tabler--info-circle] size-5"></span>
                                     <div class="text-sm">
                                         <p>Подтвердите номер <strong x-text="formData.phone"></strong></p>
@@ -791,9 +791,11 @@
                                 </div>
 
                                 <!-- Выбор метода верификации -->
-                                <div x-show="!codeSent">
-                                    <p class="text-sm font-medium mb-2">Способ получения кода:</p>
+                                <div x-show="!codeSent && verificationMethod !== 'callback'">
+                                    <p class="text-sm font-medium mb-2">Способ подтверждения:</p>
                                     <div class="join w-full">
+                                        @if(config('vonage.sms_enabled', true))
+                                        {{-- SMS верификация через Vonage (скрыта, можно включить через VONAGE_SMS_ENABLED=true) --}}
                                         <button type="button"
                                                 class="btn join-item flex-1 gap-2"
                                                 :class="verificationMethod === 'sms' ? 'btn-primary' : 'btn-outline'"
@@ -801,6 +803,7 @@
                                             <span class="icon-[tabler--message] size-4"></span>
                                             SMS
                                         </button>
+                                        @endif
                                         <button type="button"
                                                 class="btn join-item flex-1 gap-2"
                                                 :class="verificationMethod === 'telegram' ? 'btn-primary' : 'btn-outline'"
@@ -808,10 +811,18 @@
                                             <span class="icon-[tabler--brand-telegram] size-4"></span>
                                             Telegram
                                         </button>
+                                        <button type="button"
+                                                class="btn join-item flex-1 gap-2"
+                                                :class="verificationMethod === 'callback' ? 'btn-primary' : 'btn-outline'"
+                                                @click="verificationMethod = 'callback'">
+                                            <span class="icon-[tabler--phone-call] size-4"></span>
+                                            Звонок
+                                        </button>
                                     </div>
                                 </div>
 
-                                <!-- Кнопка отправки SMS-кода -->
+                                @if(config('vonage.sms_enabled', true))
+                                {{-- Кнопка отправки SMS-кода (активна только когда sms_enabled=true) --}}
                                 <div x-show="!codeSent && verificationMethod === 'sms'">
                                     <button type="button"
                                             @click="sendVerificationCode()"
@@ -820,6 +831,41 @@
                                         <span x-show="!sendingCode" class="icon-[tabler--send] size-5"></span>
                                         <span x-show="sendingCode" class="loading loading-spinner loading-sm"></span>
                                         <span x-text="sendingCode ? 'Отправка...' : 'Отправить SMS-код'"></span>
+                                    </button>
+                                </div>
+                                @endif
+
+                                <!-- Метод "Мне позвонит менеджер" -->
+                                <div x-show="verificationMethod === 'callback'">
+                                    <div class="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 mb-4">
+                                        <p class="text-sm font-medium text-amber-800 dark:text-amber-200 flex items-center gap-2 mb-1">
+                                            <span class="icon-[tabler--phone-call] size-5"></span>
+                                            Менеджер перезвонит вам
+                                        </p>
+                                        <p class="text-xs text-amber-700/80 dark:text-amber-300/80">
+                                            Заказ будет создан, и наш менеджер позвонит на номер <strong x-text="formData.phone"></strong> для подтверждения.
+                                        </p>
+                                    </div>
+
+                                    <div x-show="orderError" class="mb-3">
+                                        <div class="alert alert-error">
+                                            <span class="icon-[tabler--alert-circle] size-5"></span>
+                                            <span class="text-sm" x-text="orderError"></span>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit"
+                                            class="btn btn-primary w-full gap-2"
+                                            :disabled="loading">
+                                        <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
+                                        <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                                        <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
+                                    </button>
+
+                                    <button type="button"
+                                            @click="verificationMethod = '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}'"
+                                            class="btn btn-ghost btn-sm w-full mt-2">
+                                        Выбрать другой способ
                                     </button>
                                 </div>
 
@@ -857,8 +903,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Поле ввода кода -->
-                                <div x-show="codeSent && !phoneVerified">
+                                <!-- Поле ввода кода (только для SMS/Telegram) -->
+                                <div x-show="codeSent && !phoneVerified && verificationMethod !== 'callback'">
                                     <label class="label">
                                         <span class="label-text">Введите 6-значный код <span class="text-error">*</span></span>
                                     </label>
@@ -893,8 +939,8 @@
                                     </button>
                                 </div>
 
-                                <!-- Успешная верификация -->
-                                <div x-show="phoneVerified">
+                                <!-- Успешная верификация (только для SMS/Telegram) -->
+                                <div x-show="phoneVerified && verificationMethod !== 'callback'">
                                     <div class="alert alert-success">
                                         <span class="icon-[tabler--circle-check] size-6"></span>
                                         <div>

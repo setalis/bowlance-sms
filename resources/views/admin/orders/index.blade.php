@@ -70,6 +70,12 @@
                                         <a href="{{ route('admin.orders.show', $order) }}" class="link link-primary font-medium">
                                             {{ $order->order_number }}
                                         </a>
+                                        @if($order->needs_callback)
+                                            <span class="badge badge-warning badge-sm ml-1" title="Клиент ожидает звонка менеджера">
+                                                <span class="icon-[tabler--phone-call] size-3 mr-0.5"></span>
+                                                Перезвонить
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>{{ $order->customer_name }}</td>
                                     <td>{{ $order->customer_phone }}</td>

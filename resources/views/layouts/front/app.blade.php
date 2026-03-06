@@ -237,7 +237,7 @@
             },
             
             phoneVerification: null,
-            verificationMethod: 'sms',
+            verificationMethod: '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}',
             codeSent: false,
             sendingCode: false,
             verificationCode: '',
@@ -495,12 +495,14 @@
             orderError: '',
             
             async submitOrder() {
-                if (!this.phoneVerified) {
+                const isCallback = this.verificationMethod === 'callback';
+
+                if (!isCallback && !this.phoneVerified) {
                     this.$store.cart.showNotification('Необходимо верифицировать номер телефона', 'error');
                     return;
                 }
                 
-                if (!this.verificationRequestId) {
+                if (!isCallback && !this.verificationRequestId) {
                     this.$store.cart.showNotification('Ошибка верификации. Попробуйте снова', 'error');
                     return;
                 }
@@ -511,7 +513,8 @@
                 try {
                     const orderData = {
                         ...this.formData,
-                        verification_request_id: this.verificationRequestId,
+                        verification_method: this.verificationMethod,
+                        verification_request_id: isCallback ? null : this.verificationRequestId,
                         confirm_switch_user: this.formData.confirm_switch_user || false,
                         // Явно передаём адрес доставки при отправке (поля могут не попадать в spread при скрытом шаге 1)
                         deliveryCity: (this.formData.deliveryCity || '').trim(),
@@ -522,11 +525,13 @@
                     const order = await this.$store.cart.checkout(orderData);
                     
                     if (order) {
-                        const msg = order.wolt_tracking_url
-                            ? `Заказ ${order.order_number} оформлен. Отслеживание доставки открыто во вкладке.`
-                            : (order.delivery_type === 'delivery'
-                                ? `Заказ ${order.order_number} оформлен. Доставка будет уточнена — с вами могут связаться.`
-                                : `Заказ ${order.order_number} успешно оформлен!`);
+                        const msg = order.needs_callback
+                            ? `Заказ ${order.order_number} оформлен. Менеджер перезвонит вам для подтверждения.`
+                            : (order.wolt_tracking_url
+                                ? `Заказ ${order.order_number} оформлен. Отслеживание доставки открыто во вкладке.`
+                                : (order.delivery_type === 'delivery'
+                                    ? `Заказ ${order.order_number} оформлен. Доставка будет уточнена — с вами могут связаться.`
+                                    : `Заказ ${order.order_number} успешно оформлен!`));
                         this.$store.cart.showNotification(msg, 'success');
                         if (order.wolt_tracking_url) {
                             window.open(order.wolt_tracking_url, '_blank', 'noopener');
@@ -581,7 +586,7 @@
                     comment: ''
                 };
                 this.step = 1;
-                this.verificationMethod = 'sms';
+                this.verificationMethod = '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}';
                 this.codeSent = false;
                 this.verificationCode = '';
                 this.phoneVerified = false;
