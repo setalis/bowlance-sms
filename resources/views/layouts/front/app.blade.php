@@ -80,32 +80,51 @@
     @include('layouts.front.footer')
 
     <!-- Toast уведомления -->
-    <div x-data="{ 
-        show: false, 
-        message: '', 
+    <div x-data="{
+        show: false,
+        message: '',
         type: 'success',
+        timer: null,
         init() {
             window.addEventListener('cart-notification', (e) => {
                 this.message = e.detail.message;
                 this.type = e.detail.type || 'success';
                 this.show = true;
-                setTimeout(() => { this.show = false; }, 3000);
+                clearTimeout(this.timer);
+                this.timer = setTimeout(() => { this.show = false; }, 4000);
             });
         }
-    }" 
+    }"
          x-show="show"
+         x-cloak
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+         x-transition:enter-start="opacity-0 translate-y-3"
+         x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-         class="fixed bottom-4 right-4 z-[110] max-w-sm"
-         style="display: none;">
-        <div class="alert" :class="type === 'success' ? 'alert-success' : 'alert-error'">
-            <span class="icon-[tabler--check]" x-show="type === 'success'"></span>
-            <span class="icon-[tabler--alert-circle]" x-show="type === 'error'"></span>
-            <span x-text="message"></span>
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-3"
+         class="fixed bottom-6 left-6 z-[110] max-w-sm w-auto">
+        <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-xl border"
+             :class="{
+                 'bg-emerald-600 border-emerald-700 text-white': type === 'success',
+                 'bg-red-600 border-red-700 text-white': type === 'error',
+                 'bg-sky-600 border-sky-700 text-white': type === 'info'
+             }">
+            <!-- Иконка в круге -->
+            <div class="size-8 rounded-full flex items-center justify-center shrink-0"
+                 :class="{
+                     'bg-emerald-500/40': type === 'success',
+                     'bg-red-500/40': type === 'error',
+                     'bg-sky-500/40': type === 'info'
+                 }">
+                <span x-show="type === 'success'" class="icon-[tabler--check] size-4.5"></span>
+                <span x-show="type === 'error'" class="icon-[tabler--x] size-4.5"></span>
+                <span x-show="type === 'info'" class="icon-[tabler--info-circle] size-4.5"></span>
+            </div>
+            <span class="text-sm font-medium leading-snug" x-text="message"></span>
+            <button @click="show = false" class="ml-1 opacity-60 hover:opacity-100 transition-opacity shrink-0">
+                <span class="icon-[tabler--x] size-4"></span>
+            </button>
         </div>
     </div>
 
