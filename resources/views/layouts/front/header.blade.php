@@ -165,11 +165,11 @@
                 <div class="flex items-center gap-1">
                     <button type="button"
                             @click="$store.cart.clearCart()"
-                            class="btn btn-ghost btn-sm btn-circle text-base-content/40 hover:text-error hover:bg-error/10"
+                            class="btn btn-sm btn-circle  text-base-content/60 hover:text-error bg-white hover:bg-error/10"
                             title="{{ __('frontend.clear_cart') }}">
                         <span class="icon-[tabler--trash] size-4"></span>
                     </button>
-                    <button @click="$store.cart.isOpen = false" type="button" class="btn btn-ghost btn-sm btn-circle text-base-content/40">
+                    <button @click="$store.cart.isOpen = false" type="button" class="btn btn-ghost btn-sm btn-circle bg-white text-base-content/60">
                         <span class="icon-[tabler--x] size-5"></span>
                     </button>
                 </div>
@@ -253,7 +253,7 @@
                                             </div>
                                             <button type="button"
                                                     @click="$store.cart.removeItem(index)"
-                                                    class="btn btn-ghost btn-circle size-7 min-h-0 h-7 text-base-content/30 hover:text-error hover:bg-error/10 shrink-0"
+                                                    class="btn btn-circle size-7 min-h-0 h-7 text-base-content/50 hover:text-error bg-white hover:bg-error/10 shrink-0"
                                                     aria-label="{{ __('frontend.remove') }}">
                                                 <span class="icon-[tabler--x] size-3.5"></span>
                                             </button>
@@ -265,11 +265,11 @@
                                             <template x-if="item.calories > 0">
                                                 <button type="button"
                                                         @click="showNutrition = !showNutrition"
-                                                        class="flex items-center gap-1 text-xs text-base-content/40 hover:text-emerald-600 transition-colors">
-                                                    <span class="icon-[tabler--flame] size-3"></span>
+                                                        class="flex items-center gap-1 text-md text-base-content/40 hover:text-emerald-600 transition-colors">
+                                                    <span class="icon-[tabler--flame] size-5"></span>
                                                     <span x-text="Math.round((item.calories || 0) + (item.sauce_calories || 0))"></span>
                                                     <span>{{ __('frontend.calories') }}</span>
-                                                    <span class="icon-[tabler--chevron-down] size-3 transition-transform" :class="showNutrition ? 'rotate-180' : ''"></span>
+                                                    <span class="icon-[tabler--chevron-down] size-5 transition-transform" :class="showNutrition ? 'rotate-180' : ''"></span>
                                                 </button>
                                             </template>
 
@@ -455,7 +455,7 @@
                         <button type="button"
                                 @click="step = 1"
                                 x-show="step === 2"
-                                class="btn btn-ghost btn-circle btn-sm text-base-content/50 hover:text-base-content -ml-1">
+                                class="btn btn-circle btn-sm text-base-content/50 bg-white hover:text-base-content -ml-1">
                             <span class="icon-[tabler--arrow-left] size-4"></span>
                         </button>
                         <div>
@@ -465,7 +465,7 @@
                                x-text="step === 1 ? 'Шаг 1 из 2 — контакты и доставка' : 'Шаг 2 из 2 — подтверждение номера'"></p>
                         </div>
                     </div>
-                    <button @click="closeModal()" class="btn btn-ghost btn-circle btn-sm text-base-content/40 shrink-0">
+                    <button @click="closeModal()" class="btn btn-circle btn-sm text-base-content/40 shrink-0 bg-white hover:bg-error/10">
                         <span class="icon-[tabler--x] size-5"></span>
                     </button>
                 </div>
