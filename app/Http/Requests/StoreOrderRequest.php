@@ -62,19 +62,12 @@ class StoreOrderRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-<<<<<<< HEAD
-            $normalizedPhone = PhoneNormalizer::normalize(trim((string) $this->customer_phone));
-            $verification = PhoneVerification::where('request_id', $this->verification_request_id)
-                ->where('phone', $normalizedPhone)
-                ->first();
-=======
             // При выборе метода "звонок менеджера" верификация телефона не требуется
             if ($this->verification_method === 'callback') {
                 return;
             }
 
             $verification = PhoneVerification::where('request_id', $this->verification_request_id)->first();
->>>>>>> dev-wolt
 
             if (! $verification) {
                 $validator->errors()->add(
