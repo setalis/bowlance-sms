@@ -34,11 +34,14 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            $normalizedPhone = PhoneNormalizer::normalize(trim((string) $request->customer_phone));
-            $verification = PhoneVerification::where('request_id', $request->verification_request_id)
-                ->where('verified', true)
-                ->where('phone', $normalizedPhone)
-                ->first();
+            $isCallback = $request->verification_method === 'callback';
+
+            $verification = null;
+            if (! $isCallback) {
+                $verification = PhoneVerification::where('request_id', $request->verification_request_id)
+                    ->where('verified', true)
+                    ->first();
+            }
 
             // Check if we need to re-authenticate (user switching scenario)
             $authResult = $this->phoneAuthService->shouldReauthenticate(
@@ -62,7 +65,7 @@ class OrderController extends Controller
                 ], 409);
             }
 
-            // Find or create user by verified phone
+            // Find or create user by phone
             $user = $this->phoneAuthService->findOrCreateUser(
                 $request->customer_phone,
                 $request->customer_email,
@@ -117,8 +120,9 @@ class OrderController extends Controller
                 'delivery_fee' => $deliveryFee,
                 'total' => $total,
                 'status' => OrderStatus::New,
-                'phone_verified' => true,
-                'phone_verified_at' => $verification?->verified_at ?? now(),
+                'phone_verified' => ! $isCallback,
+                'phone_verified_at' => $isCallback ? null : ($verification?->verified_at ?? now()),
+                'needs_callback' => $isCallback,
             ]);
 
             foreach ($request->items as $item) {
@@ -149,6 +153,9 @@ class OrderController extends Controller
                     auth()->user()->addresses()->create([
                         'label' => 'Адрес '.($addressCount + 1),
                         'address' => $deliveryAddress,
+                        'delivery_city' => $request->delivery_city,
+                        'delivery_street' => $request->delivery_street,
+                        'delivery_house' => $request->delivery_house,
                         'entrance' => $request->entrance,
                         'floor' => $request->floor,
                         'apartment' => $request->apartment,
@@ -175,6 +182,7 @@ class OrderController extends Controller
                     'total' => $order->total,
                     'status' => $order->status->label(),
                     'delivery_type' => $order->delivery_type?->value,
+                    'needs_callback' => $order->needs_callback,
                     'wolt_delivery_id' => $order->wolt_delivery_id,
                     'wolt_tracking_url' => $order->wolt_tracking_url,
                 ],

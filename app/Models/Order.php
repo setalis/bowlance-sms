@@ -45,6 +45,7 @@ class Order extends Model
         'wolt_status',
         'wolt_tracking_url',
         'wolt_last_payload',
+        'needs_callback',
     ];
 
     protected function casts(): array
@@ -56,6 +57,7 @@ class Order extends Model
             'delivery_fee' => 'decimal:2',
             'total' => 'decimal:2',
             'phone_verified' => 'boolean',
+            'needs_callback' => 'boolean',
             'leave_at_door' => 'boolean',
             'phone_verified_at' => 'datetime',
             'confirmed_at' => 'datetime',

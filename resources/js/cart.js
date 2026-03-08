@@ -228,8 +228,9 @@ export function initCart() {
                 return false;
             }
 
-            // Проверка наличия verification_request_id
-            if (!customerData.verification_request_id) {
+            // Проверка наличия verification_request_id (не требуется для метода "звонок менеджера")
+            const verificationMethod = customerData.verification_method || 'sms';
+            if (verificationMethod !== 'callback' && !customerData.verification_request_id) {
                 this.showNotification('Необходимо верифицировать номер телефона', 'error');
                 return false;
             }
@@ -257,7 +258,8 @@ export function initCart() {
                     receiver_phone: customerData.receiverPhone || null,
                     leave_at_door: customerData.leaveAtDoor || false,
                     comment: customerData.comment || null,
-                    verification_request_id: customerData.verification_request_id,
+                    verification_method: verificationMethod,
+                    verification_request_id: verificationMethod !== 'callback' ? customerData.verification_request_id : null,
                     confirm_switch_user: customerData.confirm_switch_user || false,
                     items: this.items.map(item => ({
                         type: item.type,

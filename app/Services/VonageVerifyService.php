@@ -109,6 +109,11 @@ class VonageVerifyService
                 ];
             }
 
+            // Telegram-канал: проверяем код из БД
+            if ($verification->channel === 'telegram') {
+                return $this->verifyTelegramCode($verification, $code);
+            }
+
             // Тестовый режим - принимаем любой 6-значный код
             if ($this->testMode) {
                 return $this->verifyTestCode($verification, $code);
@@ -203,6 +208,34 @@ class VonageVerifyService
             'request_id' => $requestId,
             'test_mode' => true,
             'test_code' => $testCode, // Возвращаем код для отладки
+        ];
+    }
+
+    /**
+     * Telegram-канал: проверка кода из БД
+     */
+    protected function verifyTelegramCode(PhoneVerification $verification, string $code): array
+    {
+        $verification->incrementAttempts();
+
+        if ($verification->code !== $code) {
+            return [
+                'success' => false,
+                'message' => 'Неверный код подтверждения',
+            ];
+        }
+
+        $verification->markAsVerified();
+
+        Log::info('Telegram code verified', [
+            'phone' => $verification->phone,
+            'request_id' => $verification->request_id,
+        ]);
+
+        return [
+            'success' => true,
+            'message' => 'Номер телефона успешно подтверждён через Telegram',
+            'phone' => $verification->phone,
         ];
     }
 

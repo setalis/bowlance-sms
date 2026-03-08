@@ -80,32 +80,51 @@
     @include('layouts.front.footer')
 
     <!-- Toast уведомления -->
-    <div x-data="{ 
-        show: false, 
-        message: '', 
+    <div x-data="{
+        show: false,
+        message: '',
         type: 'success',
+        timer: null,
         init() {
             window.addEventListener('cart-notification', (e) => {
                 this.message = e.detail.message;
                 this.type = e.detail.type || 'success';
                 this.show = true;
-                setTimeout(() => { this.show = false; }, 3000);
+                clearTimeout(this.timer);
+                this.timer = setTimeout(() => { this.show = false; }, 4000);
             });
         }
-    }" 
+    }"
          x-show="show"
+         x-cloak
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+         x-transition:enter-start="opacity-0 translate-y-3"
+         x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-         class="fixed bottom-4 right-4 z-[110] max-w-sm"
-         style="display: none;">
-        <div class="alert" :class="type === 'success' ? 'alert-success' : 'alert-error'">
-            <span class="icon-[tabler--check]" x-show="type === 'success'"></span>
-            <span class="icon-[tabler--alert-circle]" x-show="type === 'error'"></span>
-            <span x-text="message"></span>
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-3"
+         class="fixed bottom-6 left-6 z-[110] max-w-sm w-auto">
+        <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-xl border"
+             :class="{
+                 'bg-emerald-600 border-emerald-700 text-white': type === 'success',
+                 'bg-red-600 border-red-700 text-white': type === 'error',
+                 'bg-sky-600 border-sky-700 text-white': type === 'info'
+             }">
+            <!-- Иконка в круге -->
+            <div class="size-8 rounded-full flex items-center justify-center shrink-0"
+                 :class="{
+                     'bg-emerald-500/40': type === 'success',
+                     'bg-red-500/40': type === 'error',
+                     'bg-sky-500/40': type === 'info'
+                 }">
+                <span x-show="type === 'success'" class="icon-[tabler--check] size-4.5"></span>
+                <span x-show="type === 'error'" class="icon-[tabler--x] size-4.5"></span>
+                <span x-show="type === 'info'" class="icon-[tabler--info-circle] size-4.5"></span>
+            </div>
+            <span class="text-sm font-medium leading-snug" x-text="message"></span>
+            <button @click="show = false" class="ml-1 opacity-60 hover:opacity-100 transition-opacity shrink-0">
+                <span class="icon-[tabler--x] size-4"></span>
+            </button>
         </div>
     </div>
 
@@ -237,6 +256,7 @@
             },
             
             phoneVerification: null,
+            verificationMethod: '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}',
             codeSent: false,
             sendingCode: false,
             verificationCode: '',
@@ -244,6 +264,8 @@
             phoneVerified: false,
             verificationRequestId: null,
             verificationError: '',
+            telegramLink: null,
+            telegramStarted: false,
             
             // Адреса
             savedAddresses: [],
@@ -259,6 +281,14 @@
             
             async init() {
                 this.phoneVerification = new PhoneVerification();
+
+                // Восстановить состояние Telegram-верификации после возврата из Telegram
+                // (Safari на iOS перезагружает вкладку при возврате из другого приложения)
+                const saved = this.restoreTelegramSession();
+                if (saved) {
+                    this.open = true;
+                    this.step = 2;
+                }
                 
                 // Загрузить адреса
                 if (this.isAuthenticated) {
@@ -266,6 +296,46 @@
                 } else {
                     this.loadGuestAddresses();
                 }
+            },
+
+            saveTelegramSession() {
+                try {
+                    sessionStorage.setItem('tg_verify', JSON.stringify({
+                        requestId: this.verificationRequestId,
+                        telegramLink: this.telegramLink,
+                        phone: this.formData.phone,
+                        method: this.verificationMethod,
+                    }));
+                } catch (e) {}
+            },
+
+            restoreTelegramSession() {
+                try {
+                    const raw = sessionStorage.getItem('tg_verify');
+                    if (!raw) {
+                        return false;
+                    }
+                    const data = JSON.parse(raw);
+                    if (!data.requestId) {
+                        return false;
+                    }
+                    this.verificationRequestId = data.requestId;
+                    this.phoneVerification.requestId = data.requestId;
+                    this.telegramLink = data.telegramLink;
+                    this.verificationMethod = data.method || 'telegram';
+                    this.formData.phone = data.phone || '';
+                    this.telegramStarted = true;
+                    this.codeSent = true;
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            },
+
+            clearTelegramSession() {
+                try {
+                    sessionStorage.removeItem('tg_verify');
+                } catch (e) {}
             },
 
             fetchWoltEstimate() {
@@ -368,6 +438,7 @@
                 try {
                     await this.phoneVerification.verifyCode(this.verificationCode);
                     this.phoneVerified = true;
+                    this.clearTelegramSession();
                     this.$store.cart.showNotification('Номер успешно верифицирован!', 'success');
                 } catch (error) {
                     this.verificationError = error.message;
@@ -381,19 +452,76 @@
                 this.verificationCode = '';
                 this.verificationError = '';
                 this.codeSent = false;
+                this.telegramLink = null;
+                this.telegramStarted = false;
                 this.phoneVerification.reset();
-                await this.sendVerificationCode();
+                if (this.verificationMethod === 'telegram') {
+                    await this.startTelegramVerification();
+                } else {
+                    await this.sendVerificationCode();
+                }
+            },
+
+            async startTelegramVerification() {
+                this.sendingCode = true;
+                this.verificationError = '';
+
+                try {
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+                    const phone = this.phoneVerification.normalizePhone(this.formData.phone);
+
+                    const response = await fetch('/phone/verify/telegram/start', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ phone })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Не удалось создать ссылку Telegram');
+                    }
+
+                    this.verificationRequestId = data.request_id;
+                    this.phoneVerification.requestId = data.request_id;
+                    this.telegramLink = data.telegram_link;
+                    this.telegramStarted = true;
+                    this.codeSent = true;
+
+                    // Сохранить состояние в sessionStorage — на случай перезагрузки вкладки
+                    // (Safari на iOS перезагружает фоновые вкладки при переходе в другое приложение)
+                    this.saveTelegramSession();
+
+                    // Сохранить адрес в localStorage для гостей
+                    if (!this.isAuthenticated && this.formData.deliveryType === 'delivery' && (this.formData.deliveryCity || this.formData.deliveryStreet)) {
+                        this.saveGuestAddress();
+                    }
+
+                    window.open(data.telegram_link, '_blank', 'noopener,noreferrer');
+                    this.$store.cart.showNotification('Открыт Telegram — нажмите кнопку и введите код', 'success');
+                } catch (error) {
+                    this.verificationError = error.message;
+                    this.$store.cart.showNotification(error.message, 'error');
+                } finally {
+                    this.sendingCode = false;
+                }
             },
             
             orderError: '',
             
             async submitOrder() {
-                if (!this.phoneVerified) {
+                const isCallback = this.verificationMethod === 'callback';
+
+                if (!isCallback && !this.phoneVerified) {
                     this.$store.cart.showNotification('Необходимо верифицировать номер телефона', 'error');
                     return;
                 }
                 
-                if (!this.verificationRequestId) {
+                if (!isCallback && !this.verificationRequestId) {
                     this.$store.cart.showNotification('Ошибка верификации. Попробуйте снова', 'error');
                     return;
                 }
@@ -404,7 +532,8 @@
                 try {
                     const orderData = {
                         ...this.formData,
-                        verification_request_id: this.verificationRequestId,
+                        verification_method: this.verificationMethod,
+                        verification_request_id: isCallback ? null : this.verificationRequestId,
                         confirm_switch_user: this.formData.confirm_switch_user || false,
                         // Явно передаём адрес доставки при отправке (поля могут не попадать в spread при скрытом шаге 1)
                         deliveryCity: (this.formData.deliveryCity || '').trim(),
@@ -415,11 +544,13 @@
                     const order = await this.$store.cart.checkout(orderData);
                     
                     if (order) {
-                        const msg = order.wolt_tracking_url
-                            ? `Заказ ${order.order_number} оформлен. Отслеживание доставки открыто во вкладке.`
-                            : (order.delivery_type === 'delivery'
-                                ? `Заказ ${order.order_number} оформлен. Доставка будет уточнена — с вами могут связаться.`
-                                : `Заказ ${order.order_number} успешно оформлен!`);
+                        const msg = order.needs_callback
+                            ? `Заказ ${order.order_number} оформлен. Менеджер перезвонит вам для подтверждения.`
+                            : (order.wolt_tracking_url
+                                ? `Заказ ${order.order_number} оформлен. Отслеживание доставки открыто во вкладке.`
+                                : (order.delivery_type === 'delivery'
+                                    ? `Заказ ${order.order_number} оформлен. Доставка будет уточнена — с вами могут связаться.`
+                                    : `Заказ ${order.order_number} успешно оформлен!`));
                         this.$store.cart.showNotification(msg, 'success');
                         if (order.wolt_tracking_url) {
                             window.open(order.wolt_tracking_url, '_blank', 'noopener');
@@ -474,11 +605,15 @@
                     comment: ''
                 };
                 this.step = 1;
+                this.verificationMethod = '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}';
                 this.codeSent = false;
                 this.verificationCode = '';
                 this.phoneVerified = false;
                 this.verificationRequestId = null;
                 this.verificationError = '';
+                this.telegramLink = null;
+                this.telegramStarted = false;
+                this.clearTelegramSession();
                 this.selectedAddressId = '';
                 this.selectedGuestAddressIndex = '';
                 if (this.phoneVerification) {
@@ -537,13 +672,13 @@
                 if (this.selectedAddressId) {
                     const addr = this.savedAddresses.find(a => a.id == this.selectedAddressId);
                     if (addr) {
-                        // Сохранённый адрес может быть одной строкой или с полями city, street, house
-                        this.formData.deliveryCity = addr.delivery_city || addr.city || '';
-                        this.formData.deliveryStreet = addr.delivery_street || addr.street || addr.address || '';
-                        this.formData.deliveryHouse = addr.delivery_house || addr.house || '';
+                        this.formData.deliveryCity = addr.delivery_city || '';
+                        this.formData.deliveryStreet = addr.delivery_street || '';
+                        this.formData.deliveryHouse = addr.delivery_house || '';
+                        // Обратная совместимость: старые адреса хранятся одной строкой в addr.address
                         if (!this.formData.deliveryCity && !this.formData.deliveryStreet && addr.address) {
-                            this.formData.deliveryStreet = addr.address;
                             this.formData.deliveryCity = 'Batumi';
+                            this.formData.deliveryStreet = addr.address;
                         }
                         this.formData.entrance = addr.entrance || '';
                         this.formData.floor = addr.floor || '';

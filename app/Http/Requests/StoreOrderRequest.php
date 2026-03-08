@@ -25,7 +25,8 @@ class StoreOrderRequest extends FormRequest
             'delivery_street' => 'required_if:delivery_type,delivery|nullable|string|max:500',
             'delivery_house' => 'nullable|string|max:50',
             'comment' => 'nullable|string|max:1000',
-            'verification_request_id' => 'required|string',
+            'verification_method' => 'nullable|in:sms,telegram,callback',
+            'verification_request_id' => 'required_unless:verification_method,callback|nullable|string',
             'confirm_switch_user' => 'nullable|boolean',
             'items' => 'required|array|min:1',
             'items.*.type' => 'required|in:dish,bowl',
@@ -52,7 +53,7 @@ class StoreOrderRequest extends FormRequest
             'delivery_address.max' => 'Адрес доставки слишком длинный',
             'delivery_city.required_if' => 'Укажите город',
             'delivery_street.required_if' => 'Укажите улицу и дом',
-            'verification_request_id.required' => 'Требуется верификация номера телефона',
+            'verification_request_id.required_unless' => 'Требуется верификация номера телефона',
             'items.required' => 'Корзина не может быть пустой',
             'items.min' => 'Необходимо добавить хотя бы один товар',
         ];
@@ -61,10 +62,19 @@ class StoreOrderRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+<<<<<<< HEAD
             $normalizedPhone = PhoneNormalizer::normalize(trim((string) $this->customer_phone));
             $verification = PhoneVerification::where('request_id', $this->verification_request_id)
                 ->where('phone', $normalizedPhone)
                 ->first();
+=======
+            // При выборе метода "звонок менеджера" верификация телефона не требуется
+            if ($this->verification_method === 'callback') {
+                return;
+            }
+
+            $verification = PhoneVerification::where('request_id', $this->verification_request_id)->first();
+>>>>>>> dev-wolt
 
             if (! $verification) {
                 $validator->errors()->add(
