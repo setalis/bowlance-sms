@@ -47,15 +47,28 @@
                         <img src="{{ asset('storage/images/slider/slider-2-1-desktop.jpg') }}" 
                              alt="Боулы" 
                              class="h-full w-full object-cover hidden md:block">
+
+                             <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
+                            <h2 class="mb-4 text-4xl font-black sm:text-5xl">{{ __('frontend.slider_2_title') }}</h2>
+                            <p class="text-sm sm:text-2xl">{{ __('frontend.slider_2_desc') }}</p>
+                                <div class="flex flex-col gap-2 mt-4">
+                                    <a href="#menu-tab" 
+                                        @click.prevent="document.getElementById('menu-tab').click(); setTimeout(() => document.getElementById('menu-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
+                                        type="button" 
+                                        class=" text-white bg-emerald-600 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer uppercase">
+                                        Заказать
+                                    </a>         
+                                </div>
+                        </div>
                         <!-- Градиентная подложка -->
                         <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div> -->
                         <!-- Текстовый блок с размытием -->
-                        <div class="absolute inset-0 md:inset-20 flex items-center">
+                        <!-- <div class="absolute inset-0 md:inset-20 flex items-center">
                             <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
                                 <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.slider_2_title') }}</h2>
                                 <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.slider_2_desc') }}</p>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="carousel-slide">
@@ -63,10 +76,23 @@
                         <img src="{{ asset('storage/images/slider/slider-3.jpg') }}" 
                              alt="Собери сам" 
                              class="h-full w-full object-cover">
+
+                         <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
+                            <h2 class="mb-4 text-4xl font-black sm:text-5xl">{{ __('frontend.slider_3_title') }}</h2>
+                            <p class="text-sm sm:text-2xl">{{ __('frontend.slider_3_desc') }}</p>
+                                <div class="flex flex-col gap-2 mt-4">
+                                    <a href="#constructor-tab" 
+                                        @click.prevent="document.getElementById('constructor-tab').click(); setTimeout(() => document.getElementById('constructor-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
+                                        type="button" 
+                                        class="border border-white text-white bg-emerald-600 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer">
+                                        {{ __('frontend.slider_3_button') }}
+                                    </a>         
+                                </div>
+                        </div>
                         <!-- Градиентная подложка -->
-                        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
+                        <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div> -->
                         <!-- Текстовый блок с размытием -->
-                        <div class="absolute inset-0 flex items-center justify-center">                            
+                        <!-- <div class="absolute inset-0 flex items-center justify-center">                            
                             <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
                                 <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.slider_3_title') }}</h2>
                                 <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.slider_3_desc') }}</p>
@@ -79,7 +105,7 @@
                                     </a>         
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="carousel-slide">
@@ -90,19 +116,29 @@
                         <!-- Градиентная подложка -->
                         <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div> -->
                         <!-- Текстовый блок с размытием -->
-                        <div class="absolute inset-0 flex items-center justify-center">                            
-                            <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">  
+                                <h2 class="mb-4 text-4xl text-white font-bold sm:text-5xl text-center">{{ __('frontend.slider_4_title') }}</h2>
+                                <p class="text-sm sm:text-2xl text-white">{{ __('frontend.slider_4_desc') }}</p>
+                                <div class="flex flex-col gap-2 mt-4">
+                                    <a href="#constructor-tab" 
+                                        @click.prevent="document.getElementById('constructor-tab').click(); setTimeout(() => document.getElementById('constructor-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
+                                        type="button" 
+                                        class="border border-white text-white bg-black/20 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer uppercase">
+                                        {{ __('frontend.slider_4_button') }}
+                                    </a>         
+                                </div>
+                            <!-- <div class="backdrop-blur-sm bg-black/40 px-8 py-6 rounded-2xl border border-white/10 text-center text-white max-w-4xl mx-4">
                                 <h2 class="mb-4 text-4xl font-bold sm:text-5xl slider-text-strong">{{ __('frontend.slider_4_title') }}</h2>
                                 <p class="text-xl sm:text-2xl slider-text">{{ __('frontend.slider_4_desc') }}</p>
                                 <div class="flex flex-col gap-2 mt-4">
                                     <a href="#constructor-tab" 
                                         @click.prevent="document.getElementById('constructor-tab').click(); setTimeout(() => document.getElementById('constructor-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
                                         type="button" 
-                                        class="border border-white text-white bg-emerald-600 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer">
+                                        class="border border-white text-white bg-black/20 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer uppercase">
                                         {{ __('frontend.slider_4_button') }}
                                     </a>         
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
