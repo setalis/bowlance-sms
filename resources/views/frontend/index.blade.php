@@ -22,10 +22,10 @@
                         <!-- Текстовый блок без размытия -->
                         <div class="absolute inset-0 flex flex-col items-top justify-start pt-10">
                             <div class="text-left text-white max-w-4xl mx-4 px-6 md:px-20">
-                            <p class="text-base sm:text-2xl slider-text mb-3">Попробуй в Батуми!</p>    
-                            <h2 class="text-2xl font-bold sm:text-3xl uppercase slider-text">Авторское меню</h2>
-                            <h3 class="mb-4 text-3xl font-black sm:text-5xl slider-text-strong text-primary">by Nancy Topko</h3>
-                            <p class="text-xl sm:text-2xl slider-text">Победитель<br> Мастер Шеф<br>Украина 15<br></p> 
+                            <p class="text-base sm:text-2xl mb-3">Попробуй в Батуми!</p>    
+                            <h2 class="text-2xl font-bold sm:text-3xl uppercase">Авторское меню</h2>
+                            <h3 class="mb-4 text-3xl font-black sm:text-5xl">by Nancy Topko</h3>
+                            <p class="text-xl sm:text-2xl">Победитель<br> Мастер Шеф<br>Украина 15<br></p> 
                             </div>  
                             
                         </div>
