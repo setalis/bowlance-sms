@@ -59,6 +59,7 @@
                                 <th>Сумма</th>
                                 <th>Статус</th>
                                 <th>Wolt</th>
+                                <th>Время</th>
                                 <th>Дата</th>
                                 <th class="text-right">Действия</th>
                             </tr>
@@ -94,6 +95,16 @@
                                             @endif
                                         @else
                                             <span class="text-base-content/40">—</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($order->delivery_time)
+                                            <span class="badge badge-outline gap-1">
+                                                <span class="icon-[tabler--clock] size-3"></span>
+                                                {{ $order->delivery_time }}
+                                            </span>
+                                        @else
+                                            <span class="text-base-content/40 text-xs">ASAP</span>
                                         @endif
                                     </td>
                                     <td>{{ $order->created_at->format('d.m.Y H:i') }}</td>

@@ -180,6 +180,17 @@
                             <p class="text-xs text-base-content/60 mb-1">Способ получения</p>
                             <p>{{ $order->delivery_type?->label() ?? 'Доставка' }}</p>
                         </div>
+                        <div>
+                            <p class="text-xs text-base-content/60 mb-1">Время доставки</p>
+                            @if($order->delivery_time)
+                                <p class="font-medium flex items-center gap-1">
+                                    <span class="icon-[tabler--clock] size-4 text-primary"></span>
+                                    {{ $order->delivery_time }}
+                                </p>
+                            @else
+                                <p class="text-base-content/50">Как можно быстрее</p>
+                            @endif
+                        </div>
                         @if($order->delivery_address && $order->delivery_type?->value === 'delivery')
                             <div>
                                 <p class="text-xs text-base-content/60 mb-1">Адрес доставки</p>
