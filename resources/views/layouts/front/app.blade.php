@@ -242,6 +242,8 @@
                 phone: '',
                 email: '',
                 deliveryType: 'delivery',
+                deliveryTimeMode: 'asap',
+                scheduledTime: '10:00',
                 deliveryCity: '',
                 deliveryStreet: '',
                 deliveryHouse: '',
@@ -383,6 +385,16 @@
                 }, 400);
             },
             
+            deliveryTimeSlots() {
+                const slots = [];
+                for (let minutes = 10 * 60; minutes <= 20 * 60; minutes += 30) {
+                    const h = String(Math.floor(minutes / 60)).padStart(2, '0');
+                    const m = String(minutes % 60).padStart(2, '0');
+                    slots.push(`${h}:${m}`);
+                }
+                return slots;
+            },
+
             goToVerification() {
                 if (!this.formData.name || !this.formData.phone) {
                     this.$store.cart.showNotification('Заполните имя и телефон', 'error');
@@ -547,7 +559,10 @@
                         // Явно передаём адрес доставки при отправке (поля могут не попадать в spread при скрытом шаге 1)
                         deliveryCity: (this.formData.deliveryCity || '').trim(),
                         deliveryStreet: (this.formData.deliveryStreet || '').trim(),
-                        deliveryHouse: (this.formData.deliveryHouse || '').trim()
+                        deliveryHouse: (this.formData.deliveryHouse || '').trim(),
+                        deliveryTime: this.formData.deliveryTimeMode === 'scheduled'
+                            ? this.formData.scheduledTime
+                            : null
                     };
                     
                     const order = await this.$store.cart.checkout(orderData);
@@ -601,6 +616,8 @@
                     phone: '',
                     email: '',
                     deliveryType: 'delivery',
+                    deliveryTimeMode: 'asap',
+                    scheduledTime: '10:00',
                     deliveryCity: '',
                     deliveryStreet: '',
                     deliveryHouse: '',

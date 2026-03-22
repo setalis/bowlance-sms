@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\PhoneVerification;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -19,6 +20,7 @@ class StoreOrderRequest extends FormRequest
             'customer_phone' => 'required|string|max:20',
             'customer_email' => 'nullable|email|max:255',
             'delivery_type' => 'required|in:delivery,pickup',
+            'delivery_time' => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/', Rule::in($this->allowedDeliveryTimeSlots())],
             'delivery_address' => 'nullable|string|max:1000',
             'delivery_city' => 'required_if:delivery_type,delivery|nullable|string|max:255',
             'delivery_street' => 'required_if:delivery_type,delivery|nullable|string|max:500',
@@ -52,6 +54,7 @@ class StoreOrderRequest extends FormRequest
             'delivery_type.required' => 'Необходимо выбрать способ получения',
             'delivery_type.in' => 'Неверный способ получения',
             'delivery_address.max' => 'Адрес доставки слишком длинный',
+            'delivery_time.in' => 'Выбранное время доставки недоступно. Выберите время с 10:00 до 20:00.',
             'delivery_city.required_if' => 'Укажите город',
             'delivery_street.required_if' => 'Укажите улицу и дом',
             'delivery_house.required_if' => 'Укажите номер дома',
@@ -107,6 +110,16 @@ class StoreOrderRequest extends FormRequest
                 );
             }
         });
+    }
+
+    protected function allowedDeliveryTimeSlots(): array
+    {
+        $slots = [];
+        for ($minutes = 10 * 60; $minutes <= 20 * 60; $minutes += 30) {
+            $slots[] = sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60);
+        }
+
+        return $slots;
     }
 
     /**

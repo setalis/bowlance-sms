@@ -103,6 +103,7 @@ class OrderController extends Controller
                 'customer_phone' => $request->customer_phone,
                 'customer_email' => $request->customer_email,
                 'delivery_type' => $request->delivery_type ?? 'delivery',
+                'delivery_time' => $request->delivery_time,
                 'delivery_address' => $deliveryAddress,
                 'delivery_city' => $request->delivery_city,
                 'delivery_street' => $request->delivery_street,

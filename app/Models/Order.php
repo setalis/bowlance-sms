@@ -20,6 +20,7 @@ class Order extends Model
         'customer_phone',
         'customer_email',
         'delivery_type',
+        'delivery_time',
         'delivery_address',
         'delivery_city',
         'delivery_street',

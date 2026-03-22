@@ -563,6 +563,59 @@
                             </div>
                         </div>
 
+                        <!-- Блок: Время доставки -->
+                        <div class="space-y-2">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">
+                                <span class="icon-[tabler--clock] size-3.5 mr-1 inline-block"></span>
+                                Время доставки
+                            </p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <!-- Как можно быстрее -->
+                                <label class="flex items-center gap-2.5 p-3 rounded-2xl border-2 cursor-pointer transition-all"
+                                       :class="formData.deliveryTimeMode === 'asap' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
+                                    <input type="radio"
+                                           x-model="formData.deliveryTimeMode"
+                                           value="asap"
+                                           class="hidden">
+                                    <div class="size-8 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                         :class="formData.deliveryTimeMode === 'asap' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
+                                        <span class="icon-[tabler--rocket] size-4"
+                                              :class="formData.deliveryTimeMode === 'asap' ? 'text-emerald-600' : 'text-base-content/40'"></span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-xs leading-tight">Как можно</p>
+                                        <p class="text-xs text-base-content/50 leading-tight">быстрее</p>
+                                    </div>
+                                </label>
+                                <!-- Запланировать -->
+                                <label class="flex items-center gap-2.5 p-3 rounded-2xl border-2 cursor-pointer transition-all"
+                                       :class="formData.deliveryTimeMode === 'scheduled' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
+                                    <input type="radio"
+                                           x-model="formData.deliveryTimeMode"
+                                           value="scheduled"
+                                           class="hidden">
+                                    <div class="size-8 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                         :class="formData.deliveryTimeMode === 'scheduled' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
+                                        <span class="icon-[tabler--calendar-time] size-4"
+                                              :class="formData.deliveryTimeMode === 'scheduled' ? 'text-emerald-600' : 'text-base-content/40'"></span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-xs leading-tight">Запланировать</p>
+                                        <p class="text-xs text-base-content/50 leading-tight">выбрать время</p>
+                                    </div>
+                                </label>
+                            </div>
+                            <!-- Выбор времени -->
+                            <div x-show="formData.deliveryTimeMode === 'scheduled'" x-cloak>
+                                <select x-model="formData.scheduledTime"
+                                        class="select select-bordered w-full rounded-xl focus:border-emerald-400 text-sm">
+                                    <template x-for="slot in deliveryTimeSlots()" :key="slot">
+                                        <option :value="slot" x-text="slot"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Блок: Адрес доставки (только при delivery) -->
                         <div x-show="formData.deliveryType === 'delivery'" x-cloak class="space-y-3">
                             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">

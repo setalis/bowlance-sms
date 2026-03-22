@@ -241,6 +241,7 @@ export function initCart() {
                 const deliveryCity = (customerData.deliveryCity ?? customerData.delivery_city ?? '').toString().trim() || null;
                 const deliveryStreet = (customerData.deliveryStreet ?? customerData.delivery_street ?? '').toString().trim() || null;
                 const deliveryHouse = (customerData.deliveryHouse ?? customerData.delivery_house ?? '').toString().trim() || null;
+                const deliveryTime = customerData.deliveryTime ?? customerData.delivery_time ?? null;
 
                 const orderData = {
                     customer_name: customerData.name,
@@ -250,6 +251,7 @@ export function initCart() {
                     delivery_city: deliveryCity,
                     delivery_street: deliveryStreet,
                     delivery_house: deliveryHouse,
+                    delivery_time: deliveryTime || null,
                     entrance: customerData.entrance || null,
                     floor: customerData.floor || null,
                     apartment: customerData.apartment || null,
