@@ -617,7 +617,7 @@
                                            @change="fetchWoltEstimate()">
                                 </div>
                                 <div>
-                                    <label class="text-xs font-medium text-base-content/60 mb-1 block">Дом</label>
+                                    <label class="text-xs font-medium text-base-content/60 mb-1 block">Дом <span class="text-error">*</span></label>
                                     <input type="text"
                                            x-model="formData.deliveryHouse"
                                            class="input input-bordered input-sm w-full rounded-xl bg-base-100 focus:border-emerald-400"

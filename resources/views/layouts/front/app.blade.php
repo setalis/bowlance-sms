@@ -392,6 +392,10 @@
                     this.$store.cart.showNotification('Укажите город и улицу', 'error');
                     return;
                 }
+                if (this.formData.deliveryType === 'delivery' && !this.formData.deliveryHouse?.trim()) {
+                    this.$store.cart.showNotification('Укажите номер дома', 'error');
+                    return;
+                }
                 this.step = 2;
             },
             
@@ -523,6 +527,11 @@
                 
                 if (!isCallback && !this.verificationRequestId) {
                     this.$store.cart.showNotification('Ошибка верификации. Попробуйте снова', 'error');
+                    return;
+                }
+
+                if (this.formData.deliveryType === 'delivery' && !this.formData.deliveryHouse?.trim()) {
+                    this.$store.cart.showNotification('Укажите номер дома', 'error');
                     return;
                 }
                 

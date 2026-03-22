@@ -22,7 +22,9 @@ class StoreOrderRequest extends FormRequest
             'delivery_address' => 'nullable|string|max:1000',
             'delivery_city' => 'required_if:delivery_type,delivery|nullable|string|max:255',
             'delivery_street' => 'required_if:delivery_type,delivery|nullable|string|max:500',
-            'delivery_house' => 'nullable|string|max:50',
+            'delivery_house' => $this->delivery_type === 'delivery'
+                ? 'required|string|max:50'
+                : 'nullable|string|max:50',
             'comment' => 'nullable|string|max:1000',
             'verification_method' => 'nullable|in:sms,telegram,callback',
             'verification_request_id' => 'required_unless:verification_method,callback|nullable|string',
@@ -52,6 +54,7 @@ class StoreOrderRequest extends FormRequest
             'delivery_address.max' => 'Адрес доставки слишком длинный',
             'delivery_city.required_if' => 'Укажите город',
             'delivery_street.required_if' => 'Укажите улицу и дом',
+            'delivery_house.required_if' => 'Укажите номер дома',
             'verification_request_id.required_unless' => 'Требуется верификация номера телефона',
             'items.required' => 'Корзина не может быть пустой',
             'items.min' => 'Необходимо добавить хотя бы один товар',
