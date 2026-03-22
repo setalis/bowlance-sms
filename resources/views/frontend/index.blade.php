@@ -158,34 +158,36 @@
     </div>
 
     <!-- Табы -->
+    @php
+        $tabsTop = $siteOrdersEnabled ? 'top-20' : 'top-[136px]';
+        $categoryLinksTop = $siteOrdersEnabled ? 'top-[144px]' : 'top-[210px]';
+        $scrollMt = $siteOrdersEnabled ? 'scroll-mt-[210px]' : 'scroll-mt-[270px]';
+    @endphp
     <div class="mt-8">
-        <nav class="tabs tabs-bordered" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
-            <button type="button" 
-                    class="tab w-full h-16 text-base md:text-lg active-tab:tab-active active" 
-                    id="menu-tab" 
-                    data-tab="#menu-content" 
-                    aria-controls="menu-content" 
-                    role="tab" 
-                    aria-selected="true">
-                <span class="icon-[tabler--checkup-list] mr-2 size-6"></span>
-                <!-- <img src="{{ asset('storage/images/menu-icon.png') }}" alt="Меню" class="size-10 mr-2 md:mr-4"> -->
-                <!-- <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" class="size-6 mr-2 md:mr-4">
-                    <path d="m19.5,13h-11c-.276,0-.5-.224-.5-.5s.224-.5.5-.5h11c.276,0,.5.224.5.5s-.224.5-.5.5Zm-7-4h7c.276,0,.5-.224.5-.5s-.224-.5-.5-.5h-7c-.276,0-.5.224-.5.5s.224.5.5.5Zm-4,7c-.276,0-.5.224-.5.5s.224.5.5.5h4c.276,0,.5-.224.5-.5s-.224-.5-.5-.5h-4Zm-4-6c-1.378,0-2.5-1.121-2.5-2.5v-2.55c-1.14-.232-2-1.243-2-2.45C0,1.121,1.122,0,2.5,0c.618,0,1.21.232,1.664.639,1.048-.82,2.624-.82,3.672,0,.454-.406,1.046-.639,1.664-.639,1.378,0,2.5,1.121,2.5,2.5,0,1.207-.86,2.218-2,2.45v2.55c0,1.379-1.122,2.5-2.5,2.5h-3Zm0-1h3c.827,0,1.5-.673,1.5-1.5v-3c0-.276.224-.5.5-.5.827,0,1.5-.673,1.5-1.5s-.673-1.5-1.5-1.5c-.485,0-.943.239-1.225.64-.088.125-.229.203-.381.211-.157.016-.301-.054-.402-.168-.778-.881-2.205-.881-2.983,0-.101.115-.245.189-.402.168-.153-.008-.293-.086-.381-.211-.282-.4-.74-.64-1.225-.64-.827,0-1.5.673-1.5,1.5s.673,1.5,1.5,1.5c.276,0,.5.224.5.5v3c0,.827.673,1.5,1.5,1.5Zm19.5-4.5v9.515c0,1.736-.677,3.369-1.904,4.597l-3.484,3.484c-1.228,1.228-2.86,1.904-4.597,1.904h-5.515c-2.481,0-4.5-2.019-4.5-4.5v-7c0-.276.224-.5.5-.5s.5.224.5.5v7c0,1.93,1.57,3.5,3.5,3.5h5.515c.335,0,.663-.038.985-.096v-5.404c0-1.379,1.121-2.5,2.5-2.5h5.404c.058-.323.096-.651.096-.985V4.5c0-1.93-1.57-3.5-3.5-3.5h-5c-.276,0-.5-.224-.5-.5s.224-.5.5-.5h5c2.481,0,4.5,2.019,4.5,4.5Zm-1.38,11.5h-5.12c-.827,0-1.5.673-1.5,1.5v5.121c.704-.273,1.354-.682,1.904-1.232l3.484-3.484c.55-.55.959-1.2,1.232-1.904Z"/>
-                </svg> -->
-                {{ __('frontend.menu_tab') }}
-            </button>
-            <button type="button" 
-                    class="tab w-full h-16 text-base md:text-lg font-medium active-tab:tab-active" 
-                    id="constructor-tab" 
-                    data-tab="#constructor-content" 
-                    aria-controls="constructor-content" 
-                    role="tab" 
-                    aria-selected="false">
-                <span class="icon-[tabler--category-plus] mr-2 size-5"></span>
-                <!-- <img src="{{ asset('storage/images/constructor-icon.png') }}" alt="Конструктор" class="size-10 mr-2 md:mr-4"> -->
-                {{ __('frontend.constructor_tab') }}
-            </button>
-        </nav>
+        <div class="sticky {{ $tabsTop }} z-40 -mx-4 px-4 bg-base-100 shadow-sm">
+            <nav class="tabs tabs-bordered" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
+                <button type="button" 
+                        class="tab w-full h-16 text-base md:text-lg active-tab:tab-active active" 
+                        id="menu-tab" 
+                        data-tab="#menu-content" 
+                        aria-controls="menu-content" 
+                        role="tab" 
+                        aria-selected="true">
+                    <span class="icon-[tabler--checkup-list] mr-2 size-6"></span>
+                    {{ __('frontend.menu_tab') }}
+                </button>
+                <button type="button" 
+                        class="tab w-full h-16 text-base md:text-lg font-medium active-tab:tab-active" 
+                        id="constructor-tab" 
+                        data-tab="#constructor-content" 
+                        aria-controls="constructor-content" 
+                        role="tab" 
+                        aria-selected="false">
+                    <span class="icon-[tabler--category-plus] mr-2 size-5"></span>
+                    {{ __('frontend.constructor_tab') }}
+                </button>
+            </nav>
+        </div>
 
         <!-- Контент табов -->
         <!-- <div class="rounded-box bg-base-100 p-6 shadow-md"> -->
@@ -195,7 +197,7 @@
                     @php
                         $categoryBadgeColors = ['badge-primary', 'badge-success', 'badge-info', 'badge-warning', 'badge-error'];
                     @endphp
-                    <nav class="flex flex-wrap gap-2 mb-6 pb-4 border-b border-gray-200" aria-label="{{ __('frontend.menu_tab') }}">
+                    <nav class="sticky {{ $categoryLinksTop }} z-39 flex flex-wrap gap-2 -mx-4 px-4 py-3 mb-6 border-b border-base-content/10 bg-base-100 shadow-sm" aria-label="{{ __('frontend.menu_tab') }}">
                         @foreach($dishCategories as $category)
                             <a href="#menu-category-{{ $category->id }}"
                                @click.prevent="const el = document.querySelector($event.currentTarget.getAttribute('href')); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })"
@@ -213,7 +215,7 @@
                     </div>
                 @else
                     @foreach($dishCategories as $category)
-                        <div id="menu-category-{{ $category->id }}" class="mb-10 scroll-mt-24">
+                        <div id="menu-category-{{ $category->id }}" class="mb-10 {{ $scrollMt }}">
                             <h3 class="mb-6 flex items-center gap-2 text-2xl font-bold">
                                 <span class="{{ $category->icon_class ?: 'icon-[tabler--bowl-chopsticks]' }} size-6 text-emerald-600"></span>
                                 {{ $category->name }}
