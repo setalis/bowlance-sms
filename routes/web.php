@@ -39,6 +39,9 @@ Route::post('/phone/verify/telegram/start', [\App\Http\Controllers\PhoneVerifica
 Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramBotController::class, 'webhook'])
     ->name('telegram.webhook');
 
+// Обновление CSRF-токена (используется при автоматическом ретрае после 419)
+Route::get('/csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf.token');
+
 // Публичные маршруты для заказов
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');

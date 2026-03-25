@@ -119,6 +119,7 @@ class OrderController extends Controller
                 'subtotal' => $subtotal,
                 'delivery_fee' => $deliveryFee,
                 'total' => $total,
+                'payment_method' => $request->payment_method ?? 'cash',
                 'status' => OrderStatus::New,
                 'phone_verified' => ! $isCallback,
                 'phone_verified_at' => $isCallback ? null : ($verification?->verified_at ?? now()),

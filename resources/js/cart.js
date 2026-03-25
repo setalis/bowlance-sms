@@ -217,8 +217,26 @@ export function initCart() {
             this.isOpen = false;
         },
 
+        // Обновить CSRF-токен (используется при автоматическом ретрае после 419)
+        async refreshCsrfToken() {
+            try {
+                const response = await fetch('/csrf-token', {
+                    headers: { 'Accept': 'application/json' },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const meta = document.querySelector('meta[name="csrf-token"]');
+                    if (meta && data.token) {
+                        meta.setAttribute('content', data.token);
+                        return data.token;
+                    }
+                }
+            } catch (e) {}
+            return null;
+        },
+
         // Оформить заказ
-        async checkout(customerData) {
+        async checkout(customerData, isRetry = false) {
             if (!this.isOrdersEnabled()) {
                 this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
                 return false;
@@ -260,6 +278,7 @@ export function initCart() {
                     receiver_phone: customerData.receiverPhone || null,
                     leave_at_door: customerData.leaveAtDoor || false,
                     comment: customerData.comment || null,
+                    payment_method: customerData.paymentMethod || customerData.payment_method || 'cash',
                     verification_method: verificationMethod,
                     verification_request_id: verificationMethod !== 'callback' ? customerData.verification_request_id : null,
                     confirm_switch_user: customerData.confirm_switch_user || false,
@@ -294,6 +313,13 @@ export function initCart() {
                 });
 
                 if (response.status === 419) {
+                    if (!isRetry) {
+                        // Автоматически обновляем токен и делаем один повтор запроса
+                        const newToken = await this.refreshCsrfToken();
+                        if (newToken) {
+                            return this.checkout(customerData, true);
+                        }
+                    }
                     this.showNotification('Сессия истекла. Обновите страницу (F5) и повторите попытку.', 'error');
                     setTimeout(() => window.location.reload(), 1500);
                     return false;

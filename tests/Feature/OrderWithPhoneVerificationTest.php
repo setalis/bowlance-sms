@@ -840,3 +840,84 @@ it('заказ с callback имеет корректные флаги phone_veri
     expect($order->phone_verified)->toBeFalse();
     expect($order->phone_verified_at)->toBeNull();
 });
+
+it('сохраняет способ оплаты наличными по умолчанию', function () {
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 15.50,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $this->postJson('/orders', $orderData)->assertStatus(201);
+
+    $order = \App\Models\Order::latest()->first();
+    expect($order->payment_method)->toBe(\App\Enums\PaymentMethod::Cash);
+});
+
+it('сохраняет способ оплаты банковским переводом', function () {
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+        'payment_method' => 'bank_transfer',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 15.50,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $this->postJson('/orders', $orderData)->assertStatus(201);
+
+    $order = \App\Models\Order::latest()->first();
+    expect($order->payment_method)->toBe(\App\Enums\PaymentMethod::BankTransfer);
+});
+
+it('отклоняет некорректный способ оплаты', function () {
+    $verification = PhoneVerification::factory()->verified()->create([
+        'phone' => '+995555123456',
+    ]);
+
+    $orderData = [
+        'customer_name' => 'Тестовый Клиент',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+        'payment_method' => 'bitcoin',
+        'verification_request_id' => $verification->request_id,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 15.50,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $this->postJson('/orders', $orderData)->assertStatus(422)
+        ->assertJsonValidationErrors('payment_method');
+});

@@ -438,8 +438,8 @@
         >
             <!-- Sticky Header с прогресс-индикатором -->
             <div class="flex-none px-6 pt-5 pb-4 border-b border-base-200">
-                <!-- Прогресс-индикатор шагов -->
-                <div class="flex items-center gap-2 mb-4">
+                <!-- Прогресс-индикатор 4 шага -->
+                <div class="flex items-center gap-1.5 mb-4">
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">1</div>
                     <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
@@ -448,21 +448,33 @@
                     </div>
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 2 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">2</div>
+                    <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
+                        <div class="h-full bg-emerald-600 transition-all duration-500 rounded-full"
+                             :style="step >= 3 ? 'width: 100%' : 'width: 0%'"></div>
+                    </div>
+                    <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
+                         :class="step >= 3 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">3</div>
+                    <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
+                        <div class="h-full bg-emerald-600 transition-all duration-500 rounded-full"
+                             :style="step >= 4 ? 'width: 100%' : 'width: 0%'"></div>
+                    </div>
+                    <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
+                         :class="step >= 4 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">4</div>
                 </div>
                 <!-- Заголовок + кнопка назад + закрыть -->
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                         <button type="button"
-                                @click="step = 1"
-                                x-show="step === 2"
+                                @click="step = step - 1"
+                                x-show="step > 1"
                                 class="btn btn-circle btn-sm text-base-content/50 bg-white hover:text-base-content -ml-1">
                             <span class="icon-[tabler--arrow-left] size-4"></span>
                         </button>
                         <div>
                             <h3 class="text-lg font-bold leading-tight"
-                                x-text="step === 1 ? '{{ __('frontend.checkout_title') }}' : 'Подтверждение'"></h3>
+                                x-text="step === 1 ? '{{ __('frontend.checkout_title') }}' : (step === 2 ? 'Адрес доставки' : (step === 3 ? 'Способ оплаты' : 'Подтверждение'))"></h3>
                             <p class="text-xs text-base-content/40 leading-tight"
-                               x-text="step === 1 ? 'Шаг 1 из 2 — контакты и доставка' : 'Шаг 2 из 2 — подтверждение номера'"></p>
+                               x-text="step === 1 ? 'Шаг 1 из 4 — контакты и время' : (step === 2 ? 'Шаг 2 из 4 — адрес или самовывоз' : (step === 3 ? 'Шаг 3 из 4 — как вы оплатите' : 'Шаг 4 из 4 — подтверждение номера'))"></p>
                         </div>
                     </div>
                     <button @click="closeModal()" class="btn btn-circle btn-sm text-base-content/40 shrink-0 bg-white hover:bg-error/10">
@@ -475,7 +487,7 @@
             <div class="overflow-y-auto grow">
                 <form @submit.prevent="submitOrder">
 
-                    <!-- ====== ШАГ 1 ====== -->
+                    <!-- ====== ШАГ 1: Контакты + Время доставки ====== -->
                     <div x-show="step === 1" class="p-6 space-y-5">
 
                         <!-- Блок: Контакты -->
@@ -512,54 +524,6 @@
                                           x-cloak
                                           class="absolute right-3 top-1/2 -translate-y-1/2 icon-[tabler--circle-check-filled] size-5 text-emerald-500"></span>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Блок: Способ получения -->
-                        <div class="space-y-3">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">
-                                <span class="icon-[tabler--map-pin] size-3.5 mr-1 inline-block"></span>
-                                Способ получения <span class="text-error">*</span>
-                            </p>
-                            <div class="grid grid-cols-2 gap-3">
-                                <!-- Доставка -->
-                                <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
-                                       :class="formData.deliveryType === 'delivery' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
-                                    <input type="radio"
-                                           x-model="formData.deliveryType"
-                                           value="delivery"
-                                           name="delivery_type"
-                                           class="hidden"
-                                           @change="fetchWoltEstimate()">
-                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
-                                         :class="formData.deliveryType === 'delivery' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
-                                        <span class="icon-[tabler--truck-delivery] size-5"
-                                              :class="formData.deliveryType === 'delivery' ? 'text-emerald-600' : 'text-base-content/40'"></span>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-sm leading-tight">Доставка</p>
-                                        <p class="text-xs text-base-content/50 leading-tight">Wolt Drive</p>
-                                    </div>
-                                </label>
-                                <!-- Самовывоз -->
-                                <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
-                                       :class="formData.deliveryType === 'pickup' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
-                                    <input type="radio"
-                                           x-model="formData.deliveryType"
-                                           value="pickup"
-                                           name="delivery_type"
-                                           class="hidden"
-                                           @change="woltEstimate = { loading: false, available: null, fee: null, eta_minutes: null, message: null }">
-                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
-                                         :class="formData.deliveryType === 'pickup' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
-                                        <span class="icon-[tabler--walk] size-5"
-                                              :class="formData.deliveryType === 'pickup' ? 'text-emerald-600' : 'text-base-content/40'"></span>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-sm leading-tight">Самовывоз</p>
-                                        <p class="text-xs text-base-content/50 leading-tight">Из заведения</p>
-                                    </div>
-                                </label>
                             </div>
                         </div>
 
@@ -613,6 +577,83 @@
                                         <option :value="slot" x-text="slot"></option>
                                     </template>
                                 </select>
+                            </div>
+                        </div>
+
+                        <!-- Итоговая сумма -->
+                        <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 dark:from-emerald-950/30 dark:to-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/40 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-0.5">{{ __('frontend.total_to_pay') }}</p>
+                                    <p x-show="formData.deliveryType === 'pickup' && pickupDiscount"
+                                       x-cloak
+                                       class="text-xs text-emerald-600/70 dark:text-emerald-400/70">
+                                        Скидка за самовывоз применена
+                                    </p>
+                                </div>
+                                <p class="text-3xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums"
+                                   x-text="totalToPay.toFixed(2) + ' ₾'"></p>
+                            </div>
+                        </div>
+
+                        <!-- Кнопка далее -->
+                        <button type="button"
+                                @click="goToStep2()"
+                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                                :disabled="!formData.name || !formData.phone">
+                            Далее
+                            <span class="icon-[tabler--arrow-right] size-5"></span>
+                        </button>
+                    </div>
+
+                    <!-- ====== ШАГ 2: Способ получения + Адрес ====== -->
+                    <div x-show="step === 2" class="p-6 space-y-5">
+
+                        <!-- Блок: Способ получения -->
+                        <div class="space-y-3">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">
+                                <span class="icon-[tabler--map-pin] size-3.5 mr-1 inline-block"></span>
+                                Способ получения <span class="text-error">*</span>
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- Доставка -->
+                                <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
+                                       :class="formData.deliveryType === 'delivery' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
+                                    <input type="radio"
+                                           x-model="formData.deliveryType"
+                                           value="delivery"
+                                           name="delivery_type"
+                                           class="hidden"
+                                           @change="fetchWoltEstimate()">
+                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                         :class="formData.deliveryType === 'delivery' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
+                                        <span class="icon-[tabler--truck-delivery] size-5"
+                                              :class="formData.deliveryType === 'delivery' ? 'text-emerald-600' : 'text-base-content/40'"></span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-sm leading-tight">Доставка</p>
+                                        <p class="text-xs text-base-content/50 leading-tight">Wolt Drive</p>
+                                    </div>
+                                </label>
+                                <!-- Самовывоз -->
+                                <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
+                                       :class="formData.deliveryType === 'pickup' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
+                                    <input type="radio"
+                                           x-model="formData.deliveryType"
+                                           value="pickup"
+                                           name="delivery_type"
+                                           class="hidden"
+                                           @change="woltEstimate = { loading: false, available: null, fee: null, eta_minutes: null, message: null }">
+                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                         :class="formData.deliveryType === 'pickup' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
+                                        <span class="icon-[tabler--walk] size-5"
+                                              :class="formData.deliveryType === 'pickup' ? 'text-emerald-600' : 'text-base-content/40'"></span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-sm leading-tight">Самовывоз</p>
+                                        <p class="text-xs text-base-content/50 leading-tight">Из заведения</p>
+                                    </div>
+                                </label>
                             </div>
                         </div>
 
@@ -739,34 +780,162 @@
                             </div>
                         </div>
 
-                        <!-- Итоговая сумма -->
-                        <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 dark:from-emerald-950/30 dark:to-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/40 p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-0.5">{{ __('frontend.total_to_pay') }}</p>
-                                    <p x-show="formData.deliveryType === 'pickup' && pickupDiscount"
-                                       x-cloak
-                                       class="text-xs text-emerald-600/70 dark:text-emerald-400/70">
-                                        Скидка за самовывоз применена
-                                    </p>
-                                </div>
-                                <p class="text-3xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums"
-                                   x-text="totalToPay.toFixed(2) + ' ₾'"></p>
+                        <!-- Блок: информация о самовывозе -->
+                        <div x-show="formData.deliveryType === 'pickup'" x-cloak
+                             class="rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 p-4 flex items-start gap-3">
+                            <div class="size-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                                <span class="icon-[tabler--walk] size-5 text-emerald-600"></span>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-sm text-emerald-800 dark:text-emerald-200">Самовывоз из заведения</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Заказ будет готов — мы свяжемся с вами для уточнения времени.</p>
                             </div>
                         </div>
 
                         <!-- Кнопка далее -->
                         <button type="button"
-                                @click="goToVerification()"
-                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
-                                :disabled="!formData.name || !formData.phone">
+                                @click="goToStep3()"
+                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20">
                             Далее
                             <span class="icon-[tabler--arrow-right] size-5"></span>
                         </button>
                     </div>
 
-                    <!-- ====== ШАГ 2 ====== -->
-                    <div x-show="step === 2" class="p-6 space-y-4">
+                    <!-- ====== ШАГ 3: Способ оплаты ====== -->
+                    <div x-show="step === 3" class="p-6 space-y-5">
+
+                        <div class="space-y-3">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">
+                                <span class="icon-[tabler--credit-card] size-3.5 mr-1 inline-block"></span>
+                                Способ оплаты
+                            </p>
+
+                            <!-- Наличными -->
+                            <label class="flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all"
+                                   :class="formData.paymentMethod === 'cash' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
+                                <input type="radio"
+                                       x-model="formData.paymentMethod"
+                                       value="cash"
+                                       class="hidden">
+                                <div class="size-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                     :class="formData.paymentMethod === 'cash' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
+                                    <span class="icon-[tabler--cash] size-5"
+                                          :class="formData.paymentMethod === 'cash' ? 'text-emerald-600' : 'text-base-content/40'"></span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">Наличными курьеру</p>
+                                    <p class="text-xs text-base-content/50">Оплата при получении</p>
+                                </div>
+                                <span x-show="formData.paymentMethod === 'cash'" class="icon-[tabler--circle-check-filled] size-5 text-emerald-500 shrink-0"></span>
+                            </label>
+
+                            <!-- Перевод на карту -->
+                            <label class="flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all"
+                                   :class="formData.paymentMethod === 'bank_transfer' ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/20' : 'border-base-200 hover:border-base-300'">
+                                <input type="radio"
+                                       x-model="formData.paymentMethod"
+                                       value="bank_transfer"
+                                       class="hidden">
+                                <div class="size-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                     :class="formData.paymentMethod === 'bank_transfer' ? 'bg-violet-100 dark:bg-violet-900/40' : 'bg-base-200'">
+                                    <span class="icon-[tabler--credit-card] size-5"
+                                          :class="formData.paymentMethod === 'bank_transfer' ? 'text-violet-600' : 'text-base-content/40'"></span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">Перевод на карту</p>
+                                    <p class="text-xs text-base-content/50">Bank of Georgia</p>
+                                </div>
+                                <span x-show="formData.paymentMethod === 'bank_transfer'" class="icon-[tabler--circle-check-filled] size-5 text-violet-500 shrink-0"></span>
+                            </label>
+                        </div>
+
+                        <!-- Банковская карта (показывается при выборе bank_transfer) -->
+                        <div x-show="formData.paymentMethod === 'bank_transfer'"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-cloak>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
+                                <span class="icon-[tabler--info-circle] size-3.5 mr-1 inline-block"></span>
+                                Реквизиты для перевода
+                            </p>
+
+                            <!-- Карта -->
+                            <div x-data="{ copied: false }"
+                                 @click="navigator.clipboard.writeText('GE05BG0000000539887879').then(() => { copied = true; $store.cart.showNotification('Номер карты скопирован!', 'success'); setTimeout(() => copied = false, 2000); })"
+                                 class="relative rounded-2xl cursor-pointer select-none overflow-hidden transition-all active:scale-[0.98] flex flex-col justify-between"
+                                 style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #4c1d95 100%); aspect-ratio: 1.586; padding: 6% 7%;">
+
+                                <!-- Декоративные круги -->
+                                <div class="absolute -top-8 -right-8 size-36 rounded-full opacity-20"
+                                     style="background: rgba(255,255,255,0.3);"></div>
+                                <div class="absolute -bottom-6 -left-6 size-28 rounded-full opacity-10"
+                                     style="background: rgba(255,255,255,0.4);"></div>
+
+                                <!-- Верхняя строка: лого банка + иконка платёжной системы -->
+                                <div class="flex items-center justify-between relative z-10">
+                                    <span class="text-white/90 font-bold text-xs tracking-wide">Bank of Georgia</span>
+                                    <div class="flex gap-1 items-center">
+                                        <div class="size-5 rounded-full bg-red-500/80"></div>
+                                        <div class="size-5 rounded-full bg-amber-400/80 -ml-2.5"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Чип -->
+                                <div class="relative z-10">
+                                    <div class="w-8 h-6 rounded-md bg-amber-300/70 flex items-center justify-center">
+                                        <div class="w-6 h-4 rounded-sm border border-amber-400/50 grid grid-cols-3 gap-px p-0.5">
+                                            <div class="bg-amber-400/60 rounded-sm"></div>
+                                            <div class="bg-amber-400/60 rounded-sm"></div>
+                                            <div class="bg-amber-400/60 rounded-sm"></div>
+                                            <div class="bg-amber-400/60 rounded-sm"></div>
+                                            <div class="bg-amber-400/60 rounded-sm"></div>
+                                            <div class="bg-amber-400/60 rounded-sm"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Номер карты -->
+                                <div class="relative z-10">
+                                    <p class="text-white/60 mb-0.5" style="font-size: 10px;">Номер карты</p>
+                                    <p class="text-white font-mono font-bold whitespace-nowrap" style="font-size: clamp(11px, 3vw, 15px); letter-spacing: 0.08em;">
+                                        GE05 BG00 0000 0539 8878 79
+                                    </p>
+                                </div>
+
+                                <!-- Держатель + индикатор копирования -->
+                                <div class="flex items-end justify-between relative z-10">
+                                    <div>
+                                        <p class="text-white/60 uppercase mb-0.5" style="font-size: 9px; letter-spacing: 0.05em;">Держатель</p>
+                                        <p class="text-white font-semibold" style="font-size: clamp(10px, 2.5vw, 13px); letter-spacing: 0.04em;">VLADISLAV KRAVCHENKO</p>
+                                    </div>
+                                    <!-- Индикатор копирования -->
+                                    <div class="flex items-center gap-1 transition-all shrink-0"
+                                         :class="copied ? 'text-white' : 'text-white/60'"
+                                         style="font-size: 10px;">
+                                        <span x-show="!copied" class="icon-[tabler--copy] size-3"></span>
+                                        <span x-show="copied" class="icon-[tabler--check] size-3 text-emerald-300"></span>
+                                        <span x-text="copied ? 'Скопировано!' : 'Копировать'"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-xs text-base-content/50 mt-2 text-center">
+                                После оплаты сохраните скриншот чека — менеджер может запросить подтверждение.
+                            </p>
+                        </div>
+
+                        <!-- Кнопка далее -->
+                        <button type="button"
+                                @click="goToStep4()"
+                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20">
+                            Далее
+                            <span class="icon-[tabler--arrow-right] size-5"></span>
+                        </button>
+                    </div>
+
+                    <!-- ====== ШАГ 4: Подтверждение номера ====== -->
+                    <div x-show="step === 4" class="p-6 space-y-4">
 
                         <!-- Номер телефона (не для callback) -->
                         <div x-show="verificationMethod !== 'callback'"
@@ -915,9 +1084,7 @@
 
                         <!-- Callback: карточка + кнопка -->
                         <div x-show="verificationMethod === 'callback'" class="space-y-4">
-                            <!-- Сменить метод (показываем всегда при callback) -->
-                            <div x-show="verificationMethod === 'callback'"
-                                 class="rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4">
+                            <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4">
                                 <div class="flex items-start gap-3 mb-3">
                                     <div class="size-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0 mt-0.5">
                                         <span class="icon-[tabler--phone-call] size-5 text-amber-600"></span>

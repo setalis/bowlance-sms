@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,6 +48,7 @@ class Order extends Model
         'wolt_tracking_url',
         'wolt_last_payload',
         'needs_callback',
+        'payment_method',
     ];
 
     protected function casts(): array
@@ -54,6 +56,7 @@ class Order extends Model
         return [
             'status' => OrderStatus::class,
             'delivery_type' => DeliveryType::class,
+            'payment_method' => PaymentMethod::class,
             'subtotal' => 'decimal:2',
             'delivery_fee' => 'decimal:2',
             'total' => 'decimal:2',

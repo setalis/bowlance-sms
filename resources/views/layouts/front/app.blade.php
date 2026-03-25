@@ -254,7 +254,8 @@
                 courierComment: '',
                 receiverPhone: '',
                 leaveAtDoor: false,
-                comment: ''
+                comment: '',
+                paymentMethod: 'cash'
             },
             
             phoneVerification: null,
@@ -289,7 +290,7 @@
                 const saved = this.restoreTelegramSession();
                 if (saved) {
                     this.open = true;
-                    this.step = 2;
+                    this.step = 4;
                 }
                 
                 // Загрузить адреса
@@ -395,11 +396,15 @@
                 return slots;
             },
 
-            goToVerification() {
+            goToStep2() {
                 if (!this.formData.name || !this.formData.phone) {
                     this.$store.cart.showNotification('Заполните имя и телефон', 'error');
                     return;
                 }
+                this.step = 2;
+            },
+
+            goToStep3() {
                 if (this.formData.deliveryType === 'delivery' && (!this.formData.deliveryCity?.trim() || !this.formData.deliveryStreet?.trim())) {
                     this.$store.cart.showNotification('Укажите город и улицу', 'error');
                     return;
@@ -408,7 +413,11 @@
                     this.$store.cart.showNotification('Укажите номер дома', 'error');
                     return;
                 }
-                this.step = 2;
+                this.step = 3;
+            },
+
+            goToStep4() {
+                this.step = 4;
             },
             
             async sendVerificationCode() {
@@ -556,6 +565,7 @@
                         verification_method: this.verificationMethod,
                         verification_request_id: isCallback ? null : this.verificationRequestId,
                         confirm_switch_user: this.formData.confirm_switch_user || false,
+                        paymentMethod: this.formData.paymentMethod || 'cash',
                         // Явно передаём адрес доставки при отправке (поля могут не попадать в spread при скрытом шаге 1)
                         deliveryCity: (this.formData.deliveryCity || '').trim(),
                         deliveryStreet: (this.formData.deliveryStreet || '').trim(),
@@ -628,7 +638,8 @@
                     courierComment: '',
                     receiverPhone: '',
                     leaveAtDoor: false,
-                    comment: ''
+                    comment: '',
+                    paymentMethod: 'cash'
                 };
                 this.step = 1;
                 this.verificationMethod = '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}';
