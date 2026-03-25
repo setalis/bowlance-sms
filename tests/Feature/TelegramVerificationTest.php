@@ -109,7 +109,7 @@ it('отклоняет неверный код для Telegram-верифика�
     $response->assertJson(['success' => false]);
 });
 
-it('обрабатывает Telegram webhook с командой /start TOKEN', function () {
+it('webhook /start TOKEN сохраняет chat_id и запрашивает контакт', function () {
     Http::fake([
         'api.telegram.org/*' => Http::response(['ok' => true], 200),
     ]);
@@ -127,6 +127,7 @@ it('обрабатывает Telegram webhook с командой /start TOKEN',
         'update_id' => 1,
         'message' => [
             'message_id' => 100,
+            'from' => ['id' => 777111222],
             'chat' => ['id' => 777111222, 'type' => 'private'],
             'text' => '/start webhook-test-token',
         ],
@@ -136,9 +137,14 @@ it('обрабатывает Telegram webhook с командой /start TOKEN',
 
     $response->assertSuccessful();
     $response->assertJson(['ok' => true]);
+
+    $this->assertDatabaseHas('phone_verifications', [
+        'telegram_token' => 'webhook-test-token',
+        'telegram_chat_id' => 777111222,
+    ]);
 });
 
-it('обрабатывает Telegram webhook с callback_query confirm:TOKEN', function () {
+it('webhook с правильным контактом генерирует код верификации', function () {
     Http::fake([
         'api.telegram.org/*' => Http::response(['ok' => true], 200),
     ]);
@@ -146,22 +152,24 @@ it('обрабатывает Telegram webhook с callback_query confirm:TOKEN', 
     $verification = PhoneVerification::create([
         'phone' => '+995555123456',
         'channel' => 'telegram',
-        'request_id' => 'tg-callback-test',
-        'telegram_token' => 'callback-test-token',
+        'request_id' => 'tg-contact-test',
+        'telegram_token' => 'contact-test-token',
+        'telegram_chat_id' => 777111444,
         'expires_at' => now()->addMinutes(10),
         'verified' => false,
     ]);
 
     $update = [
-        'update_id' => 2,
-        'callback_query' => [
-            'id' => 'cq-id-123',
-            'from' => ['id' => 777111333],
-            'message' => [
-                'message_id' => 101,
-                'chat' => ['id' => 777111333],
+        'update_id' => 3,
+        'message' => [
+            'message_id' => 102,
+            'from' => ['id' => 777111444],
+            'chat' => ['id' => 777111444, 'type' => 'private'],
+            'contact' => [
+                'phone_number' => '995555123456',
+                'first_name' => 'Test',
+                'user_id' => 777111444,
             ],
-            'data' => 'confirm:callback-test-token',
         ],
     ];
 
@@ -172,7 +180,82 @@ it('обрабатывает Telegram webhook с callback_query confirm:TOKEN', 
 
     $verification->refresh();
     expect($verification->code)->not->toBeNull();
-    expect($verification->telegram_chat_id)->toBe(777111333);
+    expect($verification->code)->toHaveLength(6);
+});
+
+it('webhook с неправильным контактом не генерирует код', function () {
+    Http::fake([
+        'api.telegram.org/*' => Http::response(['ok' => true], 200),
+    ]);
+
+    $verification = PhoneVerification::create([
+        'phone' => '+995555123456',
+        'channel' => 'telegram',
+        'request_id' => 'tg-mismatch-test',
+        'telegram_token' => 'mismatch-test-token',
+        'telegram_chat_id' => 777111555,
+        'expires_at' => now()->addMinutes(10),
+        'verified' => false,
+    ]);
+
+    $update = [
+        'update_id' => 4,
+        'message' => [
+            'message_id' => 103,
+            'from' => ['id' => 777111555],
+            'chat' => ['id' => 777111555, 'type' => 'private'],
+            'contact' => [
+                'phone_number' => '995999999999',
+                'first_name' => 'Test',
+                'user_id' => 777111555,
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/telegram/webhook', $update);
+
+    $response->assertSuccessful();
+    $response->assertJson(['ok' => true]);
+
+    $verification->refresh();
+    expect($verification->code)->toBeNull();
+});
+
+it('webhook с чужим контактом (не своим) не генерирует код', function () {
+    Http::fake([
+        'api.telegram.org/*' => Http::response(['ok' => true], 200),
+    ]);
+
+    $verification = PhoneVerification::create([
+        'phone' => '+995555123456',
+        'channel' => 'telegram',
+        'request_id' => 'tg-foreign-contact-test',
+        'telegram_token' => 'foreign-contact-token',
+        'telegram_chat_id' => 777111666,
+        'expires_at' => now()->addMinutes(10),
+        'verified' => false,
+    ]);
+
+    $update = [
+        'update_id' => 5,
+        'message' => [
+            'message_id' => 104,
+            'from' => ['id' => 777111666],
+            'chat' => ['id' => 777111666, 'type' => 'private'],
+            'contact' => [
+                'phone_number' => '995555123456',
+                'first_name' => 'Someone Else',
+                'user_id' => 999888777,
+            ],
+        ],
+    ];
+
+    $response = $this->postJson('/telegram/webhook', $update);
+
+    $response->assertSuccessful();
+
+    $verification->refresh();
+    expect($verification->code)->toBeNull();
 });
 
 it('отклоняет Telegram webhook при неверном секрете', function () {
@@ -198,6 +281,7 @@ it('принимает Telegram webhook при правильном секрет
         'update_id' => 100,
         'message' => [
             'message_id' => 110,
+            'from' => ['id' => 99999],
             'chat' => ['id' => 99999, 'type' => 'private'],
             'text' => '/start',
         ],

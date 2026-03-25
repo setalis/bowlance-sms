@@ -56,8 +56,6 @@ class TelegramVerifyService
     {
         if (isset($update['message'])) {
             $this->handleMessage($update['message']);
-        } elseif (isset($update['callback_query'])) {
-            $this->handleCallbackQuery($update['callback_query']);
         }
     }
 
@@ -67,6 +65,13 @@ class TelegramVerifyService
     protected function handleMessage(array $message): void
     {
         $chatId = $message['chat']['id'];
+
+        if (isset($message['contact'])) {
+            $this->handleContactMessage($chatId, $message['from']['id'] ?? null, $message['contact']);
+
+            return;
+        }
+
         $text = $message['text'] ?? '';
 
         if (str_starts_with($text, '/start ')) {
@@ -79,6 +84,7 @@ class TelegramVerifyService
 
     /**
      * Обработать /start с токеном верификации.
+     * Сохраняет chat_id и просит пользователя поделиться номером телефона.
      */
     protected function handleStartWithToken(int $chatId, string $token): void
     {
@@ -104,78 +110,72 @@ class TelegramVerifyService
             return;
         }
 
+        $verification->update(['telegram_chat_id' => $chatId]);
+
         $phone = $verification->phone;
 
-        $this->sendMessageWithInlineKeyboard(
+        $this->sendMessageWithContactKeyboard(
             $chatId,
-            "📱 Подтверждение номера телефона\n\nНомер: *{$phone}*\n\nНажмите кнопку ниже, чтобы получить код подтверждения:",
-            [
-                [
-                    [
-                        'text' => '✅ Получить код подтверждения',
-                        'callback_data' => "confirm:{$token}",
-                    ],
-                ],
-            ]
+            "📱 Подтверждение номера телефона\n\nВы хотите подтвердить номер: *{$phone}*\n\nНажмите кнопку ниже, чтобы поделиться своим номером из Telegram. Он должен совпадать с введённым на сайте."
         );
     }
 
     /**
-     * Обработать нажатие инлайн-кнопки.
+     * Обработать контакт, отправленный пользователем через кнопку «Поделиться номером».
+     * Сравнивает номер из Telegram с сохранённым и при совпадении выдаёт код.
      */
-    protected function handleCallbackQuery(array $callbackQuery): void
+    protected function handleContactMessage(int $chatId, ?int $fromId, array $contact): void
     {
-        $chatId = $callbackQuery['message']['chat']['id'];
-        $messageId = $callbackQuery['message']['message_id'];
-        $callbackQueryId = $callbackQuery['id'];
-        $data = $callbackQuery['data'] ?? '';
-
-        $this->answerCallbackQuery($callbackQueryId);
-
-        if (str_starts_with($data, 'confirm:')) {
-            $token = substr($data, 8);
-            $this->processConfirmation($chatId, $messageId, $token);
-        }
-    }
-
-    /**
-     * Обработать подтверждение номера: сгенерировать и отправить код.
-     */
-    protected function processConfirmation(int $chatId, int $messageId, string $token): void
-    {
-        $verification = PhoneVerification::where('telegram_token', $token)
-            ->where('channel', 'telegram')
-            ->first();
-
-        if (! $verification) {
-            $this->sendMessage($chatId, '❌ Запрос верификации не найден. Пожалуйста, начните процесс заново.');
+        // Убедиться, что пользователь делится своим собственным номером, а не чужим контактом
+        if (isset($contact['user_id']) && $fromId !== null && $contact['user_id'] !== $fromId) {
+            $this->sendMessageRemoveKeyboard($chatId, '❌ Пожалуйста, поделитесь своим собственным номером телефона, нажав на кнопку ниже.');
 
             return;
         }
 
-        if ($verification->verified) {
-            $this->sendMessage($chatId, '✅ Этот номер телефона уже подтверждён.');
+        $verification = PhoneVerification::where('telegram_chat_id', $chatId)
+            ->where('channel', 'telegram')
+            ->where('verified', false)
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (! $verification) {
+            $this->sendMessageRemoveKeyboard($chatId, '❌ Активный запрос верификации не найден. Пожалуйста, начните процесс заново на сайте.');
 
             return;
         }
 
         if ($verification->isExpired()) {
-            $this->sendMessage($chatId, '⏰ Срок действия запроса истёк. Пожалуйста, начните процесс заново на сайте.');
+            $this->sendMessageRemoveKeyboard($chatId, '⏰ Срок действия запроса истёк. Пожалуйста, начните процесс заново на сайте.');
+
+            return;
+        }
+
+        $telegramPhone = $this->normalizePhone($contact['phone_number']);
+        $storedPhone = $this->normalizePhone($verification->phone);
+
+        if ($telegramPhone !== $storedPhone) {
+            $this->sendMessageRemoveKeyboard(
+                $chatId,
+                "❌ Номер телефона в Telegram не совпадает с введённым на сайте.\n\nОжидался номер: *{$verification->phone}*\n\nПожалуйста, используйте Telegram-аккаунт с этим номером или введите правильный номер на сайте."
+            );
+
+            Log::warning('Telegram phone mismatch during verification', [
+                'request_id' => $verification->request_id,
+                'stored_phone' => $verification->phone,
+                'telegram_phone' => '+'.$telegramPhone,
+            ]);
 
             return;
         }
 
         $code = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
 
-        $verification->update([
-            'code' => $code,
-            'telegram_chat_id' => $chatId,
-        ]);
+        $verification->update(['code' => $code]);
 
-        $this->editMessageText(
+        $this->sendMessageRemoveKeyboard(
             $chatId,
-            $messageId,
-            "📱 Ваш код подтверждения:\n\n`{$code}`\n\nВведите этот код на сайте Bowlance.\n\n⏱ Код действителен 10 минут."
+            "✅ Номер подтверждён!\n\n📱 Ваш код подтверждения:\n\n`{$code}`\n\nВведите этот код на сайте Bowlance.\n\n⏱ Код действителен 10 минут."
         );
 
         Log::info('Telegram verification code sent', [
@@ -191,6 +191,14 @@ class TelegramVerifyService
     public function sendConfirmationMessage(int $chatId): void
     {
         $this->sendMessage($chatId, "✅ Ваш номер телефона успешно подтверждён!\n\nСпасибо за использование Bowlance.");
+    }
+
+    /**
+     * Нормализовать номер телефона до цифр (без +, пробелов и т.д.).
+     */
+    protected function normalizePhone(string $phone): string
+    {
+        return preg_replace('/\D/', '', $phone);
     }
 
     /**
@@ -214,11 +222,9 @@ class TelegramVerifyService
     }
 
     /**
-     * Отправить сообщение с инлайн-клавиатурой.
-     *
-     * @param  array<int, array<int, array{text: string, callback_data: string}>>  $keyboard
+     * Отправить сообщение с кнопкой «Поделиться номером телефона» (reply keyboard).
      */
-    protected function sendMessageWithInlineKeyboard(int $chatId, string $text, array $keyboard): void
+    protected function sendMessageWithContactKeyboard(int $chatId, string $text): void
     {
         if (empty($this->botToken)) {
             return;
@@ -229,49 +235,35 @@ class TelegramVerifyService
                 'chat_id' => $chatId,
                 'text' => $text,
                 'parse_mode' => 'Markdown',
-                'reply_markup' => json_encode(['inline_keyboard' => $keyboard]),
+                'reply_markup' => json_encode([
+                    'keyboard' => [[['text' => '📱 Поделиться номером телефона', 'request_contact' => true]]],
+                    'resize_keyboard' => true,
+                    'one_time_keyboard' => true,
+                ]),
             ]);
         } catch (\Exception $e) {
-            Log::error('Telegram sendMessageWithInlineKeyboard failed', ['error' => $e->getMessage()]);
+            Log::error('Telegram sendMessageWithContactKeyboard failed', ['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Редактировать текст существующего сообщения.
+     * Отправить сообщение и убрать reply-клавиатуру.
      */
-    protected function editMessageText(int $chatId, int $messageId, string $text): void
+    protected function sendMessageRemoveKeyboard(int $chatId, string $text): void
     {
         if (empty($this->botToken)) {
             return;
         }
 
         try {
-            Http::timeout(10)->post("{$this->apiBase}/editMessageText", [
+            Http::timeout(10)->post("{$this->apiBase}/sendMessage", [
                 'chat_id' => $chatId,
-                'message_id' => $messageId,
                 'text' => $text,
                 'parse_mode' => 'Markdown',
+                'reply_markup' => json_encode(['remove_keyboard' => true]),
             ]);
         } catch (\Exception $e) {
-            Log::error('Telegram editMessageText failed', ['error' => $e->getMessage()]);
-        }
-    }
-
-    /**
-     * Ответить на callback-запрос (убрать "загрузку" с кнопки).
-     */
-    protected function answerCallbackQuery(string $callbackQueryId): void
-    {
-        if (empty($this->botToken)) {
-            return;
-        }
-
-        try {
-            Http::timeout(10)->post("{$this->apiBase}/answerCallbackQuery", [
-                'callback_query_id' => $callbackQueryId,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Telegram answerCallbackQuery failed', ['error' => $e->getMessage()]);
+            Log::error('Telegram sendMessageRemoveKeyboard failed', ['error' => $e->getMessage()]);
         }
     }
 }
