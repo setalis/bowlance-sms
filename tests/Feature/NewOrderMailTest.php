@@ -48,7 +48,7 @@ it('отправляет письмо администратору после с
     $this->postJson('/orders', validOrderPayload('+995555100200', $verification->request_id))
         ->assertStatus(201);
 
-    Mail::assertQueued(NewOrderMail::class, function (NewOrderMail $mail) {
+    Mail::assertSent(NewOrderMail::class, function (NewOrderMail $mail) {
         return $mail->hasTo(config('mail.admin_email'));
     });
 });
@@ -63,7 +63,7 @@ it('письмо содержит правильный номер заказа �
     $this->postJson('/orders', validOrderPayload('+995555100201', $verification->request_id))
         ->assertStatus(201);
 
-    Mail::assertQueued(NewOrderMail::class, function (NewOrderMail $mail) {
+    Mail::assertSent(NewOrderMail::class, function (NewOrderMail $mail) {
         $order = \App\Models\Order::latest()->first();
 
         return str_contains($mail->envelope()->subject, $order->order_number);
@@ -82,5 +82,5 @@ it('не отправляет письмо когда приём заказов 
     $this->postJson('/orders', validOrderPayload('+995555100202', $verification->request_id))
         ->assertStatus(503);
 
-    Mail::assertNothingQueued();
+    Mail::assertNothingSent();
 });

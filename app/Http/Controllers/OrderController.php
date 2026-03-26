@@ -173,7 +173,7 @@ class OrderController extends Controller
 
             DB::commit();
 
-            Mail::to(config('mail.admin_email'))->queue(new NewOrderMail($order->load('items')));
+            Mail::to(config('mail.admin_email'))->send(new NewOrderMail($order->load('items')));
 
             $this->woltDriveService->createDeliveryForOrder($order->fresh('items'));
             $order->refresh();
