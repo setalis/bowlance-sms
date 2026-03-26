@@ -33,7 +33,7 @@ class StoreOrderRequest extends FormRequest
             'verification_request_id' => 'required_unless:verification_method,callback|nullable|string',
             'confirm_switch_user' => 'nullable|boolean',
             'items' => 'required|array|min:1',
-            'items.*.type' => 'required|in:dish,bowl',
+            'items.*.type' => 'required|in:dish,bowl,drink',
             'items.*.id' => 'required|integer',
             'items.*.name' => 'required|string',
             'items.*.price' => 'required|numeric|min:0',
