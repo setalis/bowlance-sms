@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
 use App\Http\Requests\StoreOrderRequest;
+use App\Mail\NewOrderMail;
 use App\Models\Discount;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -13,6 +14,7 @@ use App\Services\PhoneAuthService;
 use App\Services\WoltDriveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -170,6 +172,8 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
+            Mail::to(config('mail.admin_email'))->queue(new NewOrderMail($order->load('items')));
 
             $this->woltDriveService->createDeliveryForOrder($order->fresh('items'));
             $order->refresh();
