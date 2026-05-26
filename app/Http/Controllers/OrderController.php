@@ -11,6 +11,7 @@ use App\Models\OrderItem;
 use App\Models\PhoneVerification;
 use App\Models\Setting;
 use App\Services\PhoneAuthService;
+use App\Services\PosterService;
 use App\Services\WoltDriveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,8 @@ class OrderController extends Controller
 {
     public function __construct(
         protected PhoneAuthService $phoneAuthService,
-        protected WoltDriveService $woltDriveService
+        protected WoltDriveService $woltDriveService,
+        protected PosterService $posterService
     ) {}
 
     public function store(StoreOrderRequest $request): JsonResponse
@@ -175,6 +177,7 @@ class OrderController extends Controller
 
             Mail::to(config('mail.admin_email'))->send(new NewOrderMail($order->load('items')));
 
+            $this->posterService->createIncomingOrder($order->fresh('items.dish'));
             $this->woltDriveService->createDeliveryForOrder($order->fresh('items'));
             $order->refresh();
 

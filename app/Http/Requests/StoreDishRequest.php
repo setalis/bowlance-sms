@@ -48,6 +48,7 @@ class StoreDishRequest extends FormRequest
             'sauce_carbohydrates' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'sauce_fiber' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'sort_order' => ['integer', 'min:0'],
+            'poster_product_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
 

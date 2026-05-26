@@ -49,6 +49,7 @@ class Order extends Model
         'wolt_last_payload',
         'needs_callback',
         'payment_method',
+        'poster_order_id',
     ];
 
     protected function casts(): array

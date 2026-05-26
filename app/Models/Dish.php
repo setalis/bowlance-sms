@@ -38,6 +38,7 @@ class Dish extends Model
         'sauce_carbohydrates',
         'sauce_fiber',
         'sort_order',
+        'poster_product_id',
     ];
 
     protected function casts(): array
