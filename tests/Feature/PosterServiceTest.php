@@ -169,6 +169,40 @@ it('не отправляет заказ в Poster когда токен не з
     expect($result)->toBeNull();
 });
 
+it('логирует ошибку когда Poster возвращает error с HTTP 200', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'error' => 32,
+            'message' => 'Query parameters error',
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 250.00,
+        'quantity' => 1,
+        'subtotal' => 250.00,
+    ]);
+
+    $service = new PosterService;
+    $result = $service->createIncomingOrder($order->load('items.dish'));
+
+    expect($result)->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBeNull();
+});
+
 it('пропускает bowl и drink элементы при отправке в Poster', function () {
     config([
         'poster.enabled' => true,
