@@ -24,6 +24,7 @@ class ConstructorProduct extends Model
         'price',
         'image',
         'sort_order',
+        'poster_modification_id',
         'description',
         'description_ru',
         'description_ka',

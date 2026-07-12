@@ -3,6 +3,7 @@
 use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Models\ConstructorProduct;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -259,4 +260,202 @@ it('пропускает bowl и drink элементы при отправке 
         return count($body['products']) === 1
             && $body['products'][0]['product_id'] === 200;
     });
+});
+
+it('отправляет боул как конструктор с модификаторами', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.constructor_product_id' => 74,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '55'],
+        ]),
+    ]);
+
+    $rice = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
+    $salmon = ConstructorProduct::factory()->create(['poster_modification_id' => 302]);
+
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'bowl',
+        'dish_id' => null,
+        'name' => 'Собранный боул',
+        'price' => 300.00,
+        'quantity' => 2,
+        'subtotal' => 600.00,
+        'bowl_products' => [
+            ['id' => $rice->id, 'name' => 'Рис', 'price' => 100.00, 'quantity' => 1],
+            ['id' => $salmon->id, 'name' => 'Лосось', 'price' => 200.00, 'quantity' => 3],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $result = $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+        $modification = json_decode($body['products'][0]['modification'] ?? '', true);
+
+        return count($body['products']) === 1
+            && $body['products'][0]['product_id'] === 74
+            && $body['products'][0]['count'] === 2
+            && $modification === [
+                ['m' => 301, 'a' => 1],
+                ['m' => 302, 'a' => 3],
+            ];
+    });
+
+    expect($result)->not->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBe('55');
+});
+
+it('пропускает боул без сопоставленных модификаторов но отправляет блюда', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.constructor_product_id' => 74,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '56'],
+        ]),
+    ]);
+
+    $unmappedProduct = ConstructorProduct::factory()->create(['poster_modification_id' => null]);
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 250.00,
+        'quantity' => 1,
+        'subtotal' => 250.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'bowl',
+        'dish_id' => null,
+        'name' => 'Собранный боул',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+        'bowl_products' => [
+            ['id' => $unmappedProduct->id, 'name' => 'Без маппинга', 'price' => 100.00, 'quantity' => 1],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return count($body['products']) === 1
+            && $body['products'][0]['product_id'] === 169;
+    });
+});
+
+it('пропускает боул когда constructor_product_id не настроен', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.constructor_product_id' => 0,
+    ]);
+
+    Http::fake();
+
+    $rice = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'bowl',
+        'dish_id' => null,
+        'name' => 'Собранный боул',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+        'bowl_products' => [
+            ['id' => $rice->id, 'name' => 'Рис', 'price' => 100.00, 'quantity' => 1],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $result = $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertNothingSent();
+    expect($result)->toBeNull();
+});
+
+it('отправляет смешанный заказ с блюдом и боулом', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.constructor_product_id' => 74,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '57'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $rice = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
+
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 250.00,
+        'quantity' => 1,
+        'subtotal' => 250.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'bowl',
+        'dish_id' => null,
+        'name' => 'Собранный боул',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+        'bowl_products' => [
+            ['id' => $rice->id, 'name' => 'Рис', 'price' => 100.00, 'quantity' => 2],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $result = $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+        $modification = json_decode($body['products'][1]['modification'] ?? '', true);
+
+        return count($body['products']) === 2
+            && $body['products'][0]['product_id'] === 169
+            && $body['products'][1]['product_id'] === 74
+            && $modification === [['m' => 301, 'a' => 2]];
+    });
+
+    expect($result)->not->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBe('57');
 });

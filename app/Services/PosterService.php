@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\ConstructorProduct;
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -35,6 +37,14 @@ class PosterService
             ])
             ->values()
             ->all();
+
+        foreach ($order->items->where('item_type', 'bowl') as $bowlItem) {
+            $bowlProduct = $this->buildBowlProduct($bowlItem);
+
+            if ($bowlProduct !== null) {
+                $products[] = $bowlProduct;
+            }
+        }
 
         if (empty($products)) {
             Log::warning('Poster: no order items mapped to Poster products, order skipped', [
@@ -115,5 +125,53 @@ class PosterService
 
             return null;
         }
+    }
+
+    /**
+     * @return array{product_id: int, count: int, modification: string}|null
+     */
+    protected function buildBowlProduct(OrderItem $item): ?array
+    {
+        $constructorProductId = (int) config('poster.constructor_product_id');
+
+        if ($constructorProductId < 1) {
+            Log::warning('Poster: constructor_product_id is not configured, bowl skipped', [
+                'order_id' => $item->order_id,
+                'order_item_id' => $item->id,
+            ]);
+
+            return null;
+        }
+
+        $bowlProducts = collect($item->bowl_products ?? [])
+            ->filter(fn ($product) => is_array($product) && ! empty($product['id']));
+
+        $modificationIds = ConstructorProduct::whereIn('id', $bowlProducts->pluck('id'))
+            ->whereNotNull('poster_modification_id')
+            ->pluck('poster_modification_id', 'id');
+
+        $modification = $bowlProducts
+            ->filter(fn ($product) => $modificationIds->has($product['id']))
+            ->map(fn ($product) => [
+                'm' => (int) $modificationIds->get($product['id']),
+                'a' => max(1, (int) ($product['quantity'] ?? 1)),
+            ])
+            ->values();
+
+        if ($modification->isEmpty()) {
+            Log::warning('Poster: bowl has no products mapped to Poster modifications, bowl skipped', [
+                'order_id' => $item->order_id,
+                'order_item_id' => $item->id,
+                'bowl_products' => $item->bowl_products,
+            ]);
+
+            return null;
+        }
+
+        return [
+            'product_id' => $constructorProductId,
+            'count' => $item->quantity,
+            'modification' => $modification->toJson(),
+        ];
     }
 }
