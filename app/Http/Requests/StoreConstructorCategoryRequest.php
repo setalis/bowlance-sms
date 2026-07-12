@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ConstructorType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreConstructorCategoryRequest extends FormRequest
 {
@@ -27,6 +29,7 @@ class StoreConstructorCategoryRequest extends FormRequest
             'name_ka' => ['nullable', 'string', 'max:255'],
             'icon_class' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['integer', 'min:0'],
+            'type' => ['required', Rule::enum(ConstructorType::class)],
         ];
     }
 

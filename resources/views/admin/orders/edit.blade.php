@@ -126,6 +126,10 @@
                                     <span class="icon-[tabler--tools-kitchen-2] size-4"></span>
                                     Боул
                                 </button>
+                                <button type="button" @click="addBreakfastItem()" class="btn btn-sm btn-primary join-item gap-2">
+                                    <span class="icon-[tabler--coffee] size-4"></span>
+                                    Завтрак
+                                </button>
                             </div>
                         </div>
 
@@ -169,10 +173,10 @@
                                         </div>
                                     </div>
 
-                                    <!-- Боул -->
-                                    <div x-show="item.type === 'bowl'">
+                                    <!-- Боул / Завтрак -->
+                                    <div x-show="item.type === 'bowl' || item.type === 'breakfast'">
                                         <div class="flex items-center justify-between mb-3">
-                                            <h3 class="font-medium">Собранный боул</h3>
+                                            <h3 class="font-medium" x-text="item.type === 'breakfast' ? 'Собранный завтрак' : 'Собранный боул'"></h3>
                                             <button type="button" 
                                                     @click="removeItem(index)" 
                                                     class="btn btn-ghost btn-circle btn-sm text-error">
@@ -181,20 +185,18 @@
                                         </div>
                                         
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                                            @foreach($constructorCategories as $category)
+                                            <template x-for="category in getCategoriesForItem(item)" :key="category.id">
                                                 <div>
-                                                    <label class="label"><span class="label-text">{{ $category->name }}</span></label>
+                                                    <label class="label"><span class="label-text" x-text="category.name"></span></label>
                                                     <select class="select select-bordered select-sm w-full"
                                                             @change="toggleProduct(index, $event.target.value)">
                                                         <option value="">Выбрать...</option>
-                                                        @foreach($category->products as $product)
-                                                            <option value="{{ $product->id }}">
-                                                                {{ $product->name }} ({{ number_format($product->price, 2) }} ₾)
-                                                            </option>
-                                                        @endforeach
+                                                        <template x-for="product in category.products" :key="product.id">
+                                                            <option :value="product.id" x-text="product.name + ' (' + parseFloat(product.price).toFixed(2) + ' ₾)'"></option>
+                                                        </template>
                                                     </select>
                                                 </div>
-                                            @endforeach
+                                            </template>
                                         </div>
 
                                         <!-- Выбранные продукты -->
@@ -306,7 +308,7 @@ function orderForm() {
                 }
 
                 return [
-                    'type' => 'bowl',
+                    'type' => $item->item_type,
                     'bowl_products' => $bowlProducts,
                     'quantity' => $item->quantity ?? 1,
                 ];
@@ -316,11 +318,22 @@ function orderForm() {
     @endphp
 
     const productsData = @json($productsData);
+    const categoriesData = @json($constructorCategories->map(fn ($category) => [
+        'id' => $category->id,
+        'name' => $category->name,
+        'type' => $category->type->value,
+        'products' => $category->products->map(fn ($product) => [
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->price,
+        ])->values(),
+    ])->values());
     const existingItems = @json($existingItems);
 
     return {
         items: Array.isArray(existingItems) ? existingItems : [],
         productsData: productsData || {},
+        categoriesData: categoriesData,
         deliveryType: '{{ old('delivery_type', $order->delivery_type?->value ?? 'delivery') }}',
 
         addDishItem() {
@@ -338,6 +351,18 @@ function orderForm() {
                 bowl_products: [], 
                 quantity: 1 
             });
+        },
+
+        addBreakfastItem() {
+            this.items.push({
+                type: 'breakfast',
+                bowl_products: [],
+                quantity: 1
+            });
+        },
+
+        getCategoriesForItem(item) {
+            return this.categoriesData.filter(category => category.type === item.type);
         },
 
         removeItem(index) {

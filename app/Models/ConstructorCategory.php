@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ConstructorType;
 use Database\Factories\ConstructorCategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +23,15 @@ class ConstructorCategory extends Model
         'name_ka',
         'icon_class',
         'sort_order',
+        'type',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'type' => ConstructorType::class,
+        ];
+    }
 
     public function products(): HasMany
     {

@@ -100,7 +100,7 @@ class OrderController extends Controller
             'comment' => 'nullable|string|max:1000',
             'status' => 'required|in:new,unconfirmed,in_progress,completed,cancelled',
             'items' => 'required|array|min:1',
-            'items.*.type' => 'required|in:dish,bowl',
+            'items.*.type' => 'required|in:dish,bowl,breakfast',
             'items.*.dish_id' => 'nullable|exists:dishes,id',
             'items.*.bowl_products' => 'nullable|array',
             'items.*.quantity' => 'required|integer|min:1',
@@ -115,7 +115,7 @@ class OrderController extends Controller
 
             // Получаем продукты конструктора для расчёта цен боулов
             $allProductIds = collect($validated['items'])
-                ->where('type', 'bowl')
+                ->whereIn('type', $this->constructorItemTypes())
                 ->pluck('bowl_products')
                 ->flatten(1)
                 ->filter()
@@ -127,8 +127,7 @@ class OrderController extends Controller
                 if ($item['type'] === 'dish') {
                     $dish = $dishes->get($item['dish_id']);
                     $price = $dish->discount_price ?? $dish->price;
-                } else {
-                    // Для боула считаем сумму всех продуктов
+                } elseif ($this->isConstructorItem($item['type'])) {
                     $price = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
                         $constructorProduct = $constructorProducts->get($productId);
 
@@ -184,63 +183,8 @@ class OrderController extends Controller
                         'fats' => $dish->fats,
                         'carbohydrates' => $dish->carbohydrates,
                     ]);
-                } else {
-                    // Создаём боул
-                    $bowlPrice = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->price : 0;
-                    });
-
-                    $bowlCalories = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->calories : 0;
-                    });
-
-                    $bowlProteins = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->proteins : 0;
-                    });
-
-                    $bowlFats = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->fats : 0;
-                    });
-
-                    $bowlCarbs = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->carbohydrates : 0;
-                    });
-
-                    // Формируем массив с полной информацией о продуктах
-                    $bowlProductsData = collect($item['bowl_products'])->map(function ($productId) use ($constructorProducts) {
-                        $product = $constructorProducts->get($productId);
-
-                        return $product ? [
-                            'id' => $product->id,
-                            'name' => $product->name,
-                            'price' => $product->price,
-                        ] : null;
-                    })->filter()->values()->toArray();
-
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'item_type' => 'bowl',
-                        'dish_id' => null,
-                        'name' => 'Собранный боул',
-                        'price' => $bowlPrice,
-                        'quantity' => $item['quantity'],
-                        'subtotal' => $bowlPrice * $item['quantity'],
-                        'calories' => $bowlCalories,
-                        'proteins' => $bowlProteins,
-                        'fats' => $bowlFats,
-                        'carbohydrates' => $bowlCarbs,
-                        'bowl_products' => $bowlProductsData,
-                    ]);
+                } elseif ($this->isConstructorItem($item['type'])) {
+                    $this->createConstructorOrderItem($order, $item, $constructorProducts);
                 }
             }
 
@@ -283,7 +227,7 @@ class OrderController extends Controller
             'comment' => 'nullable|string|max:1000',
             'status' => 'required|in:new,unconfirmed,in_progress,completed,cancelled',
             'items' => 'required|array|min:1',
-            'items.*.type' => 'required|in:dish,bowl',
+            'items.*.type' => 'required|in:dish,bowl,breakfast',
             'items.*.dish_id' => 'nullable|exists:dishes,id',
             'items.*.bowl_products' => 'nullable|array',
             'items.*.quantity' => 'required|integer|min:1',
@@ -298,7 +242,7 @@ class OrderController extends Controller
 
             // Получаем продукты конструктора для расчёта цен боулов
             $allProductIds = collect($validated['items'])
-                ->where('type', 'bowl')
+                ->whereIn('type', $this->constructorItemTypes())
                 ->pluck('bowl_products')
                 ->flatten(1)
                 ->filter()
@@ -310,8 +254,7 @@ class OrderController extends Controller
                 if ($item['type'] === 'dish') {
                     $dish = $dishes->get($item['dish_id']);
                     $price = $dish->discount_price ?? $dish->price;
-                } else {
-                    // Для боула считаем сумму всех продуктов
+                } elseif ($this->isConstructorItem($item['type'])) {
                     $price = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
                         $constructorProduct = $constructorProducts->get($productId);
 
@@ -379,63 +322,8 @@ class OrderController extends Controller
                         'fats' => $dish->fats,
                         'carbohydrates' => $dish->carbohydrates,
                     ]);
-                } else {
-                    // Создаём боул
-                    $bowlPrice = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->price : 0;
-                    });
-
-                    $bowlCalories = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->calories : 0;
-                    });
-
-                    $bowlProteins = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->proteins : 0;
-                    });
-
-                    $bowlFats = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->fats : 0;
-                    });
-
-                    $bowlCarbs = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->carbohydrates : 0;
-                    });
-
-                    // Формируем массив с полной информацией о продуктах
-                    $bowlProductsData = collect($item['bowl_products'])->map(function ($productId) use ($constructorProducts) {
-                        $product = $constructorProducts->get($productId);
-
-                        return $product ? [
-                            'id' => $product->id,
-                            'name' => $product->name,
-                            'price' => $product->price,
-                        ] : null;
-                    })->filter()->values()->toArray();
-
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'item_type' => 'bowl',
-                        'dish_id' => null,
-                        'name' => 'Собранный боул',
-                        'price' => $bowlPrice,
-                        'quantity' => $item['quantity'],
-                        'subtotal' => $bowlPrice * $item['quantity'],
-                        'calories' => $bowlCalories,
-                        'proteins' => $bowlProteins,
-                        'fats' => $bowlFats,
-                        'carbohydrates' => $bowlCarbs,
-                        'bowl_products' => $bowlProductsData,
-                    ]);
+                } elseif ($this->isConstructorItem($item['type'])) {
+                    $this->createConstructorOrderItem($order, $item, $constructorProducts);
                 }
             }
 
@@ -458,5 +346,87 @@ class OrderController extends Controller
 
         return redirect()->route('admin.orders.index')
             ->with('success', 'Заказ удалён');
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function constructorItemTypes(): array
+    {
+        return ['bowl', 'breakfast'];
+    }
+
+    protected function isConstructorItem(string $type): bool
+    {
+        return in_array($type, $this->constructorItemTypes(), true);
+    }
+
+    protected function constructorItemName(string $type): string
+    {
+        return match ($type) {
+            'breakfast' => 'Собранный завтрак',
+            default => 'Собранный боул',
+        };
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, ConstructorProduct>  $constructorProducts
+     */
+    protected function createConstructorOrderItem(Order $order, array $item, $constructorProducts): void
+    {
+        $bowlPrice = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
+            $constructorProduct = $constructorProducts->get($productId);
+
+            return $constructorProduct ? $constructorProduct->price : 0;
+        });
+
+        $bowlCalories = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
+            $constructorProduct = $constructorProducts->get($productId);
+
+            return $constructorProduct ? $constructorProduct->calories : 0;
+        });
+
+        $bowlProteins = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
+            $constructorProduct = $constructorProducts->get($productId);
+
+            return $constructorProduct ? $constructorProduct->proteins : 0;
+        });
+
+        $bowlFats = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
+            $constructorProduct = $constructorProducts->get($productId);
+
+            return $constructorProduct ? $constructorProduct->fats : 0;
+        });
+
+        $bowlCarbs = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
+            $constructorProduct = $constructorProducts->get($productId);
+
+            return $constructorProduct ? $constructorProduct->carbohydrates : 0;
+        });
+
+        $bowlProductsData = collect($item['bowl_products'])->map(function ($productId) use ($constructorProducts) {
+            $product = $constructorProducts->get($productId);
+
+            return $product ? [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+            ] : null;
+        })->filter()->values()->toArray();
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'item_type' => $item['type'],
+            'dish_id' => null,
+            'name' => $this->constructorItemName($item['type']),
+            'price' => $bowlPrice,
+            'quantity' => $item['quantity'],
+            'subtotal' => $bowlPrice * $item['quantity'],
+            'calories' => $bowlCalories,
+            'proteins' => $bowlProteins,
+            'fats' => $bowlFats,
+            'carbohydrates' => $bowlCarbs,
+            'bowl_products' => $bowlProductsData,
+        ]);
     }
 }

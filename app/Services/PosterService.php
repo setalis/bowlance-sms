@@ -38,7 +38,7 @@ class PosterService
             ->values()
             ->all();
 
-        foreach ($order->items->where('item_type', 'bowl') as $bowlItem) {
+        foreach ($order->items->whereIn('item_type', ['bowl', 'breakfast']) as $bowlItem) {
             $bowlProduct = $this->buildBowlProduct($bowlItem);
 
             if ($bowlProduct !== null) {
@@ -132,12 +132,16 @@ class PosterService
      */
     protected function buildBowlProduct(OrderItem $item): ?array
     {
-        $constructorProductId = (int) config('poster.constructor_product_id');
+        $constructorProductId = match ($item->item_type) {
+            'breakfast' => (int) config('poster.breakfast_constructor_product_id'),
+            default => (int) config('poster.constructor_product_id'),
+        };
 
         if ($constructorProductId < 1) {
-            Log::warning('Poster: constructor_product_id is not configured, bowl skipped', [
+            Log::warning('Poster: constructor product id is not configured, item skipped', [
                 'order_id' => $item->order_id,
                 'order_item_id' => $item->id,
+                'item_type' => $item->item_type,
             ]);
 
             return null;
@@ -159,9 +163,10 @@ class PosterService
             ->values();
 
         if ($modification->isEmpty()) {
-            Log::warning('Poster: bowl has no products mapped to Poster modifications, bowl skipped', [
+            Log::warning('Poster: constructor item has no products mapped to Poster modifications, item skipped', [
                 'order_id' => $item->order_id,
                 'order_item_id' => $item->id,
+                'item_type' => $item->item_type,
                 'bowl_products' => $item->bowl_products,
             ]);
 

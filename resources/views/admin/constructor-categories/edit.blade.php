@@ -86,6 +86,23 @@
                     </div>
 
                     <div>
+                        <label class="label-text" for="type">Тип конструктора*</label>
+                        <select name="type"
+                                class="select @error('type') select-error @enderror"
+                                id="type"
+                                required>
+                            @foreach(\App\Enums\ConstructorType::cases() as $constructorType)
+                                <option value="{{ $constructorType->value }}" @selected(old('type', $category->type->value) === $constructorType->value)>
+                                    {{ $constructorType->label() }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('type')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div>
                         <label class="label-text" for="sort_order">Сортировка</label>
                         <input type="number" 
                                name="sort_order" 

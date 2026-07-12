@@ -41,9 +41,9 @@
                                     <div class="flex items-start justify-between mb-2">
                                         <div>
                                             <h3 class="font-medium">{{ $item->name }}</h3>
-                                            @if($item->item_type === 'bowl' && $item->bowl_products)
+                                            @if(in_array($item->item_type, ['bowl', 'breakfast'], true) && $item->bowl_products)
                                                 <div class="mt-2">
-                                                    <p class="text-xs text-base-content/60 mb-1">Состав боула:</p>
+                                                    <p class="text-xs text-base-content/60 mb-1">{{ $item->item_type === 'breakfast' ? 'Состав завтрака:' : 'Состав боула:' }}</p>
                                                     <div class="flex flex-wrap gap-1">
                                                         @foreach($item->bowl_products as $product)
                                                             <span class="badge badge-sm badge-outline">{{ $product['name'] }}</span>
@@ -52,7 +52,7 @@
                                                 </div>
                                             @endif
                                         </div>
-                                        <span class="badge badge-primary">{{ $item->item_type === 'dish' ? 'Блюдо' : 'Боул' }}</span>
+                                        <span class="badge badge-primary">{{ match($item->item_type) { 'dish' => 'Блюдо', 'breakfast' => 'Завтрак', default => 'Боул' } }}</span>
                                     </div>
                                     
                                     @if($item->calories || $item->proteins || $item->fats || $item->carbohydrates)

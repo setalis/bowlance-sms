@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ConstructorType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,6 +22,7 @@ class ConstructorCategoryFactory extends Factory
             'name_ru' => fake('ru_RU')->words(2, true),
             'name_ka' => fake()->words(2, true),
             'sort_order' => fake()->numberBetween(1, 100),
+            'type' => ConstructorType::Bowl,
         ];
     }
 }

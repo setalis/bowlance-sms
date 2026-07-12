@@ -143,7 +143,7 @@ class OrderController extends Controller
                     'proteins' => $item['proteins'] ?? null,
                     'fats' => $item['fats'] ?? null,
                     'carbohydrates' => $item['carbs'] ?? null,
-                    'bowl_products' => $item['type'] === 'bowl' ? ($item['products'] ?? []) : null,
+                    'bowl_products' => in_array($item['type'], ['bowl', 'breakfast'], true) ? ($item['products'] ?? []) : null,
                 ]);
             }
 

@@ -26,6 +26,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Название</th>
+                            <th>Тип</th>
                             <th>Продуктов</th>
                             <th>Сортировка</th>
                             <th>Создано</th>
@@ -38,6 +39,9 @@
                                 <td>{{ $category->id }}</td>
                                 <td>
                                     <div class="font-medium">{{ $category->name }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-outline">{{ $category->type->label() }}</span>
                                 </td>
                                 <td>
                                     <span class="badge badge-outline">{{ $category->products_count }}</span>
@@ -67,7 +71,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-8">
+                                <td colspan="7" class="text-center py-8">
                                     <div class="flex flex-col items-center gap-4">
                                         <span class="icon-[tabler--category] size-12 text-base-content/30"></span>
                                         <div>

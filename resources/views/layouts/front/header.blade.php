@@ -220,9 +220,9 @@
                                                 <span class="icon-[tabler--cup] size-7 text-sky-400"></span>
                                             </div>
                                         </template>
-                                        <template x-if="item.type === 'bowl'">
+                                        <template x-if="item.type === 'bowl' || item.type === 'breakfast'">
                                             <div class="size-16 rounded-xl overflow-hidden">
-                                                <img src="{{ asset('storage/constructor-products/bowl-constructor.jpg') }}" alt="Bowl" class="size-16 object-cover">
+                                                <img src="{{ asset('storage/constructor-products/bowl-constructor.jpg') }}" alt="Constructor" class="size-16 object-cover">
                                             </div>
                                         </template>
                                     </div>
@@ -232,7 +232,7 @@
                                         <div class="flex items-start justify-between gap-1 mb-1">
                                             <div class="flex-1 min-w-0">
                                                 <h4 class="font-semibold text-sm leading-tight truncate" x-text="item.name"></h4>
-                                                <template x-if="item.type === 'bowl' && item.products">
+                                                <template x-if="(item.type === 'bowl' || item.type === 'breakfast') && item.products">
                                                     <p class="text-xs text-base-content/50 mt-0.5">
                                                         <span x-text="item.products.length"></span> {{ __('frontend.ingredients') }}
                                                     </p>
@@ -322,11 +322,11 @@
                                 </div>
 
                                 <!-- Состав боула -->
-                                <template x-if="item.type === 'bowl' && item.products && item.products.length > 0">
+                                <template x-if="(item.type === 'bowl' || item.type === 'breakfast') && item.products && item.products.length > 0">
                                     <details class="mt-3 pt-3 border-t border-base-200">
                                         <summary class="text-xs font-medium text-base-content/50 cursor-pointer hover:text-base-content/70 transition-colors list-none flex items-center gap-1">
                                             <span class="icon-[tabler--list] size-3"></span>
-                                            {{ __('frontend.bowl_composition') }}
+                                            <span x-text="item.type === 'breakfast' ? '{{ __('frontend.breakfast_composition') }}' : '{{ __('frontend.bowl_composition') }}'"></span>
                                             <span class="icon-[tabler--chevron-down] size-3 ml-auto"></span>
                                         </summary>
                                         <ul class="mt-2 space-y-1">

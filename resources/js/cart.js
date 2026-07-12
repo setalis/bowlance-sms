@@ -87,13 +87,13 @@ export function initCart() {
         },
 
         // Добавить собранный боул в корзину
-        addBowl(products) {
+        addBowl(products, type = 'bowl') {
             if (!this.isOrdersEnabled()) {
                 this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
                 return;
             }
             if (!products || products.length === 0) {
-                this.showNotification('Выберите продукты для боула', 'error');
+                this.showNotification(type === 'breakfast' ? 'Выберите продукты для завтрака' : 'Выберите продукты для боула', 'error');
                 return;
             }
 
@@ -103,11 +103,12 @@ export function initCart() {
             const totalProteins = products.reduce((sum, p) => sum + (p.proteins || 0) * (p.quantity || 1), 0);
             const totalFats = products.reduce((sum, p) => sum + (p.fats || 0) * (p.quantity || 1), 0);
             const totalCarbs = products.reduce((sum, p) => sum + (p.carbs || 0) * (p.quantity || 1), 0);
+            const isBreakfast = type === 'breakfast';
 
             this.items.push({
-                type: 'bowl',
+                type,
                 id: bowlId,
-                name: 'Собранный боул',
+                name: isBreakfast ? 'Собранный завтрак' : 'Собранный боул',
                 price: totalPrice,
                 quantity: 1,
                 products: products,
@@ -118,7 +119,7 @@ export function initCart() {
             });
 
             this.saveCart();
-            this.showNotification('Боул добавлен в корзину');
+            this.showNotification(isBreakfast ? 'Завтрак добавлен в корзину' : 'Боул добавлен в корзину');
         },
 
         // Увеличить количество

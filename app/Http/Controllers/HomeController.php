@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ConstructorType;
 use App\Models\ConstructorCategory;
 use App\Models\DishCategory;
 use App\Models\Drink;
@@ -30,10 +31,17 @@ class HomeController extends Controller
 
         // Загружаем категории конструктора с продуктами
         $constructorCategories = ConstructorCategory::query()
+            ->where('type', ConstructorType::Bowl)
             ->orderBy('sort_order')
             ->with('products')
             ->get();
 
-        return view('frontend.index', compact('title', 'dishCategories', 'drinks', 'constructorCategories'));
+        $breakfastCategories = ConstructorCategory::query()
+            ->where('type', ConstructorType::Breakfast)
+            ->orderBy('sort_order')
+            ->with('products')
+            ->get();
+
+        return view('frontend.index', compact('title', 'dishCategories', 'drinks', 'constructorCategories', 'breakfastCategories'));
     }
 }
