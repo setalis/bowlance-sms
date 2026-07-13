@@ -49,10 +49,13 @@ class PosterService
         if (empty($products)) {
             Log::warning('Poster: no order items mapped to Poster products, order skipped', [
                 'order_id' => $order->id,
+                'constructor_product_id' => config('poster.constructor_product_id'),
+                'breakfast_constructor_product_id' => config('poster.breakfast_constructor_product_id'),
                 'items' => $order->items->map(fn ($item) => [
                     'item_type' => $item->item_type,
                     'dish_id' => $item->dish_id,
                     'poster_product_id' => $item->dish?->poster_product_id,
+                    'bowl_product_ids' => collect($item->bowl_products ?? [])->pluck('id')->all(),
                 ])->all(),
             ]);
 
@@ -65,8 +68,14 @@ class PosterService
             'first_name' => $order->customer_name,
             'address' => $order->delivery_address,
             'comment' => $order->comment,
+            'service_mode' => $order->delivery_type?->value === 'pickup' ? 2 : 3,
             'products' => $products,
         ];
+
+        Log::info('Poster: sending incoming order', [
+            'order_id' => $order->id,
+            'products' => $products,
+        ]);
 
         try {
             $response = Http::post(
@@ -138,10 +147,16 @@ class PosterService
         };
 
         if ($constructorProductId < 1) {
+            $configKey = $item->item_type === 'breakfast'
+                ? 'POSTER_BREAKFAST_CONSTRUCTOR_PRODUCT_ID'
+                : 'POSTER_CONSTRUCTOR_PRODUCT_ID';
+
             Log::warning('Poster: constructor product id is not configured, item skipped', [
                 'order_id' => $item->order_id,
                 'order_item_id' => $item->id,
                 'item_type' => $item->item_type,
+                'config_key' => $configKey,
+                'configured_value' => $constructorProductId,
             ]);
 
             return null;
@@ -160,6 +175,7 @@ class PosterService
                 'm' => (int) $modificationIds->get($product['id']),
                 'a' => max(1, (int) ($product['quantity'] ?? 1)),
             ])
+            ->sortBy('m')
             ->values();
 
         if ($modification->isEmpty()) {

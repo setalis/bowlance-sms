@@ -315,6 +315,52 @@ it('отправляет боул как конструктор с модифи�
     expect($order->fresh()->poster_order_id)->toBe('55');
 });
 
+it('сортирует модификаторы по m перед отправкой в Poster', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.constructor_product_id' => 74,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '60'],
+        ]),
+    ]);
+
+    $first = ConstructorProduct::factory()->create(['poster_modification_id' => 305]);
+    $second = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
+
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'bowl',
+        'dish_id' => null,
+        'name' => 'Собранный боул',
+        'price' => 200.00,
+        'quantity' => 1,
+        'subtotal' => 200.00,
+        'bowl_products' => [
+            ['id' => $first->id, 'name' => 'Первый', 'price' => 100.00, 'quantity' => 1],
+            ['id' => $second->id, 'name' => 'Второй', 'price' => 100.00, 'quantity' => 1],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $modification = json_decode($request->data()['products'][0]['modification'] ?? '', true);
+
+        return $modification === [
+            ['m' => 301, 'a' => 1],
+            ['m' => 305, 'a' => 1],
+        ];
+    });
+});
+
 it('пропускает боул без сопоставленных модификаторов но отправляет блюда', function () {
     config([
         'poster.enabled' => true,
