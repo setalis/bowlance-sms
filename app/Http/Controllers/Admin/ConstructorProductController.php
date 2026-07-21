@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateConstructorProductRequest;
 use App\Models\ConstructorCategory;
 use App\Models\ConstructorProduct;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ConstructorProductController extends Controller
@@ -18,7 +19,7 @@ class ConstructorProductController extends Controller
     public function index(): View
     {
         $products = ConstructorProduct::query()
-            ->with('category')
+            ->with('categories')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->paginate(15);
@@ -35,6 +36,7 @@ class ConstructorProductController extends Controller
     public function create(): View
     {
         $categories = ConstructorCategory::query()
+            ->orderBy('type')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
@@ -50,13 +52,14 @@ class ConstructorProductController extends Controller
      */
     public function store(StoreConstructorProductRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['category_ids', 'image']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('constructor-products', 'public');
         }
 
         $product = ConstructorProduct::create($data);
+        $product->categories()->sync($request->validated('category_ids'));
 
         return redirect()
             ->route('admin.constructor-products.index')
@@ -69,9 +72,12 @@ class ConstructorProductController extends Controller
     public function edit(ConstructorProduct $constructorProduct): View
     {
         $categories = ConstructorCategory::query()
+            ->orderBy('type')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
+
+        $constructorProduct->load('categories');
 
         return view('admin.constructor-products.edit', [
             'title' => 'Редактировать продукт конструктора',
@@ -85,16 +91,17 @@ class ConstructorProductController extends Controller
      */
     public function update(UpdateConstructorProductRequest $request, ConstructorProduct $constructorProduct): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['category_ids', 'image']);
 
         if ($request->hasFile('image')) {
             if ($constructorProduct->image) {
-                \Storage::disk('public')->delete($constructorProduct->image);
+                Storage::disk('public')->delete($constructorProduct->image);
             }
             $data['image'] = $request->file('image')->store('constructor-products', 'public');
         }
 
         $constructorProduct->update($data);
+        $constructorProduct->categories()->sync($request->validated('category_ids'));
 
         return redirect()
             ->route('admin.constructor-products.index')
@@ -107,7 +114,7 @@ class ConstructorProductController extends Controller
     public function destroy(ConstructorProduct $constructorProduct): RedirectResponse
     {
         if ($constructorProduct->image) {
-            \Storage::disk('public')->delete($constructorProduct->image);
+            Storage::disk('public')->delete($constructorProduct->image);
         }
 
         $constructorProduct->delete();

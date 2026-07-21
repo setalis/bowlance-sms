@@ -5,7 +5,7 @@ namespace App\Models;
 use Database\Factories\ConstructorProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ConstructorProduct extends Model
 {
@@ -17,7 +17,6 @@ class ConstructorProduct extends Model
     }
 
     protected $fillable = [
-        'constructor_category_id',
         'name',
         'name_ru',
         'name_ka',
@@ -47,9 +46,10 @@ class ConstructorProduct extends Model
         ];
     }
 
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(ConstructorCategory::class, 'constructor_category_id');
+        return $this->belongsToMany(ConstructorCategory::class, 'constructor_category_product')
+            ->orderBy('sort_order');
     }
 
     /**

@@ -6,7 +6,7 @@ use App\Enums\ConstructorType;
 use Database\Factories\ConstructorCategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ConstructorCategory extends Model
 {
@@ -33,9 +33,10 @@ class ConstructorCategory extends Model
         ];
     }
 
-    public function products(): HasMany
+    public function products(): BelongsToMany
     {
-        return $this->hasMany(ConstructorProduct::class)->orderBy('sort_order');
+        return $this->belongsToMany(ConstructorProduct::class, 'constructor_category_product')
+            ->orderBy('constructor_products.sort_order');
     }
 
     /**

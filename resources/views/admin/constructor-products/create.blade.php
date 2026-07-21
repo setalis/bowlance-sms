@@ -12,7 +12,7 @@
         <div class="bg-base-100 shadow-base-300/20 w-full space-y-6 rounded-xl p-6 shadow-md lg:p-8">
             <div>
                 <h3 class="text-base-content mb-1.5 text-2xl font-semibold">Создать продукт конструктора</h3>
-                <p class="text-base-content/80">Добавьте новый продукт для конструктора боулов</p>
+                <p class="text-base-content/80">Добавьте новый продукт для конструкторов боулов и завтраков</p>
             </div>
 
             <form action="{{ route('admin.constructor-products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
@@ -22,19 +22,36 @@
                     <h4 class="text-base-content text-lg font-semibold">Основная информация</h4>
                     
                     <div>
-                        <label class="label-text" for="constructor_category_id">Категория*</label>
-                        <select name="constructor_category_id" 
-                                class="select @error('constructor_category_id') select-error @enderror" 
-                                id="constructor_category_id" 
-                                required>
-                            <option value="">Выберите категорию</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ old('constructor_category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
+                        <span class="label-text">Категории*</span>
+                        <p class="text-base-content/60 text-xs mt-1 mb-3">Можно выбрать несколько категорий — в том числе из обоих конструкторов</p>
+                        <div class="space-y-4">
+                            @foreach(\App\Enums\ConstructorType::cases() as $constructorType)
+                                @php
+                                    $typeCategories = $categories->where('type', $constructorType);
+                                @endphp
+                                @if($typeCategories->isNotEmpty())
+                                    <div class="space-y-2 rounded-lg bg-base-200/50 p-4">
+                                        <h5 class="text-base-content font-medium">{{ $constructorType->label() }}</h5>
+                                        <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                                            @foreach($typeCategories as $category)
+                                                <label class="inline-flex cursor-pointer items-center gap-2">
+                                                    <input type="checkbox"
+                                                           name="category_ids[]"
+                                                           value="{{ $category->id }}"
+                                                           class="checkbox @error('category_ids') checkbox-error @enderror"
+                                                           @checked(in_array($category->id, old('category_ids', []), false)) />
+                                                    <span class="label-text whitespace-nowrap">{{ $category->name }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             @endforeach
-                        </select>
-                        @error('constructor_category_id')
+                        </div>
+                        @error('category_ids')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                        @error('category_ids.*')
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>

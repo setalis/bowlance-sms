@@ -25,8 +25,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 1,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
+        $this->createProduct($category1, [
             'name_ru' => 'Гречка',
             'name_ka' => 'ქერი',
             'price' => 4.00,
@@ -39,8 +38,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 1,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
+        $this->createProduct($category1, [
             'name_ru' => 'Рис белый',
             'name_ka' => 'თეთრი ბრინჯი',
             'price' => 4.00,
@@ -53,8 +51,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 2,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
+        $this->createProduct($category1, [
             'name_ru' => 'Рис черный дикий',
             'name_ka' => 'შავი ველური ბრინჯი',
             'price' => 5.00,
@@ -67,8 +64,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 3,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
+        $this->createProduct($category1, [
             'name_ru' => 'Рис бурый цельнозерновой',
             'name_ka' => 'მთელი მარცვლოვანი ყავისფერი ბრინჯი',
             'price' => 5.00,
@@ -81,8 +77,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 4,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
+        $this->createProduct($category1, [
             'name_ru' => 'Чечевица',
             'name_ka' => 'ოსპი',
             'price' => 4.00,
@@ -95,8 +90,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 5,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
+        $this->createProduct($category1, [
             'name_ru' => 'Картофель запеченый',
             'name_ka' => 'შემწვარი კარტოფილი',
             'price' => 4.00,
@@ -109,8 +103,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 6,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category1->id,
+        $this->createProduct($category1, [
             'name_ru' => 'Батат',
             'name_ka' => 'ბატატი',
             'price' => 6.00,
@@ -131,8 +124,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 2,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category2->id,
+        $this->createProduct($category2, [
             'name_ru' => 'Тунец татаки',
             'name_ka' => 'ტუნა ტატაკი',
             'price' => 17.00,
@@ -145,8 +137,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 1,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category2->id,
+        $this->createProduct($category2, [
             'name_ru' => 'Королевская креветка',
             'name_ka' => 'სამეფო კრევეტი',
             'price' => 12.00,
@@ -159,8 +150,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 2,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category2->id,
+        $this->createProduct($category2, [
             'name_ru' => 'Норвежский лосось',
             'name_ka' => 'ნორვეგიული ორაგული',
             'price' => 15.00,
@@ -173,8 +163,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 3,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category2->id,
+        $this->createProduct($category2, [
             'name_ru' => 'Куриное филе запеченое',
             'name_ka' => 'შემწვარი ქათმის ფილე',
             'price' => 12.00,
@@ -187,8 +176,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 4,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category2->id,
+        $this->createProduct($category2, [
             'name_ru' => 'Куриное филе жареное',
             'name_ka' => 'შემწვარი ქათმის ფილე',
             'price' => 12.00,
@@ -201,8 +189,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 5,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category2->id,
+        $this->createProduct($category2, [
             'name_ru' => 'Куриное бедро souvlaki',
             'name_ka' => 'ქათმის ბარკალი souvlaki',
             'price' => 10.00,
@@ -215,8 +202,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 6,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category2->id,
+        $this->createProduct($category2, [
             'name_ru' => 'Говядина tenderloin',
             'name_ka' => 'საქონლის ხორცი tenderloin',
             'price' => 19.00,
@@ -237,8 +223,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 3,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Черри запеченые',
             'name_ka' => 'შემწვარი ჩერი',
             'price' => 4.00,
@@ -251,8 +236,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 1,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Черри свежие',
             'name_ka' => 'ახალი ჩერი',
             'price' => 4.00,
@@ -265,8 +249,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 2,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Перец запеченый',
             'name_ka' => 'შემწვარი წიწაკა',
             'price' => 5.00,
@@ -279,8 +262,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 3,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Перец болгарский свежий',
             'name_ka' => 'ახალი ბულგარული წიწაკა',
             'price' => 5.50,
@@ -293,8 +275,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 4,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Броколи',
             'name_ka' => 'ბროკოლი',
             'price' => 5.00,
@@ -307,8 +288,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 5,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Цвет. капуста',
             'name_ka' => 'ყვავილოვანი კომბოსტო',
             'price' => 2.50,
@@ -321,8 +301,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 6,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Эдамаме',
             'name_ka' => 'ედამამე',
             'price' => 7.50,
@@ -335,8 +314,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 7,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Стручк. фасоль',
             'name_ka' => 'სტრუქვოვანი ლობიო',
             'price' => 7.50,
@@ -349,8 +327,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 8,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Огурец',
             'name_ka' => 'კიტრი',
             'price' => 5.50,
@@ -363,8 +340,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 9,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Авокадо',
             'name_ka' => 'ავოკადო',
             'price' => 6.00,
@@ -377,8 +353,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 10,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category3->id,
+        $this->createProduct($category3, [
             'name_ru' => 'Морковь',
             'name_ka' => 'სტაფილო',
             'price' => 2.00,
@@ -399,8 +374,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 4,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category4->id,
+        $this->createProduct($category4, [
             'name_ru' => 'Укроп',
             'name_ka' => 'კამა',
             'price' => 1.00,
@@ -413,8 +387,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 1,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category4->id,
+        $this->createProduct($category4, [
             'name_ru' => 'Петрушка',
             'name_ka' => 'ოხრახუში',
             'price' => 1.00,
@@ -427,8 +400,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 2,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category4->id,
+        $this->createProduct($category4, [
             'name_ru' => 'Руккола',
             'name_ka' => 'რუკოლა',
             'price' => 3.00,
@@ -441,8 +413,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 3,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category4->id,
+        $this->createProduct($category4, [
             'name_ru' => 'Зеленый лук',
             'name_ka' => 'მწვანე ხახვი',
             'price' => 1.00,
@@ -455,8 +426,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 4,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category4->id,
+        $this->createProduct($category4, [
             'name_ru' => 'Микс салата (лола + айсберг)',
             'name_ka' => 'სალათის მიქსი (ლოლა + აისბერგი)',
             'price' => 5.50,
@@ -477,8 +447,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 5,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Арахисовый соус',
             'name_ka' => 'არაქისის სოუსი',
             'price' => 3.00,
@@ -491,8 +460,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 1,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Hot honey sauce',
             'name_ka' => 'Hot honey sauce',
             'price' => 4.00,
@@ -505,8 +473,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 2,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Медово - цитрусовый',
             'name_ka' => 'თაფლიანი ციტრუსოვანი',
             'price' => 3.00,
@@ -519,8 +486,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 3,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Дзадзики',
             'name_ka' => 'ძაძიკი',
             'price' => 4.00,
@@ -533,8 +499,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 4,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Творожный',
             'name_ka' => 'ყველის სოუსი',
             'price' => 5.00,
@@ -547,8 +512,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 5,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Манго-мята соус',
             'name_ka' => 'მანგო-პიტნის სოუსი',
             'price' => 5.00,
@@ -561,8 +525,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 6,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Соевый',
             'name_ka' => 'სოიოს სოუსი',
             'price' => 2.00,
@@ -575,8 +538,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 7,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category5->id,
+        $this->createProduct($category5, [
             'name_ru' => 'Йогурт греческий 2% (пустой)',
             'name_ka' => 'ბერძნული იოგურტი 2%',
             'price' => 3.00,
@@ -597,8 +559,7 @@ class ConstructorSeeder extends Seeder
             'sort_order' => 6,
         ]);
 
-        ConstructorProduct::create([
-            'constructor_category_id' => $category6->id,
+        $this->createProduct($category6, [
             'name_ru' => 'Чечевичный хлеб',
             'name_ka' => 'ოსპის პური',
             'price' => 3.00,
@@ -610,5 +571,16 @@ class ConstructorSeeder extends Seeder
             'fiber' => 0.0,
             'sort_order' => 1,
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function createProduct(ConstructorCategory $category, array $attributes): ConstructorProduct
+    {
+        $product = ConstructorProduct::create($attributes);
+        $product->categories()->attach($category);
+
+        return $product;
     }
 }

@@ -25,14 +25,12 @@ it('displays constructor products in modal', function () {
         'name_ru' => 'Базы',
     ]);
 
-    $product1 = ConstructorProduct::factory()->create([
-        'constructor_category_id' => $category->id,
+    ConstructorProduct::factory()->forCategories($category)->create([
         'name_ru' => 'Рис белый',
         'price' => 5.00,
     ]);
 
-    $product2 = ConstructorProduct::factory()->create([
-        'constructor_category_id' => $category->id,
+    ConstructorProduct::factory()->forCategories($category)->create([
         'name_ru' => 'Киноа',
         'price' => 7.00,
     ]);
@@ -58,8 +56,7 @@ it('shows click to select text when no products selected in category', function 
         'name_ru' => 'Базы',
     ]);
 
-    ConstructorProduct::factory()->create([
-        'constructor_category_id' => $category->id,
+    ConstructorProduct::factory()->forCategories($category)->create([
         'name_ru' => 'Рис белый',
     ]);
 
@@ -70,15 +67,15 @@ it('shows click to select text when no products selected in category', function 
 });
 
 it('displays all constructor categories with proper ordering', function () {
-    $category1 = ConstructorCategory::factory()->create([
+    ConstructorCategory::factory()->create([
         'name_ru' => 'Категория 3',
         'sort_order' => 3,
     ]);
-    $category2 = ConstructorCategory::factory()->create([
+    ConstructorCategory::factory()->create([
         'name_ru' => 'Категория 1',
         'sort_order' => 1,
     ]);
-    $category3 = ConstructorCategory::factory()->create([
+    ConstructorCategory::factory()->create([
         'name_ru' => 'Категория 2',
         'sort_order' => 2,
     ]);
@@ -101,8 +98,7 @@ it('displays products with nutritional information', function () {
         'name_ru' => 'Протеины',
     ]);
 
-    $product = ConstructorProduct::factory()->create([
-        'constructor_category_id' => $category->id,
+    ConstructorProduct::factory()->forCategories($category)->create([
         'name_ru' => 'Курица',
         'price' => 10.00,
         'calories' => 165,
@@ -132,8 +128,7 @@ it('contains quantity management JS functions for bowl constructor', function ()
 it('contains quantity controls in modal product cards', function () {
     $category = ConstructorCategory::factory()->create(['name_ru' => 'Базы']);
 
-    ConstructorProduct::factory()->create([
-        'constructor_category_id' => $category->id,
+    ConstructorProduct::factory()->forCategories($category)->create([
         'name_ru' => 'Рис',
         'price' => 3.00,
     ]);

@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\ConstructorCategory;
+use App\Models\ConstructorProduct;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +19,6 @@ class ConstructorProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'constructor_category_id' => \App\Models\ConstructorCategory::factory(),
             'name' => fake()->words(2, true),
             'name_ru' => fake('ru_RU')->words(2, true),
             'name_ka' => fake()->words(2, true),
@@ -34,5 +35,14 @@ class ConstructorProductFactory extends Factory
             'carbohydrates' => fake()->randomFloat(1, 0, 50),
             'fiber' => fake()->randomFloat(1, 0, 10),
         ];
+    }
+
+    public function forCategories(ConstructorCategory ...$categories): static
+    {
+        return $this->afterCreating(function (ConstructorProduct $product) use ($categories): void {
+            $product->categories()->sync(
+                collect($categories)->pluck('id')->all()
+            );
+        });
     }
 }

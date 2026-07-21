@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-base-content text-2xl font-semibold">Продукты конструктора</h2>
-                <p class="text-base-content/70">Управление продуктами для конструктора боулов</p>
+                <p class="text-base-content/70">Управление продуктами для конструкторов боулов и завтраков</p>
             </div>
             <a href="{{ route('admin.constructor-products.create') }}" class="btn btn-primary">
                 <span class="icon-[tabler--plus] size-5"></span>
@@ -63,8 +63,14 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @if($product->category)
-                                        <span class="badge badge-outline">{{ $product->category->name }}</span>
+                                    @if($product->categories->isNotEmpty())
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($product->categories as $category)
+                                                <span class="badge badge-outline" title="{{ $category->type->label() }}">
+                                                    {{ $category->name }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     @else
                                         <span class="text-base-content/40 text-sm">Без категории</span>
                                     @endif
