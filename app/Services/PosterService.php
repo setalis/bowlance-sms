@@ -165,9 +165,14 @@ class PosterService
         $bowlProducts = collect($item->bowl_products ?? [])
             ->filter(fn ($product) => is_array($product) && ! empty($product['id']));
 
-        $modificationIds = ConstructorProduct::whereIn('id', $bowlProducts->pluck('id'))
-            ->whereNotNull('poster_modification_id')
-            ->pluck('poster_modification_id', 'id');
+        $modificationColumn = $item->item_type === 'breakfast'
+            ? 'poster_breakfast_modification_id'
+            : 'poster_bowl_modification_id';
+
+        $modificationIds = ConstructorProduct::query()
+            ->whereIn('id', $bowlProducts->pluck('id'))
+            ->whereNotNull($modificationColumn)
+            ->pluck($modificationColumn, 'id');
 
         $modification = $bowlProducts
             ->filter(fn ($product) => $modificationIds->has($product['id']))

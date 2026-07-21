@@ -270,15 +270,29 @@
                     </div>
 
                     <div>
-                        <label class="label-text" for="poster_modification_id">Poster Modification ID</label>
+                        <label class="label-text" for="poster_bowl_modification_id">Poster Modification ID (боулы)</label>
                         <input type="number"
-                               name="poster_modification_id"
-                               placeholder="ID модификатора в Poster"
-                               class="input @error('poster_modification_id') input-error @enderror"
-                               id="poster_modification_id"
-                               value="{{ old('poster_modification_id') }}"
+                               name="poster_bowl_modification_id"
+                               placeholder="ID модификатора для конструктора боулов"
+                               class="input @error('poster_bowl_modification_id') input-error @enderror"
+                               id="poster_bowl_modification_id"
+                               value="{{ old('poster_bowl_modification_id') }}"
                                min="1" />
-                        @error('poster_modification_id')
+                        @error('poster_bowl_modification_id')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="label-text" for="poster_breakfast_modification_id">Poster Modification ID (завтраки)</label>
+                        <input type="number"
+                               name="poster_breakfast_modification_id"
+                               placeholder="ID модификатора для конструктора завтраков"
+                               class="input @error('poster_breakfast_modification_id') input-error @enderror"
+                               id="poster_breakfast_modification_id"
+                               value="{{ old('poster_breakfast_modification_id') }}"
+                               min="1" />
+                        @error('poster_breakfast_modification_id')
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>

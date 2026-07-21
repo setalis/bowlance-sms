@@ -39,7 +39,8 @@ class UpdateConstructorProductRequest extends FormRequest
             'carbohydrates' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'fiber' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'sort_order' => ['integer', 'min:0'],
-            'poster_modification_id' => ['nullable', 'integer', 'min:1'],
+            'poster_bowl_modification_id' => ['nullable', 'integer', 'min:1'],
+            'poster_breakfast_modification_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
 
@@ -60,6 +61,10 @@ class UpdateConstructorProductRequest extends FormRequest
             'category_ids.*.exists' => 'Выбранная категория не существует.',
             'image.image' => 'Файл должен быть изображением.',
             'image.max' => 'Размер изображения не должен превышать 2 МБ.',
+            'poster_bowl_modification_id.integer' => 'Poster Modification ID (боулы) должен быть числом.',
+            'poster_bowl_modification_id.min' => 'Poster Modification ID (боулы) должен быть не меньше 1.',
+            'poster_breakfast_modification_id.integer' => 'Poster Modification ID (завтраки) должен быть числом.',
+            'poster_breakfast_modification_id.min' => 'Poster Modification ID (завтраки) должен быть не меньше 1.',
         ];
     }
 }

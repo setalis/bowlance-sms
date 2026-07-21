@@ -276,8 +276,8 @@ it('отправляет боул как конструктор с модифи�
         ]),
     ]);
 
-    $rice = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
-    $salmon = ConstructorProduct::factory()->create(['poster_modification_id' => 302]);
+    $rice = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => 301]);
+    $salmon = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => 302]);
 
     $order = makePosterOrder();
 
@@ -329,8 +329,8 @@ it('сортирует модификаторы по m перед отправк
         ]),
     ]);
 
-    $first = ConstructorProduct::factory()->create(['poster_modification_id' => 305]);
-    $second = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
+    $first = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => 305]);
+    $second = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => 301]);
 
     $order = makePosterOrder();
 
@@ -375,7 +375,7 @@ it('пропускает боул без сопоставленных модиф
         ]),
     ]);
 
-    $unmappedProduct = ConstructorProduct::factory()->create(['poster_modification_id' => null]);
+    $unmappedProduct = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => null]);
     $dish = Dish::factory()->create(['poster_product_id' => 169]);
 
     $order = makePosterOrder();
@@ -424,7 +424,7 @@ it('пропускает боул когда constructor_product_id не нас�
 
     Http::fake();
 
-    $rice = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
+    $rice = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => 301]);
     $order = makePosterOrder();
 
     OrderItem::create([
@@ -462,7 +462,7 @@ it('отправляет смешанный заказ с блюдом и боу
     ]);
 
     $dish = Dish::factory()->create(['poster_product_id' => 169]);
-    $rice = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
+    $rice = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => 301]);
 
     $order = makePosterOrder();
 
@@ -520,7 +520,7 @@ it('отправляет завтрак как конструктор с product
         ]),
     ]);
 
-    $egg = ConstructorProduct::factory()->create(['poster_modification_id' => 401]);
+    $egg = ConstructorProduct::factory()->create(['poster_breakfast_modification_id' => 401]);
     $order = makePosterOrder();
 
     OrderItem::create([
@@ -567,8 +567,8 @@ it('отправляет смешанный заказ с боулом и зав
         ]),
     ]);
 
-    $rice = ConstructorProduct::factory()->create(['poster_modification_id' => 301]);
-    $egg = ConstructorProduct::factory()->create(['poster_modification_id' => 401]);
+    $rice = ConstructorProduct::factory()->create(['poster_bowl_modification_id' => 301]);
+    $egg = ConstructorProduct::factory()->create(['poster_breakfast_modification_id' => 401]);
     $order = makePosterOrder();
 
     OrderItem::create([
@@ -613,4 +613,125 @@ it('отправляет смешанный заказ с боулом и зав
     });
 
     expect($result)->not->toBeNull();
+});
+
+it('для общего продукта использует разные modification id в боуле и завтраке', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.constructor_product_id' => 74,
+        'poster.breakfast_constructor_product_id' => 131,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '61'],
+        ]),
+    ]);
+
+    $buckwheat = ConstructorProduct::factory()->create([
+        'poster_bowl_modification_id' => 301,
+        'poster_breakfast_modification_id' => 501,
+    ]);
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'bowl',
+        'dish_id' => null,
+        'name' => 'Собранный боул',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+        'bowl_products' => [
+            ['id' => $buckwheat->id, 'name' => 'Гречка', 'price' => 100.00, 'quantity' => 1],
+        ],
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'breakfast',
+        'dish_id' => null,
+        'name' => 'Собранный завтрак',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+        'bowl_products' => [
+            ['id' => $buckwheat->id, 'name' => 'Гречка', 'price' => 100.00, 'quantity' => 2],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $result = $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+        $bowlModification = json_decode($body['products'][0]['modification'] ?? '', true);
+        $breakfastModification = json_decode($body['products'][1]['modification'] ?? '', true);
+
+        return count($body['products']) === 2
+            && $body['products'][0]['product_id'] === 74
+            && $body['products'][1]['product_id'] === 131
+            && $bowlModification === [['m' => 301, 'a' => 1]]
+            && $breakfastModification === [['m' => 501, 'a' => 2]];
+    });
+
+    expect($result)->not->toBeNull();
+});
+
+it('не использует bowl modification id для завтрака и наоборот', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.constructor_product_id' => 74,
+        'poster.breakfast_constructor_product_id' => 131,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '62'],
+        ]),
+    ]);
+
+    $onlyBowlMapped = ConstructorProduct::factory()->create([
+        'poster_bowl_modification_id' => 301,
+        'poster_breakfast_modification_id' => null,
+    ]);
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 250.00,
+        'quantity' => 1,
+        'subtotal' => 250.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'breakfast',
+        'dish_id' => null,
+        'name' => 'Собранный завтрак',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+        'bowl_products' => [
+            ['id' => $onlyBowlMapped->id, 'name' => 'Гречка', 'price' => 100.00, 'quantity' => 1],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return count($body['products']) === 1
+            && $body['products'][0]['product_id'] === 169;
+    });
 });
