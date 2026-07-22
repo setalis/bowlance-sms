@@ -43,6 +43,11 @@ class StoreOrderRequest extends FormRequest
             'items.*.fats' => 'nullable|numeric',
             'items.*.carbs' => 'nullable|numeric',
             'items.*.products' => 'nullable|array',
+            'items.*.addons' => 'nullable|array',
+            'items.*.addons.*.id' => 'required_with:items.*.addons|integer|exists:dish_addons,id',
+            'items.*.addons.*.quantity' => 'required_with:items.*.addons|integer|min:1',
+            'items.*.addons.*.name' => 'nullable|string',
+            'items.*.addons.*.price' => 'nullable|numeric|min:0',
         ];
     }
 

@@ -23,6 +23,7 @@ class OrderItem extends Model
         'fats',
         'carbohydrates',
         'bowl_products',
+        'dish_addons',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class OrderItem extends Model
             'fats' => 'decimal:2',
             'carbohydrates' => 'decimal:2',
             'bowl_products' => 'array',
+            'dish_addons' => 'array',
         ];
     }
 

@@ -250,6 +250,17 @@
                                                         + <span x-text="item.sauce_name"></span>
                                                     </p>
                                                 </template>
+                                                <template x-if="item.addons && item.addons.length">
+                                                    <div class="mt-1 space-y-0.5">
+                                                        <template x-for="addon in item.addons" :key="addon.id">
+                                                            <p class="text-xs text-primary">
+                                                                + <span x-text="addon.name"></span>
+                                                                <span x-show="addon.quantity > 1" x-text="' ×' + addon.quantity"></span>
+                                                                <span x-text="' (' + (addon.price * addon.quantity).toFixed(2) + ' ₾)'"></span>
+                                                            </p>
+                                                        </template>
+                                                    </div>
+                                                </template>
                                             </div>
                                             <button type="button"
                                                     @click="$store.cart.removeItem(index)"

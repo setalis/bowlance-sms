@@ -90,6 +90,34 @@
                         </div>
                     </li>
 
+                    <!-- Dish Addons Management Menu -->
+                    <li @class(['accordion-item', 'active' => request()->routeIs('admin.dish-addons.*')]) id="dish-addons-management">
+                        <button
+                            class="accordion-toggle accordion-item-active:bg-neutral/10 inline-flex w-full items-center p-2 text-start text-sm font-normal"
+                            aria-controls="dish-addons-management-collapse" aria-expanded="true">
+                            <span class="icon-[tabler--plus] size-4.5"></span>
+                            <span class="grow">Добавки</span>
+                            <span
+                                class="icon-[tabler--chevron-right] accordion-item-active:rotate-90 size-4.5 shrink-0 transition-transform duration-300 rtl:rotate-180"></span>
+                        </button>
+                        <div id="dish-addons-management-collapse"
+                            class="accordion-content mt-1 hidden w-full overflow-hidden transition-[height] duration-300"
+                            aria-labelledby="dish-addons-management" role="region" @if(request()->routeIs('admin.dish-addons.*')) style="display: block;" @endif>
+                            <ul class="space-y-1">
+                                <li>
+                                    <a href="{{ route('admin.dish-addons.index') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('admin.dish-addons.index')])>
+                                        <span>Все добавки</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.dish-addons.create') }}" @class(['inline-flex w-full items-center px-2', 'menu-active' => request()->routeIs('admin.dish-addons.create')])>
+                                        <span>Добавить добавку</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
                     <!-- Drinks Management Menu -->
                     <li @class(['accordion-item', 'active' => request()->routeIs('admin.drinks.*')]) id="drinks-management">
                         <button

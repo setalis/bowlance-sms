@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Dish extends Model
 {
@@ -60,6 +61,14 @@ class Dish extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(DishCategory::class, 'dish_category_id');
+    }
+
+    public function addons(): BelongsToMany
+    {
+        return $this->belongsToMany(DishAddon::class, 'dish_dish_addon')
+            ->withPivot(['poster_modification_id', 'price', 'sort_order'])
+            ->orderByPivot('sort_order')
+            ->orderBy('dish_addons.sort_order');
     }
 
     /**

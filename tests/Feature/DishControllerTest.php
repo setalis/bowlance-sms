@@ -30,6 +30,7 @@ it('displays create dish form', function () {
     $response->assertSuccessful();
     $response->assertViewIs('admin.dishes.create');
     $response->assertViewHas('categories');
+    $response->assertViewHas('addons');
 });
 
 it('can create a new dish', function () {

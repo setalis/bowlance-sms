@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Http\Requests\StoreOrderRequest;
 use App\Mail\NewOrderMail;
 use App\Models\Discount;
+use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
@@ -78,9 +79,15 @@ class OrderController extends Controller
             // Authenticate the user
             $this->phoneAuthService->authenticateUser($user);
 
-            $subtotal = collect($request->items)->sum(function ($item) {
-                return $item['price'] * $item['quantity'];
+            $resolvedItems = collect($request->items)->map(function (array $item) {
+                if ($item['type'] !== 'dish') {
+                    return $item;
+                }
+
+                return $this->resolveDishOrderItem($item);
             });
+
+            $subtotal = $resolvedItems->sum(fn ($item) => $item['price'] * $item['quantity']);
 
             $deliveryFee = 0;
             $total = $subtotal + $deliveryFee;
@@ -130,7 +137,7 @@ class OrderController extends Controller
                 'needs_callback' => $isCallback,
             ]);
 
-            foreach ($request->items as $item) {
+            foreach ($resolvedItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'item_type' => $item['type'],
@@ -144,6 +151,7 @@ class OrderController extends Controller
                     'fats' => $item['fats'] ?? null,
                     'carbohydrates' => $item['carbs'] ?? null,
                     'bowl_products' => in_array($item['type'], ['bowl', 'breakfast'], true) ? ($item['products'] ?? []) : null,
+                    'dish_addons' => $item['type'] === 'dish' ? ($item['addons'] ?? null) : null,
                 ]);
             }
 
@@ -203,6 +211,48 @@ class OrderController extends Controller
                 'message' => 'Ошибка при создании заказа: '.$e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>
+     */
+    protected function resolveDishOrderItem(array $item): array
+    {
+        $dish = Dish::query()->with('addons')->find($item['id']);
+
+        if (! $dish) {
+            return $item;
+        }
+
+        $basePrice = (float) ($dish->discount_price ?? $dish->price);
+        $addonsData = [];
+        $addonsTotal = 0.0;
+
+        foreach ($item['addons'] ?? [] as $addonInput) {
+            $attached = $dish->addons->firstWhere('id', (int) ($addonInput['id'] ?? 0));
+
+            if (! $attached) {
+                continue;
+            }
+
+            $quantity = max(1, (int) ($addonInput['quantity'] ?? 1));
+            $addonPrice = (float) ($attached->pivot->price ?? $attached->price);
+            $addonsTotal += $addonPrice * $quantity;
+
+            $addonsData[] = [
+                'id' => $attached->id,
+                'name' => $attached->name,
+                'price' => $addonPrice,
+                'quantity' => $quantity,
+            ];
+        }
+
+        $item['price'] = round($basePrice + $addonsTotal, 2);
+        $item['addons'] = $addonsData !== [] ? $addonsData : null;
+        $item['name'] = $dish->name;
+
+        return $item;
     }
 
     public function show(Order $order): JsonResponse

@@ -26,8 +26,27 @@ export function initCart() {
                 this.showNotification(window.ordersUnavailableMessage || 'Заказы временно недоступны', 'error');
                 return;
             }
-            const existingItem = this.items.find(item => item.type === 'dish' && item.id === dish.id);
-            
+
+            const addons = (dish.addons || [])
+                .filter(addon => (addon.quantity || 0) > 0)
+                .map(addon => ({
+                    id: addon.id,
+                    name: addon.name,
+                    price: parseFloat(addon.price),
+                    quantity: Math.max(1, parseInt(addon.quantity, 10) || 1),
+                }));
+
+            const basePrice = parseFloat(dish.basePrice ?? dish.price);
+            const addonsTotal = addons.reduce((sum, addon) => sum + (addon.price * addon.quantity), 0);
+            const unitPrice = basePrice + addonsTotal;
+            const addonsKey = this.getAddonsKey(addons);
+
+            const existingItem = this.items.find(item =>
+                item.type === 'dish'
+                && item.id === dish.id
+                && this.getAddonsKey(item.addons || []) === addonsKey
+            );
+
             if (existingItem) {
                 existingItem.quantity++;
             } else {
@@ -35,9 +54,11 @@ export function initCart() {
                     type: 'dish',
                     id: dish.id,
                     name: dish.name,
-                    price: parseFloat(dish.price),
+                    basePrice: basePrice,
+                    price: unitPrice,
                     image: dish.image,
                     quantity: 1,
+                    addons: addons,
                     weight: dish.weight || null,
                     calories: dish.calories || 0,
                     proteins: dish.proteins || 0,
@@ -51,9 +72,16 @@ export function initCart() {
                     sauce_carbs: dish.sauce_carbs || 0
                 });
             }
-            
+
             this.saveCart();
             this.showNotification('Блюдо добавлено в корзину');
+        },
+
+        getAddonsKey(addons) {
+            return [...addons]
+                .map(addon => `${addon.id}:${addon.quantity || 1}`)
+                .sort()
+                .join('|');
         },
 
         // Добавить напиток в корзину
@@ -294,6 +322,7 @@ export function initCart() {
                         fats: item.fats,
                         carbs: item.carbs,
                         products: item.products || null,
+                        addons: item.addons || null,
                     })),
                 };
 

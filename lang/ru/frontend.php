@@ -23,6 +23,8 @@ return [
     'no_dishes_available' => 'Пока нет доступных блюд',
     'no_dishes_in_category' => 'В этой категории пока нет блюд',
     'add_to_cart' => 'В корзину',
+    'choose_addons' => 'Выберите добавки (необязательно)',
+    'without_addons' => 'Без добавок',
     'calories' => 'ккал',
     'proteins' => 'Б',
     'fats' => 'Ж',

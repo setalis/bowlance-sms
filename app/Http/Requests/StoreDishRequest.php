@@ -6,17 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreDishRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -49,11 +44,17 @@ class StoreDishRequest extends FormRequest
             'sauce_fiber' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'sort_order' => ['integer', 'min:0'],
             'poster_product_id' => ['nullable', 'integer', 'min:1'],
+            'addon_ids' => ['nullable', 'array'],
+            'addon_ids.*' => ['integer', 'exists:dish_addons,id'],
+            'addon_poster_ids' => ['nullable', 'array'],
+            'addon_poster_ids.*' => ['nullable', 'integer', 'min:1'],
+            'addon_prices' => ['nullable', 'array'],
+            'addon_prices.*' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
         ];
     }
 
     /**
-     * Get custom error messages for validation rules.
+     * @return array<string, string>
      */
     public function messages(): array
     {
@@ -61,6 +62,7 @@ class StoreDishRequest extends FormRequest
             'name_ru.required' => 'Название блюда на русском языке обязательно для заполнения.',
             'name_ru.max' => 'Название не должно превышать 255 символов.',
             'name_ka.max' => 'Название на грузинском языке не должно превышать 255 символов.',
+            'name.max' => 'Название не должно превышать 255 символов.',
             'price.required' => 'Цена обязательна для заполнения.',
             'price.numeric' => 'Цена должна быть числом.',
             'price.min' => 'Цена не может быть отрицательной.',

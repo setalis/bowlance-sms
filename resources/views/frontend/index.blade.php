@@ -341,11 +341,11 @@
                                                     </div>
                                                     <button type="button"
                                                             class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-0 gap-2 {{ !$siteOrdersEnabled ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                                            x-data
                                                             @click="
-                                                                $store.cart.addDish({
+                                                                const dishPayload = {
                                                                     id: {{ $dish->id }},
                                                                     name: '{{ addslashes($dish->name) }}',
+                                                                    basePrice: {{ $dish->discount_price ?? $dish->price }},
                                                                     price: {{ $dish->discount_price ?? $dish->price }},
                                                                     image: '{{ $dish->image }}',
                                                                     weight: '{{ $dish->weight_volume }}',
@@ -359,17 +359,27 @@
                                                                     sauce_calories: {{ $dish->sauce_calories ?? 0 }},
                                                                     sauce_proteins: {{ $dish->sauce_proteins ?? 0 }},
                                                                     sauce_fats: {{ $dish->sauce_fats ?? 0 }},
-                                                                    sauce_carbs: {{ $dish->sauce_carbohydrates ?? 0 }}
+                                                                    sauce_carbs: {{ $dish->sauce_carbohydrates ?? 0 }},
                                                                     @else
                                                                     sauce_name: null,
                                                                     sauce_weight: null,
                                                                     sauce_calories: 0,
                                                                     sauce_proteins: 0,
                                                                     sauce_fats: 0,
-                                                                    sauce_carbs: 0
+                                                                    sauce_carbs: 0,
                                                                     @endif
-                                                                });
-                                                                $store.cart.openDrawer();
+                                                                    availableAddons: @js($dish->addons->map(fn ($addon) => [
+                                                                        'id' => $addon->id,
+                                                                        'name' => $addon->name,
+                                                                        'price' => (float) ($addon->pivot->price ?? $addon->price),
+                                                                    ])->values())
+                                                                };
+                                                                if (dishPayload.availableAddons.length) {
+                                                                    $dispatch('open-dish-addons', dishPayload);
+                                                                } else {
+                                                                    $store.cart.addDish(dishPayload);
+                                                                    $store.cart.openDrawer();
+                                                                }
                                                             ">
                                                         <span class="icon-[tabler--shopping-cart-plus] size-4"></span>
                                                         {{ __('frontend.add_to_cart') }}
@@ -505,10 +515,134 @@
             </div>
         <!-- </div> -->
     </div>
+
+    <div x-data="dishAddonsModal()"
+         @open-dish-addons.window="open($event.detail)"
+         x-show="isOpen"
+         x-cloak
+         @keydown.esc.prevent="close()"
+         class="fixed inset-0 z-[110] flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-zinc-700/75 backdrop-blur-xs" @click="close()"></div>
+        <div class="relative w-full max-w-lg rounded-xl bg-base-100 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-base-content/10 px-6 py-4">
+                <div>
+                    <h3 class="text-xl font-bold" x-text="dish?.name"></h3>
+                    <p class="text-sm text-base-content/60">{{ __('frontend.choose_addons') }}</p>
+                </div>
+                <button type="button" @click="close()" class="btn btn-circle btn-ghost btn-sm">
+                    <span class="icon-[tabler--x] size-5"></span>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto p-6 flex-1 space-y-3">
+                <template x-for="addon in selectedAddons" :key="addon.id">
+                    <div class="flex items-center justify-between gap-3 rounded-lg bg-base-200/60 p-3">
+                        <label class="inline-flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                            <input type="checkbox"
+                                   class="checkbox"
+                                   :checked="addon.quantity > 0"
+                                   @change="toggleAddon(addon.id, $event.target.checked)">
+                            <span class="font-medium truncate" x-text="addon.name"></span>
+                        </label>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-sm font-semibold text-primary" x-text="parseFloat(addon.price).toFixed(2) + ' ₾'"></span>
+                            <div class="flex items-center gap-1" x-show="addon.quantity > 0">
+                                <button type="button" class="btn btn-circle btn-xs" @click="changeQty(addon.id, -1)">
+                                    <span class="icon-[tabler--minus] size-3"></span>
+                                </button>
+                                <span class="min-w-5 text-center text-sm font-bold" x-text="addon.quantity"></span>
+                                <button type="button" class="btn btn-circle btn-xs" @click="changeQty(addon.id, 1)">
+                                    <span class="icon-[tabler--plus] size-3"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="border-t border-base-content/10 px-6 py-4 space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-base-content/60">{{ __('frontend.total') }}</span>
+                    <span class="text-lg font-bold text-primary" x-text="totalPrice.toFixed(2) + ' ₾'"></span>
+                </div>
+                <div class="flex flex-col gap-2 sm:flex-row">
+                    <button type="button" class="btn btn-outline flex-1" @click="addWithoutAddons()">
+                        {{ __('frontend.without_addons') }}
+                    </button>
+                    <button type="button" class="btn btn-primary flex-1" @click="confirmAdd()">
+                        {{ __('frontend.add_to_cart') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
 <script>
+function dishAddonsModal() {
+    return {
+        isOpen: false,
+        dish: null,
+        selectedAddons: [],
+
+        open(dish) {
+            this.dish = dish;
+            this.selectedAddons = (dish.availableAddons || []).map(addon => ({
+                ...addon,
+                quantity: 0,
+            }));
+            this.isOpen = true;
+        },
+
+        close() {
+            this.isOpen = false;
+            this.dish = null;
+            this.selectedAddons = [];
+        },
+
+        toggleAddon(id, checked) {
+            const addon = this.selectedAddons.find(item => item.id === id);
+            if (!addon) {
+                return;
+            }
+            addon.quantity = checked ? 1 : 0;
+        },
+
+        changeQty(id, delta) {
+            const addon = this.selectedAddons.find(item => item.id === id);
+            if (!addon) {
+                return;
+            }
+            addon.quantity = Math.max(0, addon.quantity + delta);
+        },
+
+        get totalPrice() {
+            if (!this.dish) {
+                return 0;
+            }
+            const base = parseFloat(this.dish.basePrice ?? this.dish.price);
+            const addons = this.selectedAddons.reduce((sum, addon) => sum + (parseFloat(addon.price) * addon.quantity), 0);
+            return base + addons;
+        },
+
+        addWithoutAddons() {
+            this.selectedAddons.forEach(addon => addon.quantity = 0);
+            this.confirmAdd();
+        },
+
+        confirmAdd() {
+            const payload = {
+                ...this.dish,
+                addons: this.selectedAddons.filter(addon => addon.quantity > 0),
+            };
+            this.$store.cart.addDish(payload);
+            this.close();
+            this.$store.cart.openDrawer();
+        },
+    };
+}
+
 function bowlConstructor(type = 'bowl') {
     return {
         type,

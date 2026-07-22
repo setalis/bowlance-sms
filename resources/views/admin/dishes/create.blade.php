@@ -436,6 +436,8 @@
                     </div>
                 </div>
 
+                @include('admin.dishes.partials.addons', ['addons' => $addons])
+
                 <div class="flex items-center gap-3 pt-2">
                     <button type="submit" class="btn btn-lg btn-primary btn-gradient">
                         <span class="icon-[tabler--check] size-5"></span>

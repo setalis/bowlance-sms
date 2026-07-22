@@ -49,6 +49,12 @@ class UpdateDishRequest extends FormRequest
             'sauce_fiber' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'sort_order' => ['integer', 'min:0'],
             'poster_product_id' => ['nullable', 'integer', 'min:1'],
+            'addon_ids' => ['nullable', 'array'],
+            'addon_ids.*' => ['integer', 'exists:dish_addons,id'],
+            'addon_poster_ids' => ['nullable', 'array'],
+            'addon_poster_ids.*' => ['nullable', 'integer', 'min:1'],
+            'addon_prices' => ['nullable', 'array'],
+            'addon_prices.*' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
         ];
     }
 

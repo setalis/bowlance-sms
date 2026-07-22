@@ -19,7 +19,11 @@ class HomeController extends Controller
             ->where('is_active', true)
             ->orderBy('sort')
             ->with(['dishes' => function ($query) {
-                $query->orderBy('sort_order')->orderBy('name');
+                $query->orderBy('sort_order')
+                    ->orderBy('name')
+                    ->with(['addons' => function ($addonQuery) {
+                        $addonQuery->where('dish_addons.is_active', true);
+                    }]);
             }])
             ->get();
 

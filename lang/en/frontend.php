@@ -23,6 +23,8 @@ return [
     'no_dishes_available' => 'No dishes available yet',
     'no_dishes_in_category' => 'No dishes in this category yet',
     'add_to_cart' => 'Add to cart',
+    'choose_addons' => 'Choose add-ons (optional)',
+    'without_addons' => 'No add-ons',
     'calories' => 'kcal',
     'proteins' => 'P',
     'fats' => 'F',

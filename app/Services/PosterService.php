@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ConstructorProduct;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -27,14 +28,11 @@ class PosterService
             return null;
         }
 
-        $order->loadMissing('items.dish');
+        $order->loadMissing(['items.dish.addons']);
 
         $products = $order->items
             ->filter(fn ($item) => $item->item_type === 'dish' && $item->dish?->poster_product_id)
-            ->map(fn ($item) => [
-                'product_id' => $item->dish->poster_product_id,
-                'count' => $item->quantity,
-            ])
+            ->map(fn ($item) => $this->buildDishProduct($item))
             ->values()
             ->all();
 
@@ -56,6 +54,7 @@ class PosterService
                     'dish_id' => $item->dish_id,
                     'poster_product_id' => $item->dish?->poster_product_id,
                     'bowl_product_ids' => collect($item->bowl_products ?? [])->pluck('id')->all(),
+                    'dish_addon_ids' => collect($item->dish_addons ?? [])->pluck('id')->all(),
                 ])->all(),
             ]);
 
@@ -134,6 +133,53 @@ class PosterService
 
             return null;
         }
+    }
+
+    /**
+     * @return array{product_id: int, count: int, modification?: string}
+     */
+    protected function buildDishProduct(OrderItem $item): array
+    {
+        $product = [
+            'product_id' => $item->dish->poster_product_id,
+            'count' => $item->quantity,
+        ];
+
+        $modification = $this->buildDishAddonModifications($item);
+
+        if ($modification->isNotEmpty()) {
+            $product['modification'] = $modification->toJson();
+        }
+
+        return $product;
+    }
+
+    /**
+     * @return Collection<int, array{m: int, a: int}>
+     */
+    protected function buildDishAddonModifications(OrderItem $item): Collection
+    {
+        $selectedAddons = collect($item->dish_addons ?? [])
+            ->filter(fn ($addon) => is_array($addon) && ! empty($addon['id']));
+
+        if ($selectedAddons->isEmpty() || ! $item->dish) {
+            return collect();
+        }
+
+        $item->dish->loadMissing('addons');
+
+        $modificationIds = $item->dish->addons
+            ->filter(fn ($addon) => $addon->pivot?->poster_modification_id)
+            ->mapWithKeys(fn ($addon) => [$addon->id => (int) $addon->pivot->poster_modification_id]);
+
+        return $selectedAddons
+            ->filter(fn ($addon) => $modificationIds->has($addon['id']))
+            ->map(fn ($addon) => [
+                'm' => (int) $modificationIds->get($addon['id']),
+                'a' => max(1, (int) ($addon['quantity'] ?? 1)),
+            ])
+            ->sortBy('m')
+            ->values();
     }
 
     /**

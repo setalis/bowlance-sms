@@ -23,6 +23,8 @@ return [
     'no_dishes_available' => 'ჯერ არ არის ხელმისაწვდომი კერძები',
     'no_dishes_in_category' => 'ამ კატეგორიაში ჯერ არ არის კერძები',
     'add_to_cart' => 'კალათაში',
+    'choose_addons' => 'აირჩიეთ დანამატები (არასავალდებულო)',
+    'without_addons' => 'დანამატების გარეშე',
     'calories' => 'კკალ',
     'proteins' => 'ც',
     'fats' => 'ცხ',
