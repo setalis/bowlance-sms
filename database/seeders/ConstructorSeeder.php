@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\ConstructorType;
 use App\Models\ConstructorCategory;
 use App\Models\ConstructorProduct;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 
 class ConstructorSeeder extends Seeder
 {
@@ -578,8 +580,38 @@ class ConstructorSeeder extends Seeder
      */
     private function createProduct(ConstructorCategory $category, array $attributes): ConstructorProduct
     {
-        $product = ConstructorProduct::create($attributes);
+        $commercialKeys = [
+            'price',
+            'weight_volume',
+            'calories',
+            'proteins',
+            'fats',
+            'carbohydrates',
+            'fiber',
+            'poster_modification_id',
+        ];
+
+        $commercial = Arr::only($attributes, $commercialKeys);
+        $productAttributes = Arr::except($attributes, $commercialKeys);
+
+        $product = ConstructorProduct::create($productAttributes);
         $product->categories()->attach($category);
+
+        $type = $category->type instanceof ConstructorType
+            ? $category->type
+            : ConstructorType::from($category->type ?? ConstructorType::Bowl->value);
+
+        $product->variants()->create([
+            'type' => $type,
+            'price' => $commercial['price'] ?? 0,
+            'weight_volume' => $commercial['weight_volume'] ?? null,
+            'calories' => $commercial['calories'] ?? null,
+            'proteins' => $commercial['proteins'] ?? null,
+            'fats' => $commercial['fats'] ?? null,
+            'carbohydrates' => $commercial['carbohydrates'] ?? null,
+            'fiber' => $commercial['fiber'] ?? null,
+            'poster_modification_id' => $commercial['poster_modification_id'] ?? null,
+        ]);
 
         return $product;
     }

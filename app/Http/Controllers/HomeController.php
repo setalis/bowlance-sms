@@ -37,13 +37,13 @@ class HomeController extends Controller
         $constructorCategories = ConstructorCategory::query()
             ->where('type', ConstructorType::Bowl)
             ->orderBy('sort_order')
-            ->with('products')
+            ->with('products.variants')
             ->get();
 
         $breakfastCategories = ConstructorCategory::query()
             ->where('type', ConstructorType::Breakfast)
             ->orderBy('sort_order')
-            ->with('products')
+            ->with('products.variants')
             ->get();
 
         return view('frontend.index', compact('title', 'dishCategories', 'drinks', 'constructorCategories', 'breakfastCategories'));

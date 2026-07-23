@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ConstructorType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreConstructorProductRequest;
 use App\Http\Requests\UpdateConstructorProductRequest;
@@ -14,13 +15,10 @@ use Illuminate\View\View;
 
 class ConstructorProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
         $products = ConstructorProduct::query()
-            ->with('categories')
+            ->with(['categories', 'variants'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->value();
 
@@ -54,9 +52,6 @@ class ConstructorProductController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         $categories = ConstructorCategory::query()
@@ -71,12 +66,9 @@ class ConstructorProductController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreConstructorProductRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['category_ids', 'image']);
+        $data = $request->safe()->except(['category_ids', 'image', 'variants']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('constructor-products', 'public');
@@ -84,15 +76,13 @@ class ConstructorProductController extends Controller
 
         $product = ConstructorProduct::create($data);
         $product->categories()->sync($request->validated('category_ids'));
+        $this->syncVariants($product, $request->selectedConstructorTypes(), $request->validated('variants', []));
 
         return redirect()
             ->route('admin.constructor-products.index')
             ->with('success', 'Продукт конструктора успешно создан.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(ConstructorProduct $constructorProduct): View
     {
         $categories = ConstructorCategory::query()
@@ -101,7 +91,7 @@ class ConstructorProductController extends Controller
             ->orderBy('name')
             ->get();
 
-        $constructorProduct->load('categories');
+        $constructorProduct->load(['categories', 'variants']);
 
         return view('admin.constructor-products.edit', [
             'title' => 'Редактировать продукт конструктора',
@@ -110,12 +100,9 @@ class ConstructorProductController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateConstructorProductRequest $request, ConstructorProduct $constructorProduct): RedirectResponse
     {
-        $data = $request->safe()->except(['category_ids', 'image']);
+        $data = $request->safe()->except(['category_ids', 'image', 'variants']);
 
         if ($request->hasFile('image')) {
             if ($constructorProduct->image) {
@@ -126,15 +113,13 @@ class ConstructorProductController extends Controller
 
         $constructorProduct->update($data);
         $constructorProduct->categories()->sync($request->validated('category_ids'));
+        $this->syncVariants($constructorProduct, $request->selectedConstructorTypes(), $request->validated('variants', []));
 
         return redirect()
             ->route('admin.constructor-products.index')
             ->with('success', 'Продукт конструктора успешно обновлен.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(ConstructorProduct $constructorProduct): RedirectResponse
     {
         if ($constructorProduct->image) {
@@ -146,5 +131,34 @@ class ConstructorProductController extends Controller
         return redirect()
             ->route('admin.constructor-products.index')
             ->with('success', 'Продукт конструктора успешно удален.');
+    }
+
+    /**
+     * @param  list<ConstructorType>  $types
+     * @param  array<string, array<string, mixed>>  $variants
+     */
+    protected function syncVariants(ConstructorProduct $product, array $types, array $variants): void
+    {
+        $typeValues = collect($types)->map(fn (ConstructorType $type) => $type->value)->all();
+
+        $product->variants()->whereNotIn('type', $typeValues)->delete();
+
+        foreach ($types as $type) {
+            $payload = $variants[$type->value] ?? [];
+
+            $product->variants()->updateOrCreate(
+                ['type' => $type],
+                [
+                    'price' => $payload['price'] ?? 0,
+                    'weight_volume' => $payload['weight_volume'] ?? null,
+                    'calories' => $payload['calories'] ?? null,
+                    'proteins' => $payload['proteins'] ?? null,
+                    'fats' => $payload['fats'] ?? null,
+                    'carbohydrates' => $payload['carbohydrates'] ?? null,
+                    'fiber' => $payload['fiber'] ?? null,
+                    'poster_modification_id' => $payload['poster_modification_id'] ?? null,
+                ]
+            );
+        }
     }
 }

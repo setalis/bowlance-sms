@@ -211,14 +211,19 @@ class PosterService
         $bowlProducts = collect($item->bowl_products ?? [])
             ->filter(fn ($product) => is_array($product) && ! empty($product['id']));
 
-        $modificationColumn = $item->item_type === 'breakfast'
-            ? 'poster_breakfast_modification_id'
-            : 'poster_bowl_modification_id';
+        $variantType = $item->item_type === 'breakfast' ? 'breakfast' : 'bowl';
 
         $modificationIds = ConstructorProduct::query()
             ->whereIn('id', $bowlProducts->pluck('id'))
-            ->whereNotNull($modificationColumn)
-            ->pluck($modificationColumn, 'id');
+            ->with(['variants' => fn ($query) => $query->where('type', $variantType)->whereNotNull('poster_modification_id')])
+            ->get()
+            ->mapWithKeys(function (ConstructorProduct $product) use ($variantType) {
+                $variant = $product->variantFor($variantType);
+
+                return $variant?->poster_modification_id
+                    ? [$product->id => (int) $variant->poster_modification_id]
+                    : [];
+            });
 
         $modification = $bowlProducts
             ->filter(fn ($product) => $modificationIds->has($product['id']))

@@ -272,7 +272,12 @@
 @push('scripts')
 <script>
 function orderForm() {
-    const productsData = @json($constructorCategories->pluck('products')->flatten()->keyBy('id'));
+    const productsData = @json($constructorCategories->pluck('products')->flatten()->unique('id')->mapWithKeys(fn ($product) => [
+        $product->id => [
+            'id' => $product->id,
+            'name' => $product->name,
+        ],
+    ]));
     const categoriesData = @json($constructorCategories->map(fn ($category) => [
         'id' => $category->id,
         'name' => $category->name,
@@ -280,7 +285,7 @@ function orderForm() {
         'products' => $category->products->map(fn ($product) => [
             'id' => $product->id,
             'name' => $product->name,
-            'price' => $product->price,
+            'price' => $product->variantFor($category->type)?->price ?? 0,
         ])->values(),
     ])->values());
     

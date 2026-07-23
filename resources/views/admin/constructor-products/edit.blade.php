@@ -151,118 +151,9 @@
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
-
-                    <div>
-                        <label class="label-text" for="price">Цена*</label>
-                        <input type="number" 
-                               name="price" 
-                               placeholder="0.00" 
-                               class="input @error('price') input-error @enderror" 
-                               id="price" 
-                               value="{{ old('price', $product->price) }}" 
-                               step="0.01"
-                               min="0"
-                               required />
-                        @error('price')
-                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
                 </div>
 
-                <div class="space-y-4 border-t border-base-content/10 pt-6">
-                    <h4 class="text-base-content text-lg font-semibold">Пищевая ценность</h4>
-                    
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="label-text" for="weight_volume">Вес/Объем</label>
-                            <input type="text" 
-                                   name="weight_volume" 
-                                   placeholder="Например: 100 г" 
-                                   class="input @error('weight_volume') input-error @enderror" 
-                                   id="weight_volume" 
-                                   value="{{ old('weight_volume', $product->weight_volume) }}" />
-                            @error('weight_volume')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="label-text" for="calories">Калории (ккал)</label>
-                            <input type="number" 
-                                   name="calories" 
-                                   placeholder="0" 
-                                   class="input @error('calories') input-error @enderror" 
-                                   id="calories" 
-                                   value="{{ old('calories', $product->calories) }}" 
-                                   min="0" />
-                            @error('calories')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        <div>
-                            <label class="label-text" for="proteins">Белки (г)</label>
-                            <input type="number" 
-                                   name="proteins" 
-                                   placeholder="0.00" 
-                                   class="input @error('proteins') input-error @enderror" 
-                                   id="proteins" 
-                                   value="{{ old('proteins', $product->proteins) }}" 
-                                   step="0.01"
-                                   min="0" />
-                            @error('proteins')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="label-text" for="fats">Жиры (г)</label>
-                            <input type="number" 
-                                   name="fats" 
-                                   placeholder="0.00" 
-                                   class="input @error('fats') input-error @enderror" 
-                                   id="fats" 
-                                   value="{{ old('fats', $product->fats) }}" 
-                                   step="0.01"
-                                   min="0" />
-                            @error('fats')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="label-text" for="carbohydrates">Углеводы (г)</label>
-                            <input type="number" 
-                                   name="carbohydrates" 
-                                   placeholder="0.00" 
-                                   class="input @error('carbohydrates') input-error @enderror" 
-                                   id="carbohydrates" 
-                                   value="{{ old('carbohydrates', $product->carbohydrates) }}" 
-                                   step="0.01"
-                                   min="0" />
-                            @error('carbohydrates')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="label-text" for="fiber">Клетчатка (г)</label>
-                            <input type="number" 
-                                   name="fiber" 
-                                   placeholder="0.00" 
-                                   class="input @error('fiber') input-error @enderror" 
-                                   id="fiber" 
-                                   value="{{ old('fiber', $product->fiber) }}" 
-                                   step="0.01"
-                                   min="0" />
-                            @error('fiber')
-                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
+                @include('admin.constructor-products.partials.variant-fields', ['product' => $product])
 
                 <div class="space-y-4 border-t border-base-content/10 pt-6">
                     <h4 class="text-base-content text-lg font-semibold">Дополнительно</h4>
@@ -277,34 +168,6 @@
                                value="{{ old('sort_order', $product->sort_order) }}" 
                                min="0" />
                         @error('sort_order')
-                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="label-text" for="poster_bowl_modification_id">Poster Modification ID (боулы)</label>
-                        <input type="number"
-                               name="poster_bowl_modification_id"
-                               placeholder="ID модификатора для конструктора боулов"
-                               class="input @error('poster_bowl_modification_id') input-error @enderror"
-                               id="poster_bowl_modification_id"
-                               value="{{ old('poster_bowl_modification_id', $product->poster_bowl_modification_id) }}"
-                               min="1" />
-                        @error('poster_bowl_modification_id')
-                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="label-text" for="poster_breakfast_modification_id">Poster Modification ID (завтраки)</label>
-                        <input type="number"
-                               name="poster_breakfast_modification_id"
-                               placeholder="ID модификатора для конструктора завтраков"
-                               class="input @error('poster_breakfast_modification_id') input-error @enderror"
-                               id="poster_breakfast_modification_id"
-                               value="{{ old('poster_breakfast_modification_id', $product->poster_breakfast_modification_id) }}"
-                               min="1" />
-                        @error('poster_breakfast_modification_id')
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>

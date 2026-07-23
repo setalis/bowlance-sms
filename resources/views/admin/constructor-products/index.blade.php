@@ -110,10 +110,29 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="font-semibold">{{ number_format($product->price, 2) }} ₾</div>
+                                    @forelse ($product->variants->sortBy('type') as $variant)
+                                        <div class="text-sm {{ ! $loop->first ? 'mt-1' : '' }}">
+                                            <span class="text-base-content/60">{{ $variant->type === \App\Enums\ConstructorType::Bowl ? 'Боул' : 'Завтрак' }}:</span>
+                                            <span class="font-semibold">{{ number_format($variant->price, 2) }} ₾</span>
+                                        </div>
+                                    @empty
+                                        <span class="text-base-content/40">—</span>
+                                    @endforelse
                                 </td>
-                                <td>{{ $product->weight_volume ?? '—' }}</td>
-                                <td>{{ $product->calories ? $product->calories . ' ккал' : '—' }}</td>
+                                <td>
+                                    @forelse ($product->variants->sortBy('type') as $variant)
+                                        <div class="text-sm {{ ! $loop->first ? 'mt-1' : '' }}">{{ $variant->weight_volume ?? '—' }}</div>
+                                    @empty
+                                        —
+                                    @endforelse
+                                </td>
+                                <td>
+                                    @forelse ($product->variants->sortBy('type') as $variant)
+                                        <div class="text-sm {{ ! $loop->first ? 'mt-1' : '' }}">{{ $variant->calories ? $variant->calories . ' ккал' : '—' }}</div>
+                                    @empty
+                                        —
+                                    @endforelse
+                                </td>
                                 <!-- <td>{{ $product->sort_order }}</td> -->
                                 <td>
                                     <div class="flex gap-2">

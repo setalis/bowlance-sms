@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\ConstructorType;
 use Database\Factories\ConstructorProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ConstructorProduct extends Model
 {
@@ -20,32 +22,12 @@ class ConstructorProduct extends Model
         'name',
         'name_ru',
         'name_ka',
-        'price',
         'image',
         'sort_order',
-        'poster_bowl_modification_id',
-        'poster_breakfast_modification_id',
         'description',
         'description_ru',
         'description_ka',
-        'weight_volume',
-        'calories',
-        'proteins',
-        'fats',
-        'carbohydrates',
-        'fiber',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'price' => 'decimal:2',
-            'proteins' => 'decimal:2',
-            'fats' => 'decimal:2',
-            'carbohydrates' => 'decimal:2',
-            'fiber' => 'decimal:2',
-        ];
-    }
 
     public function categories(): BelongsToMany
     {
@@ -53,9 +35,22 @@ class ConstructorProduct extends Model
             ->orderBy('sort_order');
     }
 
-    /**
-     * Получить название в зависимости от текущей локали.
-     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ConstructorProductVariant::class);
+    }
+
+    public function variantFor(ConstructorType|string $type): ?ConstructorProductVariant
+    {
+        $type = $type instanceof ConstructorType ? $type : ConstructorType::from($type);
+
+        if ($this->relationLoaded('variants')) {
+            return $this->variants->first(fn (ConstructorProductVariant $variant) => $variant->type === $type);
+        }
+
+        return $this->variants()->where('type', $type)->first();
+    }
+
     public function getNameAttribute(?string $value): string
     {
         $locale = app()->getLocale();
@@ -68,13 +63,9 @@ class ConstructorProduct extends Model
             return $this->name_ru;
         }
 
-        // Fallback на русский, затем на старое поле
         return $this->name_ru ?? $this->attributes['name'] ?? '';
     }
 
-    /**
-     * Получить описание в зависимости от текущей локали.
-     */
     public function getDescriptionAttribute(?string $value): ?string
     {
         $locale = app()->getLocale();
@@ -87,7 +78,6 @@ class ConstructorProduct extends Model
             return $this->description_ru;
         }
 
-        // Fallback на русский, затем на старое поле
         return $this->description_ru ?? $this->attributes['description'] ?? null;
     }
 }

@@ -57,9 +57,12 @@ it('creates a constructor product with multiple categories in admin', function (
 
     $response = $this->actingAs($admin)->post(route('admin.constructor-products.store'), [
         'name_ru' => 'Лосось',
-        'price' => 12.50,
         'category_ids' => [$bowlCategory->id, $breakfastCategory->id],
         'sort_order' => 1,
+        'variants' => [
+            'bowl' => ['price' => 12.50],
+            'breakfast' => ['price' => 12.50],
+        ],
     ]);
 
     $response->assertRedirect(route('admin.constructor-products.index'));
@@ -68,7 +71,8 @@ it('creates a constructor product with multiple categories in admin', function (
 
     expect($product)->not->toBeNull()
         ->and($product->categories()->pluck('constructor_categories.id')->all())
-        ->toEqualCanonicalizing([$bowlCategory->id, $breakfastCategory->id]);
+        ->toEqualCanonicalizing([$bowlCategory->id, $breakfastCategory->id])
+        ->and($product->variants)->toHaveCount(2);
 });
 
 it('updates constructor product categories in admin', function () {
@@ -90,9 +94,12 @@ it('updates constructor product categories in admin', function () {
 
     $response = $this->actingAs($admin)->put(route('admin.constructor-products.update', $product), [
         'name_ru' => 'Тофу',
-        'price' => $product->price,
         'category_ids' => [$breakfastCategory->id, $anotherBowlCategory->id],
         'sort_order' => $product->sort_order,
+        'variants' => [
+            'bowl' => ['price' => 8],
+            'breakfast' => ['price' => 6],
+        ],
     ]);
 
     $response->assertRedirect(route('admin.constructor-products.index'));
@@ -107,8 +114,10 @@ it('requires at least one category when creating a product', function () {
     $response = $this->actingAs($admin)->from(route('admin.constructor-products.create'))
         ->post(route('admin.constructor-products.store'), [
             'name_ru' => 'Без категории',
-            'price' => 5,
             'sort_order' => 0,
+            'variants' => [
+                'bowl' => ['price' => 5],
+            ],
         ]);
 
     $response->assertRedirect(route('admin.constructor-products.create'));

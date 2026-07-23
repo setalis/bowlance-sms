@@ -148,17 +148,20 @@
                     @else
                         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                             @foreach($category->products as $product)
+                                @php
+                                    $variant = $product->variantFor($category->type);
+                                @endphp
                                 <div @click="toggleProduct({
                                     id: {{ $product->id }},
                                     name: '{{ addslashes($product->name) }}',
-                                    price: {{ $product->price }},
+                                    price: {{ $variant?->price ?? 0 }},
                                     categoryId: {{ $category->id }},
                                     category: '{{ addslashes($category->name) }}',
                                     image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
-                                    calories: {{ $product->calories ?? 0 }},
-                                    proteins: {{ $product->proteins ?? 0 }},
-                                    fats: {{ $product->fats ?? 0 }},
-                                    carbs: {{ $product->carbohydrates ?? 0 }}
+                                    calories: {{ $variant?->calories ?? 0 }},
+                                    proteins: {{ $variant?->proteins ?? 0 }},
+                                    fats: {{ $variant?->fats ?? 0 }},
+                                    carbs: {{ $variant?->carbohydrates ?? 0 }}
                                 })"
                                      class="group relative overflow-hidden rounded-xl bg-base-200 cursor-pointer transition-all duration-300 hover:shadow-lg hover:ring-2 hover:ring-emerald-500/40 hover:-translate-y-0.5"
                                      :class="{ 'ring-2 ring-primary bg-primary/10': isSelected({{ $product->id }}) }">
@@ -187,14 +190,14 @@
                                                         @click.stop="toggleProduct({
                                                             id: {{ $product->id }},
                                                             name: '{{ addslashes($product->name) }}',
-                                                            price: {{ $product->price }},
+                                                            price: {{ $variant?->price ?? 0 }},
                                                             categoryId: {{ $category->id }},
                                                             category: '{{ addslashes($category->name) }}',
                                                             image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
-                                                            calories: {{ $product->calories ?? 0 }},
-                                                            proteins: {{ $product->proteins ?? 0 }},
-                                                            fats: {{ $product->fats ?? 0 }},
-                                                            carbs: {{ $product->carbohydrates ?? 0 }}
+                                                            calories: {{ $variant?->calories ?? 0 }},
+                                                            proteins: {{ $variant?->proteins ?? 0 }},
+                                                            fats: {{ $variant?->fats ?? 0 }},
+                                                            carbs: {{ $variant?->carbohydrates ?? 0 }}
                                                         })"
                                                         class="size-7 rounded-full bg-emerald-500 hover:bg-emerald-600 active:scale-90 text-white flex items-center justify-center transition-all shadow-sm">
                                                     <span class="icon-[tabler--plus] size-3.5"></span>
@@ -205,20 +208,20 @@
                                     <div class="card-body p-3">
                                         <h5 class="text-sm font-medium line-clamp-2">{{ $product->name }}</h5>
 
-                                        @if($product->weight_volume)
-                                            <p class="text-xs text-base-content/50">{{ $product->weight_volume }}</p>
+                                        @if($variant?->weight_volume)
+                                            <p class="text-xs text-base-content/50">{{ $variant->weight_volume }}</p>
                                         @endif
 
-                                        @if($product->calories || $product->proteins || $product->fats || $product->carbohydrates)
+                                        @if($variant?->calories || $variant?->proteins || $variant?->fats || $variant?->carbohydrates)
                                             <div class="mt-1 flex flex-wrap gap-1 text-xs">
-                                                @if($product->calories)
-                                                    <span class="badge badge-outline badge-xs">{{ $product->calories }} {{ __('frontend.calories') }}</span>
+                                                @if($variant?->calories)
+                                                    <span class="badge badge-outline badge-xs">{{ $variant->calories }} {{ __('frontend.calories') }}</span>
                                                 @endif
                                             </div>
                                         @endif
 
                                         <div class="mt-2 flex items-center justify-between">
-                                            <span class="text-base font-bold">{{ number_format($product->price, 2) }} ₾</span>
+                                            <span class="text-base font-bold">{{ number_format($variant?->price ?? 0, 2) }} ₾</span>
                                             <span x-show="isSelected({{ $product->id }})"
                                                   class="badge badge-primary badge-sm"
                                                   x-text="'×' + getProductQuantity({{ $product->id }})">

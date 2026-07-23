@@ -80,7 +80,7 @@ class OrderController extends Controller
     public function create(): View
     {
         $dishes = Dish::with('category')->orderBy('name')->get();
-        $constructorCategories = \App\Models\ConstructorCategory::with('products')->orderBy('sort_order')->get();
+        $constructorCategories = \App\Models\ConstructorCategory::with('products.variants')->orderBy('sort_order')->get();
 
         return view('admin.orders.create', [
             'title' => 'Создать заказ',
@@ -120,7 +120,7 @@ class OrderController extends Controller
                 ->flatten(1)
                 ->filter()
                 ->unique();
-            $constructorProducts = ConstructorProduct::whereIn('id', $allProductIds)->get()->keyBy('id');
+            $constructorProducts = ConstructorProduct::with('variants')->whereIn('id', $allProductIds)->get()->keyBy('id');
 
             // Подсчёт итоговой суммы
             $subtotal = collect($validated['items'])->sum(function ($item) use ($dishes, $constructorProducts) {
@@ -128,10 +128,8 @@ class OrderController extends Controller
                     $dish = $dishes->get($item['dish_id']);
                     $price = $dish->discount_price ?? $dish->price;
                 } elseif ($this->isConstructorItem($item['type'])) {
-                    $price = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->price : 0;
+                    $price = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts, $item) {
+                        return $this->constructorProductPrice($constructorProducts->get($productId), $item['type']);
                     });
                 }
 
@@ -205,7 +203,7 @@ class OrderController extends Controller
     {
         $order->load('items.dish');
         $dishes = Dish::with('category')->orderBy('name')->get();
-        $constructorCategories = \App\Models\ConstructorCategory::with('products')->orderBy('sort_order')->get();
+        $constructorCategories = \App\Models\ConstructorCategory::with('products.variants')->orderBy('sort_order')->get();
 
         return view('admin.orders.edit', [
             'title' => 'Редактировать заказ '.$order->order_number,
@@ -247,7 +245,7 @@ class OrderController extends Controller
                 ->flatten(1)
                 ->filter()
                 ->unique();
-            $constructorProducts = ConstructorProduct::whereIn('id', $allProductIds)->get()->keyBy('id');
+            $constructorProducts = ConstructorProduct::with('variants')->whereIn('id', $allProductIds)->get()->keyBy('id');
 
             // Подсчёт итоговой суммы
             $subtotal = collect($validated['items'])->sum(function ($item) use ($dishes, $constructorProducts) {
@@ -255,10 +253,8 @@ class OrderController extends Controller
                     $dish = $dishes->get($item['dish_id']);
                     $price = $dish->discount_price ?? $dish->price;
                 } elseif ($this->isConstructorItem($item['type'])) {
-                    $price = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-                        $constructorProduct = $constructorProducts->get($productId);
-
-                        return $constructorProduct ? $constructorProduct->price : 0;
+                    $price = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts, $item) {
+                        return $this->constructorProductPrice($constructorProducts->get($productId), $item['type']);
                     });
                 }
 
@@ -374,44 +370,40 @@ class OrderController extends Controller
      */
     protected function createConstructorOrderItem(Order $order, array $item, $constructorProducts): void
     {
-        $bowlPrice = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-            $constructorProduct = $constructorProducts->get($productId);
+        $type = $item['type'];
 
-            return $constructorProduct ? $constructorProduct->price : 0;
+        $bowlPrice = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts, $type) {
+            return $this->constructorProductPrice($constructorProducts->get($productId), $type);
         });
 
-        $bowlCalories = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-            $constructorProduct = $constructorProducts->get($productId);
-
-            return $constructorProduct ? $constructorProduct->calories : 0;
+        $bowlCalories = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts, $type) {
+            return $this->constructorProductAttribute($constructorProducts->get($productId), $type, 'calories');
         });
 
-        $bowlProteins = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-            $constructorProduct = $constructorProducts->get($productId);
-
-            return $constructorProduct ? $constructorProduct->proteins : 0;
+        $bowlProteins = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts, $type) {
+            return $this->constructorProductAttribute($constructorProducts->get($productId), $type, 'proteins');
         });
 
-        $bowlFats = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-            $constructorProduct = $constructorProducts->get($productId);
-
-            return $constructorProduct ? $constructorProduct->fats : 0;
+        $bowlFats = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts, $type) {
+            return $this->constructorProductAttribute($constructorProducts->get($productId), $type, 'fats');
         });
 
-        $bowlCarbs = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts) {
-            $constructorProduct = $constructorProducts->get($productId);
-
-            return $constructorProduct ? $constructorProduct->carbohydrates : 0;
+        $bowlCarbs = collect($item['bowl_products'])->sum(function ($productId) use ($constructorProducts, $type) {
+            return $this->constructorProductAttribute($constructorProducts->get($productId), $type, 'carbohydrates');
         });
 
-        $bowlProductsData = collect($item['bowl_products'])->map(function ($productId) use ($constructorProducts) {
+        $bowlProductsData = collect($item['bowl_products'])->map(function ($productId) use ($constructorProducts, $type) {
             $product = $constructorProducts->get($productId);
 
-            return $product ? [
+            if (! $product) {
+                return null;
+            }
+
+            return [
                 'id' => $product->id,
                 'name' => $product->name,
-                'price' => $product->price,
-            ] : null;
+                'price' => $this->constructorProductPrice($product, $type),
+            ];
         })->filter()->values()->toArray();
 
         OrderItem::create([
@@ -428,5 +420,23 @@ class OrderController extends Controller
             'carbohydrates' => $bowlCarbs,
             'bowl_products' => $bowlProductsData,
         ]);
+    }
+
+    protected function constructorProductPrice(?ConstructorProduct $product, string $type): float
+    {
+        if (! $product) {
+            return 0;
+        }
+
+        return (float) ($product->variantFor($type)?->price ?? 0);
+    }
+
+    protected function constructorProductAttribute(?ConstructorProduct $product, string $type, string $attribute): float|int
+    {
+        if (! $product) {
+            return 0;
+        }
+
+        return $product->variantFor($type)?->{$attribute} ?? 0;
     }
 }
