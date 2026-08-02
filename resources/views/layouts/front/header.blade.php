@@ -449,8 +449,18 @@
         >
             <!-- Sticky Header с прогресс-индикатором -->
             <div class="flex-none px-6 pt-5 pb-4 border-b border-base-200">
-                <!-- Прогресс-индикатор 4 шага -->
-                <div class="flex items-center gap-1.5 mb-4">
+                <!-- Прогресс-индикатор: 2 шага для самовывоза, 4 для доставки -->
+                <div class="flex items-center gap-1.5 mb-4" x-show="formData.deliveryType === 'pickup'">
+                    <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
+                         :class="step >= 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">1</div>
+                    <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
+                        <div class="h-full bg-emerald-600 transition-all duration-500 rounded-full"
+                             :style="step >= 2 ? 'width: 100%' : 'width: 0%'"></div>
+                    </div>
+                    <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
+                         :class="step >= 2 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">2</div>
+                </div>
+                <div class="flex items-center gap-1.5 mb-4" x-show="formData.deliveryType !== 'pickup'">
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">1</div>
                     <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
@@ -483,9 +493,11 @@
                         </button>
                         <div>
                             <h3 class="text-lg font-bold leading-tight"
-                                x-text="step === 1 ? '{{ __('frontend.checkout_title') }}' : (step === 2 ? 'Адрес доставки' : (step === 3 ? 'Способ оплаты' : 'Подтверждение'))"></h3>
+                                x-text="step === 1 ? '{{ __('frontend.checkout_title') }}' : (step === 2 ? (formData.deliveryType === 'pickup' ? 'Самовывоз' : 'Адрес доставки') : (step === 3 ? 'Способ оплаты' : 'Подтверждение'))"></h3>
                             <p class="text-xs text-base-content/40 leading-tight"
-                               x-text="step === 1 ? 'Шаг 1 из 4 — контакты и время' : (step === 2 ? 'Шаг 2 из 4 — адрес или самовывоз' : (step === 3 ? 'Шаг 3 из 4 — как вы оплатите' : 'Шаг 4 из 4 — подтверждение номера'))"></p>
+                               x-text="formData.deliveryType === 'pickup'
+                                   ? (step === 1 ? 'Шаг 1 из 2 — контакты и время' : 'Шаг 2 из 2 — самовывоз')
+                                   : (step === 1 ? 'Шаг 1 из 4 — контакты и время' : (step === 2 ? 'Шаг 2 из 4 — адрес доставки' : (step === 3 ? 'Шаг 3 из 4 — как вы оплатите' : 'Шаг 4 из 4 — подтверждение номера')))"></p>
                         </div>
                     </div>
                     <button @click="closeModal()" class="btn btn-circle btn-sm text-base-content/40 shrink-0 bg-white hover:bg-error/10">
@@ -524,17 +536,22 @@
                                     {{ __('frontend.phone') }} <span class="text-error">*</span>
                                 </label>
                                 <div class="relative">
+                                    <span class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-sm font-semibold text-base-content/60 select-none">+995</span>
                                     <input type="tel"
-                                           x-model="formData.phone"
-                                           class="input input-bordered w-full rounded-xl focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 pr-10"
+                                           x-model="formData.phoneLocal"
+                                           x-mask="999 99 99 99"
+                                           class="input input-bordered w-full rounded-xl focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 pl-14 pr-10"
                                            required
-                                           placeholder="+995555123456"
+                                           placeholder="555 12 34 56"
+                                           inputmode="numeric"
+                                           autocomplete="tel-national"
                                            :disabled="phoneVerified"
-                                           @input="phoneVerified = false; verificationRequestId = null">
+                                           @input="onPhoneLocalInput($event)">
                                     <span x-show="phoneVerified"
                                           x-cloak
                                           class="absolute right-3 top-1/2 -translate-y-1/2 icon-[tabler--circle-check-filled] size-5 text-emerald-500"></span>
                                 </div>
+                                <p class="mt-1 text-xs text-base-content/50">Формат: +995 XXX XX XX XX</p>
                             </div>
                         </div>
 
@@ -611,7 +628,7 @@
                         <button type="button"
                                 @click="goToStep2()"
                                 class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
-                                :disabled="!formData.name || !formData.phone">
+                                :disabled="!formData.name || !isPhoneComplete()">
                             Далее
                             <span class="icon-[tabler--arrow-right] size-5"></span>
                         </button>
@@ -799,21 +816,41 @@
                             </div>
                             <div>
                                 <p class="font-semibold text-sm text-emerald-800 dark:text-emerald-200">Самовывоз из заведения</p>
-                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Заказ будет готов — мы свяжемся с вами для уточнения времени.</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Заказ забрать по адресу: 174, Мепе Парнаваз Мепе, Батуми 6000, Грузия</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Время работы: 10:00 - 20:00</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Телефон: +995 555 123 456</p>
+                                <a href="https://maps.app.goo.gl/MBzMJjTLa977ah886?g_st=ic" target="_blank" class="text-base text-emerald-700 dark:text-emerald-300/70 mt-0.5">Посмотреть на карте</a>                               
                             </div>
                         </div>
 
-                        <!-- Кнопка далее -->
+                        <div x-show="orderError"
+                             class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
+                            <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
+                            <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
+                        </div>
+
+                        <!-- Доставка: далее к оплате -->
                         <button type="button"
+                                x-show="formData.deliveryType === 'delivery'"
                                 @click="goToStep3()"
                                 class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20">
                             Далее
                             <span class="icon-[tabler--arrow-right] size-5"></span>
                         </button>
+
+                        <!-- Самовывоз: сразу оформить заказ (без оплаты и подтверждения телефона) -->
+                        <button type="submit"
+                                x-show="formData.deliveryType === 'pickup'"
+                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
+                                :disabled="loading">
+                            <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                            <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
+                        </button>
                     </div>
 
                     <!-- ====== ШАГ 3: Способ оплаты ====== -->
-                    <div x-show="step === 3" class="p-6 space-y-5">
+                    <div x-show="step === 3 && formData.deliveryType === 'delivery'" class="p-6 space-y-5">
 
                         <div class="space-y-3">
                             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">
@@ -946,14 +983,14 @@
                     </div>
 
                     <!-- ====== ШАГ 4: Подтверждение номера ====== -->
-                    <div x-show="step === 4" class="p-6 space-y-4">
+                    <div x-show="step === 4 && formData.deliveryType === 'delivery'" class="p-6 space-y-4">
 
                         <!-- Номер телефона (не для callback) -->
                         <div x-show="verificationMethod !== 'callback'"
                              class="flex items-center gap-3 bg-base-200/50 rounded-2xl px-4 py-3">
                             <span class="icon-[tabler--phone] size-4 text-base-content/40 shrink-0"></span>
                             <p class="text-sm text-base-content/60">
-                                Подтвердите номер <strong class="text-base-content font-semibold" x-text="formData.phone"></strong>
+                                Подтвердите номер <strong class="text-base-content font-semibold" x-text="formData.phone || ('+995 ' + formData.phoneLocal)"></strong>
                             </p>
                         </div>
 
@@ -1104,7 +1141,7 @@
                                         <p class="font-semibold text-amber-800 dark:text-amber-200 text-sm">Менеджер перезвонит вам</p>
                                         <p class="text-xs text-amber-700/80 dark:text-amber-300/80 mt-0.5">
                                             Заказ будет создан, и наш менеджер позвонит на номер
-                                            <strong x-text="formData.phone"></strong> для подтверждения.
+                                            <strong x-text="formData.phone || ('+995 ' + formData.phoneLocal)"></strong> для подтверждения.
                                         </p>
                                     </div>
                                 </div>

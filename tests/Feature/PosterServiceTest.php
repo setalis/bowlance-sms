@@ -735,3 +735,47 @@ it('не использует bowl modification id для завтрака и н
             && $body['products'][0]['product_id'] === 169;
     });
 });
+
+it('отправляет в Poster локальный грузинский телефон в формате E.164', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'poster.breakfast_constructor_product_id' => 131,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '77'],
+        ]),
+    ]);
+
+    $egg = ConstructorProduct::factory()->create(['poster_breakfast_modification_id' => 86]);
+    $order = makePosterOrder(['customer_phone' => '0507082864']);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'breakfast',
+        'dish_id' => null,
+        'name' => 'Собранный завтрак',
+        'price' => 150.00,
+        'quantity' => 1,
+        'subtotal' => 150.00,
+        'bowl_products' => [
+            ['id' => $egg->id, 'name' => 'Яйцо', 'price' => 150.00, 'quantity' => 1],
+        ],
+    ]);
+
+    $service = new PosterService;
+    $result = $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return $body['phone'] === '+995507082864'
+            && $body['products'][0]['product_id'] === 131;
+    });
+
+    expect($result)->not->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBe('77');
+});

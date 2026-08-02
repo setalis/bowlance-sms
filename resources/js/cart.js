@@ -275,24 +275,32 @@ export function initCart() {
                 return false;
             }
 
-            // Проверка наличия verification_request_id (не требуется для метода "звонок менеджера")
-            const verificationMethod = customerData.verification_method || 'sms';
-            if (verificationMethod !== 'callback' && !customerData.verification_request_id) {
+            // Верификация не нужна для самовывоза и метода "звонок менеджера"
+            const deliveryType = customerData.deliveryType ?? customerData.delivery_type ?? 'delivery';
+            const isPickup = deliveryType === 'pickup';
+            const verificationMethod = isPickup
+                ? null
+                : (customerData.verification_method || 'sms');
+            const skipsPhoneVerification = isPickup || verificationMethod === 'callback';
+
+            if (!skipsPhoneVerification && !customerData.verification_request_id) {
                 this.showNotification('Необходимо верифицировать номер телефона', 'error');
                 return false;
             }
 
             try {
                 // Подготовка данных заказа
-                const deliveryType = customerData.deliveryType ?? customerData.delivery_type ?? 'delivery';
                 const deliveryCity = (customerData.deliveryCity ?? customerData.delivery_city ?? '').toString().trim() || null;
                 const deliveryStreet = (customerData.deliveryStreet ?? customerData.delivery_street ?? '').toString().trim() || null;
                 const deliveryHouse = (customerData.deliveryHouse ?? customerData.delivery_house ?? '').toString().trim() || null;
                 const deliveryTime = customerData.deliveryTime ?? customerData.delivery_time ?? null;
 
+                const normalizePhone = window.normalizePhone
+                    || ((phone) => String(phone ?? '').replace(/[^\d+]/g, ''));
+
                 const orderData = {
                     customer_name: customerData.name,
-                    customer_phone: customerData.phone,
+                    customer_phone: normalizePhone(customerData.phone),
                     customer_email: customerData.email || null,
                     delivery_type: deliveryType,
                     delivery_city: deliveryCity,
@@ -309,7 +317,7 @@ export function initCart() {
                     comment: customerData.comment || null,
                     payment_method: customerData.paymentMethod || customerData.payment_method || 'cash',
                     verification_method: verificationMethod,
-                    verification_request_id: verificationMethod !== 'callback' ? customerData.verification_request_id : null,
+                    verification_request_id: skipsPhoneVerification ? null : customerData.verification_request_id,
                     confirm_switch_user: customerData.confirm_switch_user || false,
                     items: this.items.map(item => ({
                         type: item.type,

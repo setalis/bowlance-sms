@@ -110,7 +110,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @forelse ($product->variants->sortBy('type') as $variant)
+                                    @forelse ($product->variants->sortBy(fn ($variant) => $variant->type->value) as $variant)
                                         <div class="text-sm {{ ! $loop->first ? 'mt-1' : '' }}">
                                             <span class="text-base-content/60">{{ $variant->type === \App\Enums\ConstructorType::Bowl ? 'Боул' : 'Завтрак' }}:</span>
                                             <span class="font-semibold">{{ number_format($variant->price, 2) }} ₾</span>
@@ -120,14 +120,14 @@
                                     @endforelse
                                 </td>
                                 <td>
-                                    @forelse ($product->variants->sortBy('type') as $variant)
+                                    @forelse ($product->variants->sortBy(fn ($variant) => $variant->type->value) as $variant)
                                         <div class="text-sm {{ ! $loop->first ? 'mt-1' : '' }}">{{ $variant->weight_volume ?? '—' }}</div>
                                     @empty
                                         —
                                     @endforelse
                                 </td>
                                 <td>
-                                    @forelse ($product->variants->sortBy('type') as $variant)
+                                    @forelse ($product->variants->sortBy(fn ($variant) => $variant->type->value) as $variant)
                                         <div class="text-sm {{ ! $loop->first ? 'mt-1' : '' }}">{{ $variant->calories ? $variant->calories . ' ккал' : '—' }}</div>
                                     @empty
                                         —

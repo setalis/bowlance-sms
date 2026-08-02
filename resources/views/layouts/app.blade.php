@@ -63,6 +63,7 @@
 
     <!-- FlyonUI JS -->
     <script src="https://cdn.jsdelivr.net/npm/flyonui@latest/dist/js/flyonui.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     @stack('scripts')
 </body>

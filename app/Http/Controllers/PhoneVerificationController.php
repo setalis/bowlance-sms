@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PhoneVerification;
 use App\Services\TelegramVerifyService;
 use App\Services\VonageVerifyService;
+use App\Support\PhoneNumber;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,8 +19,12 @@ class PhoneVerificationController extends Controller
 
     public function send(Request $request): JsonResponse
     {
+        $request->merge([
+            'phone' => PhoneNumber::toE164($request->input('phone')),
+        ]);
+
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|regex:/^\+?[1-9]\d{1,14}$/',
+            'phone' => 'required|string|regex:/^\+995\d{9}$/',
         ], [
             'phone.required' => 'Необходимо указать номер телефона',
             'phone.regex' => 'Неверный формат номера телефона',
@@ -33,11 +38,6 @@ class PhoneVerificationController extends Controller
         }
 
         $phone = $request->phone;
-
-        // Нормализуем номер телефона
-        if (! str_starts_with($phone, '+')) {
-            $phone = '+'.ltrim($phone, '0');
-        }
 
         $result = $this->verifyService->sendVerificationCode($phone);
 
@@ -57,8 +57,12 @@ class PhoneVerificationController extends Controller
 
     public function telegramStart(Request $request): JsonResponse
     {
+        $request->merge([
+            'phone' => PhoneNumber::toE164($request->input('phone')),
+        ]);
+
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|regex:/^\+?[1-9]\d{1,14}$/',
+            'phone' => 'required|string|regex:/^\+995\d{9}$/',
         ], [
             'phone.required' => 'Необходимо указать номер телефона',
             'phone.regex' => 'Неверный формат номера телефона',
@@ -72,10 +76,6 @@ class PhoneVerificationController extends Controller
         }
 
         $phone = $request->phone;
-
-        if (! str_starts_with($phone, '+')) {
-            $phone = '+'.ltrim($phone, '0');
-        }
 
         $result = $this->telegramService->initiateVerification($phone);
 

@@ -37,20 +37,25 @@
                             @csrf
                             <div>
                                 <label class="label-text" for="userPhone">Телефон *</label>
-                                <input type="tel" 
-                                       x-model="phone" 
-                                       placeholder="+995 5XX XXX XXX" 
-                                       class="input w-full" 
-                                       id="userPhone" 
-                                       required 
-                                       autocomplete="tel" 
-                                       :disabled="loading" />
+                                <div class="relative">
+                                    <span class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-sm font-semibold text-base-content/60 select-none">+995</span>
+                                    <input type="tel"
+                                           x-model="phoneLocal"
+                                           x-mask="999 99 99 99"
+                                           placeholder="555 12 34 56"
+                                           class="input w-full pl-14"
+                                           id="userPhone"
+                                           required
+                                           inputmode="numeric"
+                                           autocomplete="tel-national"
+                                           :disabled="loading" />
+                                </div>
                                 <div x-show="errors.phone" class="text-error text-sm mt-1" x-text="errors.phone"></div>
                             </div>
                             
-                            <button type="submit" 
-                                    class="btn btn-lg btn-primary btn-gradient btn-block" 
-                                    :disabled="loading || !phone">
+                            <button type="submit"
+                                    class="btn btn-lg btn-primary btn-gradient btn-block"
+                                    :disabled="loading || !phoneLocal">
                                 <span x-show="!loading">Получить код</span>
                                 <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                             </button>
@@ -119,6 +124,7 @@
             return {
                 step: 1,
                 phone: '',
+                phoneLocal: '',
                 code: '',
                 requestId: null,
                 loading: false,
@@ -128,9 +134,15 @@
                     return document.querySelector('meta[name="csrf-token"]')?.content;
                 },
 
+                syncPhoneFromLocal() {
+                    const localDigits = String(this.phoneLocal || '').replace(/\D+/g, '');
+                    this.phone = localDigits ? this.normalizePhone('+995' + localDigits) : '';
+                },
+
                 async sendCode() {
                     this.loading = true;
                     this.errors = {};
+                    this.syncPhoneFromLocal();
 
                     try {
                         const response = await fetch('/phone/verify/send', {
@@ -140,8 +152,8 @@
                                 'X-CSRF-TOKEN': this.getCsrfToken(),
                                 'Accept': 'application/json'
                             },
-                            body: JSON.stringify({ 
-                                phone: this.normalizePhone(this.phone) 
+                            body: JSON.stringify({
+                                phone: this.phone
                             })
                         });
 
@@ -258,11 +270,29 @@
                 },
 
                 normalizePhone(phone) {
-                    phone = phone.replace(/[^\d+]/g, '');
-                    if (!phone.startsWith('+')) {
-                        phone = '+' + phone.replace(/^0+/, '');
+                    if (typeof window.normalizePhone === 'function') {
+                        return window.normalizePhone(phone);
                     }
-                    return phone;
+
+                    const digits = String(phone ?? '').replace(/\D+/g, '');
+
+                    if (!digits) {
+                        return '';
+                    }
+
+                    if (digits.startsWith('995') && digits.length >= 12) {
+                        return '+' + digits;
+                    }
+
+                    if (digits.startsWith('0') && digits.length === 10) {
+                        return '+995' + digits.slice(1);
+                    }
+
+                    if (digits.length === 9) {
+                        return '+995' + digits;
+                    }
+
+                    return '+' + digits;
                 }
             };
         }

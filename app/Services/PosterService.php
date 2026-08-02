@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ConstructorProduct;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -63,7 +64,7 @@ class PosterService
 
         $payload = [
             'spot_id' => config('poster.spot_id'),
-            'phone' => $order->customer_phone,
+            'phone' => PhoneNumber::toE164($order->customer_phone),
             'first_name' => $order->customer_name,
             'address' => $order->delivery_address,
             'comment' => $order->comment,

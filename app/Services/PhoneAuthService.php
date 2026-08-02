@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -15,44 +16,43 @@ class PhoneAuthService
      */
     public function findOrCreateUser(string $phone, ?string $email, ?string $name): User
     {
-        // Normalize phone (remove + sign for internal use)
-        $normalizedPhone = ltrim($phone, '+');
+        $canonicalPhone = PhoneNumber::toE164($phone);
 
-        // Try to find existing user by phone
-        $user = User::where('phone', $phone)->first();
+        $user = User::query()
+            ->whereIn('phone', PhoneNumber::lookupCandidates($canonicalPhone))
+            ->first();
 
         if ($user) {
+            if ($user->phone !== $canonicalPhone) {
+                $user->update(['phone' => $canonicalPhone]);
+            }
+
             Log::info('Existing user found by phone', [
                 'user_id' => $user->id,
-                'phone' => $phone,
+                'phone' => $canonicalPhone,
             ]);
 
-            return $user;
+            return $user->fresh();
         }
 
-        // Generate email if not provided
         if (empty($email)) {
-            $email = $normalizedPhone.'@bowlance.ge';
+            $email = ltrim($canonicalPhone, '+').'@bowlance.ge';
         }
 
-        // Generate random secure password
         $password = Str::random(32);
+        $userName = $name ?: 'Клиент '.$canonicalPhone;
 
-        // Use provided name or generate default
-        $userName = $name ?: 'Клиент '.$phone;
-
-        // Create new user
         $user = User::create([
             'name' => $userName,
             'email' => $email,
-            'phone' => $phone,
+            'phone' => $canonicalPhone,
             'password' => $password,
             'role' => UserRole::User,
         ]);
 
         Log::info('New user created via phone verification', [
             'user_id' => $user->id,
-            'phone' => $phone,
+            'phone' => $canonicalPhone,
             'email' => $email,
         ]);
 
@@ -77,7 +77,6 @@ class PhoneAuthService
      */
     public function shouldReauthenticate(?int $currentUserId, string $phone): array
     {
-        // If no one is logged in, no need to re-authenticate
         if (! $currentUserId) {
             return [
                 'should_reauth' => false,
@@ -85,10 +84,10 @@ class PhoneAuthService
             ];
         }
 
-        // Find user by phone
-        $targetUser = User::where('phone', $phone)->first();
+        $targetUser = User::query()
+            ->whereIn('phone', PhoneNumber::lookupCandidates($phone))
+            ->first();
 
-        // If no user exists with this phone, no conflict
         if (! $targetUser) {
             return [
                 'should_reauth' => false,
@@ -96,7 +95,6 @@ class PhoneAuthService
             ];
         }
 
-        // If the phone belongs to the currently logged in user, no conflict
         if ($targetUser->id === $currentUserId) {
             return [
                 'should_reauth' => false,
@@ -104,7 +102,6 @@ class PhoneAuthService
             ];
         }
 
-        // Different user - requires confirmation
         return [
             'should_reauth' => true,
             'target_user' => $targetUser,

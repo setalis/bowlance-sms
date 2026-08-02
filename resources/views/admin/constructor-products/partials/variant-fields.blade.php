@@ -10,6 +10,14 @@
         $typeKey = $constructorType->value;
         $variant = $product?->variantFor($constructorType);
         $label = $constructorType === ConstructorType::Bowl ? 'боулов' : 'завтраков';
+        $priceErrorKey = "variants.{$typeKey}.price";
+        $weightErrorKey = "variants.{$typeKey}.weight_volume";
+        $caloriesErrorKey = "variants.{$typeKey}.calories";
+        $proteinsErrorKey = "variants.{$typeKey}.proteins";
+        $fatsErrorKey = "variants.{$typeKey}.fats";
+        $carbsErrorKey = "variants.{$typeKey}.carbohydrates";
+        $fiberErrorKey = "variants.{$typeKey}.fiber";
+        $posterErrorKey = "variants.{$typeKey}.poster_modification_id";
     @endphp
     <div class="space-y-4 border-t border-base-content/10 pt-6"
          data-variant-type="{{ $typeKey }}">
@@ -21,12 +29,12 @@
             <input type="number"
                    name="variants[{{ $typeKey }}][price]"
                    placeholder="0.00"
-                   class="input @error("variants.{$typeKey}.price") input-error @enderror"
+                   class="input @error($priceErrorKey) input-error @enderror"
                    id="variants_{{ $typeKey }}_price"
-                   value="{{ old("variants.{$typeKey}.price", $variant?->price) }}"
+                   value="{{ old($priceErrorKey, $variant?->price) }}"
                    step="0.01"
                    min="0" />
-            @error("variants.{$typeKey}.price")
+            @error($priceErrorKey)
                 <span class="text-error text-sm mt-1 block">{{ $message }}</span>
             @enderror
         </div>
@@ -37,10 +45,10 @@
                 <input type="text"
                        name="variants[{{ $typeKey }}][weight_volume]"
                        placeholder="Например: 100 г"
-                       class="input @error("variants.{$typeKey}.weight_volume") input-error @enderror"
+                       class="input @error($weightErrorKey) input-error @enderror"
                        id="variants_{{ $typeKey }}_weight_volume"
-                       value="{{ old("variants.{$typeKey}.weight_volume", $variant?->weight_volume) }}" />
-                @error("variants.{$typeKey}.weight_volume")
+                       value="{{ old($weightErrorKey, $variant?->weight_volume) }}" />
+                @error($weightErrorKey)
                     <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
@@ -50,11 +58,11 @@
                 <input type="number"
                        name="variants[{{ $typeKey }}][calories]"
                        placeholder="0"
-                       class="input @error("variants.{$typeKey}.calories") input-error @enderror"
+                       class="input @error($caloriesErrorKey) input-error @enderror"
                        id="variants_{{ $typeKey }}_calories"
-                       value="{{ old("variants.{$typeKey}.calories", $variant?->calories) }}"
+                       value="{{ old($caloriesErrorKey, $variant?->calories) }}"
                        min="0" />
-                @error("variants.{$typeKey}.calories")
+                @error($caloriesErrorKey)
                     <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
@@ -66,12 +74,12 @@
                 <input type="number"
                        name="variants[{{ $typeKey }}][proteins]"
                        placeholder="0.00"
-                       class="input @error("variants.{$typeKey}.proteins") input-error @enderror"
+                       class="input @error($proteinsErrorKey) input-error @enderror"
                        id="variants_{{ $typeKey }}_proteins"
-                       value="{{ old("variants.{$typeKey}.proteins", $variant?->proteins) }}"
+                       value="{{ old($proteinsErrorKey, $variant?->proteins) }}"
                        step="0.01"
                        min="0" />
-                @error("variants.{$typeKey}.proteins")
+                @error($proteinsErrorKey)
                     <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
@@ -81,12 +89,12 @@
                 <input type="number"
                        name="variants[{{ $typeKey }}][fats]"
                        placeholder="0.00"
-                       class="input @error("variants.{$typeKey}.fats") input-error @enderror"
+                       class="input @error($fatsErrorKey) input-error @enderror"
                        id="variants_{{ $typeKey }}_fats"
-                       value="{{ old("variants.{$typeKey}.fats", $variant?->fats) }}"
+                       value="{{ old($fatsErrorKey, $variant?->fats) }}"
                        step="0.01"
                        min="0" />
-                @error("variants.{$typeKey}.fats")
+                @error($fatsErrorKey)
                     <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
@@ -96,12 +104,12 @@
                 <input type="number"
                        name="variants[{{ $typeKey }}][carbohydrates]"
                        placeholder="0.00"
-                       class="input @error("variants.{$typeKey}.carbohydrates") input-error @enderror"
+                       class="input @error($carbsErrorKey) input-error @enderror"
                        id="variants_{{ $typeKey }}_carbohydrates"
-                       value="{{ old("variants.{$typeKey}.carbohydrates", $variant?->carbohydrates) }}"
+                       value="{{ old($carbsErrorKey, $variant?->carbohydrates) }}"
                        step="0.01"
                        min="0" />
-                @error("variants.{$typeKey}.carbohydrates")
+                @error($carbsErrorKey)
                     <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
@@ -111,12 +119,12 @@
                 <input type="number"
                        name="variants[{{ $typeKey }}][fiber]"
                        placeholder="0.00"
-                       class="input @error("variants.{$typeKey}.fiber") input-error @enderror"
+                       class="input @error($fiberErrorKey) input-error @enderror"
                        id="variants_{{ $typeKey }}_fiber"
-                       value="{{ old("variants.{$typeKey}.fiber", $variant?->fiber) }}"
+                       value="{{ old($fiberErrorKey, $variant?->fiber) }}"
                        step="0.01"
                        min="0" />
-                @error("variants.{$typeKey}.fiber")
+                @error($fiberErrorKey)
                     <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
@@ -127,11 +135,11 @@
             <input type="number"
                    name="variants[{{ $typeKey }}][poster_modification_id]"
                    placeholder="ID модификатора Poster"
-                   class="input @error("variants.{$typeKey}.poster_modification_id") input-error @enderror"
+                   class="input @error($posterErrorKey) input-error @enderror"
                    id="variants_{{ $typeKey }}_poster_modification_id"
-                   value="{{ old("variants.{$typeKey}.poster_modification_id", $variant?->poster_modification_id) }}"
+                   value="{{ old($posterErrorKey, $variant?->poster_modification_id) }}"
                    min="1" />
-            @error("variants.{$typeKey}.poster_modification_id")
+            @error($posterErrorKey)
                 <span class="text-error text-sm mt-1 block">{{ $message }}</span>
             @enderror
         </div>

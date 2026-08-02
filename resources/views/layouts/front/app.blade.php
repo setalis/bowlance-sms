@@ -209,11 +209,29 @@
         }
 
         normalizePhone(phone) {
-            phone = phone.replace(/[^\d+]/g, '');
-            if (!phone.startsWith('+')) {
-                phone = '+' + phone.replace(/^0+/, '');
+            if (typeof window.normalizePhone === 'function') {
+                return window.normalizePhone(phone);
             }
-            return phone;
+
+            const digits = String(phone ?? '').replace(/\D+/g, '');
+
+            if (!digits) {
+                return '';
+            }
+
+            if (digits.startsWith('995') && digits.length >= 12) {
+                return '+' + digits;
+            }
+
+            if (digits.startsWith('0') && digits.length === 10) {
+                return '+995' + digits.slice(1);
+            }
+
+            if (digits.length === 9) {
+                return '+995' + digits;
+            }
+
+            return '+' + digits;
         }
 
         getRequestId() {
@@ -240,6 +258,7 @@
             formData: {
                 name: '',
                 phone: '',
+                phoneLocal: '',
                 email: '',
                 deliveryType: 'delivery',
                 deliveryTimeMode: 'asap',
@@ -301,8 +320,51 @@
                 }
             },
 
+            onPhoneLocalInput(event) {
+                if (event?.target) {
+                    this.formData.phoneLocal = event.target.value;
+                }
+                this.phoneVerified = false;
+                this.verificationRequestId = null;
+                this.syncPhoneFromLocal();
+            },
+
+            localPhoneDigits() {
+                let digits = String(this.formData.phoneLocal || '').replace(/\D+/g, '');
+
+                if (digits.startsWith('995') && digits.length >= 12) {
+                    digits = digits.slice(3);
+                } else if (digits.startsWith('0') && digits.length >= 10) {
+                    digits = digits.slice(1);
+                }
+
+                return digits.slice(0, 9);
+            },
+
+            isPhoneComplete() {
+                return this.localPhoneDigits().length === 9;
+            },
+
+            syncPhoneFromLocal() {
+                const localDigits = this.localPhoneDigits();
+                this.formData.phone = localDigits.length === 9 ? '+995' + localDigits : '';
+            },
+
+            setPhoneFromFull(phone) {
+                const normalized = typeof window.normalizePhone === 'function'
+                    ? window.normalizePhone(phone)
+                    : String(phone || '');
+                const match = normalized.match(/^\+995(\d{9})$/);
+
+                this.formData.phone = match ? normalized : '';
+                this.formData.phoneLocal = match
+                    ? `${match[1].slice(0, 3)} ${match[1].slice(3, 5)} ${match[1].slice(5, 7)} ${match[1].slice(7, 9)}`.trim()
+                    : '';
+            },
+
             saveTelegramSession() {
                 try {
+                    this.syncPhoneFromLocal();
                     sessionStorage.setItem('tg_verify', JSON.stringify({
                         requestId: this.verificationRequestId,
                         telegramLink: this.telegramLink,
@@ -326,7 +388,7 @@
                     this.phoneVerification.requestId = data.requestId;
                     this.telegramLink = data.telegramLink;
                     this.verificationMethod = data.method || 'telegram';
-                    this.formData.phone = data.phone || '';
+                    this.setPhoneFromFull(data.phone || '');
                     this.telegramStarted = true;
                     this.codeSent = true;
                     return true;
@@ -397,19 +459,31 @@
             },
 
             goToStep2() {
-                if (!this.formData.name || !this.formData.phone) {
-                    this.$store.cart.showNotification('Заполните имя и телефон', 'error');
+                this.syncPhoneFromLocal();
+
+                if (!String(this.formData.name || '').trim()) {
+                    this.$store.cart.showNotification('Заполните имя', 'error');
                     return;
                 }
+
+                if (!this.isPhoneComplete()) {
+                    this.$store.cart.showNotification('Введите 9 цифр телефона после +995', 'error');
+                    return;
+                }
+
                 this.step = 2;
             },
 
             goToStep3() {
-                if (this.formData.deliveryType === 'delivery' && (!this.formData.deliveryCity?.trim() || !this.formData.deliveryStreet?.trim())) {
+                if (this.formData.deliveryType === 'pickup') {
+                    this.submitOrder();
+                    return;
+                }
+                if (!this.formData.deliveryCity?.trim() || !this.formData.deliveryStreet?.trim()) {
                     this.$store.cart.showNotification('Укажите город и улицу', 'error');
                     return;
                 }
-                if (this.formData.deliveryType === 'delivery' && !this.formData.deliveryHouse?.trim()) {
+                if (!this.formData.deliveryHouse?.trim()) {
                     this.$store.cart.showNotification('Укажите номер дома', 'error');
                     return;
                 }
@@ -417,6 +491,10 @@
             },
 
             goToStep4() {
+                if (this.formData.deliveryType === 'pickup') {
+                    this.submitOrder();
+                    return;
+                }
                 this.step = 4;
             },
             
@@ -425,6 +503,7 @@
                 this.verificationError = '';
                 
                 try {
+                    this.syncPhoneFromLocal();
                     const result = await this.phoneVerification.sendCode(this.formData.phone);
                     this.codeSent = true;
                     this.verificationRequestId = result.request_id;
@@ -493,6 +572,7 @@
 
                 try {
                     const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+                    this.syncPhoneFromLocal();
                     const phone = this.phoneVerification.normalizePhone(this.formData.phone);
 
                     const response = await fetch('/phone/verify/telegram/start', {
@@ -539,31 +619,35 @@
             orderError: '',
             
             async submitOrder() {
+                const isPickup = this.formData.deliveryType === 'pickup';
                 const isCallback = this.verificationMethod === 'callback';
+                const skipsPhoneVerification = isPickup || isCallback;
 
-                if (!isCallback && !this.phoneVerified) {
+                if (!skipsPhoneVerification && !this.phoneVerified) {
                     this.$store.cart.showNotification('Необходимо верифицировать номер телефона', 'error');
                     return;
                 }
                 
-                if (!isCallback && !this.verificationRequestId) {
+                if (!skipsPhoneVerification && !this.verificationRequestId) {
                     this.$store.cart.showNotification('Ошибка верификации. Попробуйте снова', 'error');
                     return;
                 }
 
-                if (this.formData.deliveryType === 'delivery' && !this.formData.deliveryHouse?.trim()) {
+                if (!isPickup && !this.formData.deliveryHouse?.trim()) {
                     this.$store.cart.showNotification('Укажите номер дома', 'error');
                     return;
                 }
                 
                 this.loading = true;
                 this.orderError = '';
+                this.syncPhoneFromLocal();
                 
                 try {
                     const orderData = {
                         ...this.formData,
-                        verification_method: this.verificationMethod,
-                        verification_request_id: isCallback ? null : this.verificationRequestId,
+                        phone: this.formData.phone,
+                        verification_method: isPickup ? null : this.verificationMethod,
+                        verification_request_id: skipsPhoneVerification ? null : this.verificationRequestId,
                         confirm_switch_user: this.formData.confirm_switch_user || false,
                         paymentMethod: this.formData.paymentMethod || 'cash',
                         // Явно передаём адрес доставки при отправке (поля могут не попадать в spread при скрытом шаге 1)
@@ -624,6 +708,7 @@
                 this.formData = {
                     name: '',
                     phone: '',
+                    phoneLocal: '',
                     email: '',
                     deliveryType: 'delivery',
                     deliveryTimeMode: 'asap',

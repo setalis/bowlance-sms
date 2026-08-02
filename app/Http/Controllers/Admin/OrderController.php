@@ -9,6 +9,7 @@ use App\Models\Discount;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Support\PhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -151,7 +152,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => auth()->id(),
                 'customer_name' => $validated['customer_name'],
-                'customer_phone' => $validated['customer_phone'],
+                'customer_phone' => PhoneNumber::toE164($validated['customer_phone']),
                 'customer_email' => $validated['customer_email'],
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_address' => $validated['delivery_address'],
@@ -276,7 +277,7 @@ class OrderController extends Controller
             $newStatus = OrderStatus::from($validated['status']);
             $order->update([
                 'customer_name' => $validated['customer_name'],
-                'customer_phone' => $validated['customer_phone'],
+                'customer_phone' => PhoneNumber::toE164($validated['customer_phone']),
                 'customer_email' => $validated['customer_email'],
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_address' => $validated['delivery_address'],

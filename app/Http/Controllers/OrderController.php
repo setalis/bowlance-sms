@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Http\Requests\StoreOrderRequest;
 use App\Mail\NewOrderMail;
@@ -14,6 +15,7 @@ use App\Models\Setting;
 use App\Services\PhoneAuthService;
 use App\Services\PosterService;
 use App\Services\WoltDriveService;
+use App\Support\PhoneNumber;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -39,9 +41,13 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $isCallback = $request->verification_method === 'callback';
+            $isPickup = $request->delivery_type === DeliveryType::Pickup->value;
+            $skipsPhoneVerification = $request->skipsPhoneVerification();
+
+            $customerPhone = PhoneNumber::toE164($request->customer_phone);
 
             $verification = null;
-            if (! $isCallback) {
+            if (! $skipsPhoneVerification) {
                 $verification = PhoneVerification::where('request_id', $request->verification_request_id)
                     ->where('verified', true)
                     ->first();
@@ -50,7 +56,7 @@ class OrderController extends Controller
             // Check if we need to re-authenticate (user switching scenario)
             $authResult = $this->phoneAuthService->shouldReauthenticate(
                 auth()->id(),
-                $request->customer_phone
+                $customerPhone
             );
 
             // If requires confirmation and user hasn't confirmed yet
@@ -71,7 +77,7 @@ class OrderController extends Controller
 
             // Find or create user by phone
             $user = $this->phoneAuthService->findOrCreateUser(
-                $request->customer_phone,
+                $customerPhone,
                 $request->customer_email,
                 $request->customer_name
             );
@@ -92,7 +98,7 @@ class OrderController extends Controller
             $deliveryFee = 0;
             $total = $subtotal + $deliveryFee;
 
-            if (($request->delivery_type ?? 'delivery') === 'pickup') {
+            if ($isPickup) {
                 $pickupDiscount = Discount::forPickup()->first();
                 if ($pickupDiscount) {
                     $discountAmount = $pickupDiscount->calculateDiscountAmount((float) $subtotal);
@@ -101,7 +107,7 @@ class OrderController extends Controller
             }
 
             $deliveryAddress = $request->delivery_address;
-            if ($request->delivery_type === 'delivery' && $request->filled('delivery_city') && $request->filled('delivery_street')) {
+            if ($request->delivery_type === DeliveryType::Delivery->value && $request->filled('delivery_city') && $request->filled('delivery_street')) {
                 $deliveryAddress = trim(implode(', ', array_filter([
                     $request->delivery_city,
                     trim($request->delivery_street.($request->filled('delivery_house') ? ' '.$request->delivery_house : '')),
@@ -111,9 +117,9 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => $user->id,
                 'customer_name' => $request->customer_name,
-                'customer_phone' => $request->customer_phone,
+                'customer_phone' => $customerPhone,
                 'customer_email' => $request->customer_email,
-                'delivery_type' => $request->delivery_type ?? 'delivery',
+                'delivery_type' => $request->delivery_type ?? DeliveryType::Delivery->value,
                 'delivery_time' => $request->delivery_time,
                 'delivery_address' => $deliveryAddress,
                 'delivery_city' => $request->delivery_city,
@@ -132,8 +138,8 @@ class OrderController extends Controller
                 'total' => $total,
                 'payment_method' => $request->payment_method ?? 'cash',
                 'status' => OrderStatus::New,
-                'phone_verified' => ! $isCallback,
-                'phone_verified_at' => $isCallback ? null : ($verification?->verified_at ?? now()),
+                'phone_verified' => ! $skipsPhoneVerification,
+                'phone_verified_at' => $skipsPhoneVerification ? null : ($verification?->verified_at ?? now()),
                 'needs_callback' => $isCallback,
             ]);
 
@@ -156,7 +162,7 @@ class OrderController extends Controller
             }
 
             // Автосохранение адреса для авторизованных пользователей
-            if (auth()->check() && $request->delivery_type === 'delivery' && $deliveryAddress) {
+            if (auth()->check() && $request->delivery_type === DeliveryType::Delivery->value && $deliveryAddress) {
                 $addressExists = auth()->user()->addresses()
                     ->where('address', $deliveryAddress)
                     ->exists();

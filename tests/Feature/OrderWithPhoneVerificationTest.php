@@ -841,6 +841,59 @@ it('заказ с callback имеет корректные флаги phone_veri
     expect($order->phone_verified_at)->toBeNull();
 });
 
+it('позволяет создать заказ на самовывоз без верификации телефона', function () {
+    $orderData = [
+        'customer_name' => 'Клиент Самовывоз',
+        'customer_phone' => '+995599000222',
+        'delivery_type' => \App\Enums\DeliveryType::Pickup->value,
+        'payment_method' => \App\Enums\PaymentMethod::Cash->value,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 18.00,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $this->postJson('/orders', $orderData)->assertCreated();
+
+    $order = \App\Models\Order::where('customer_phone', '+995599000222')->first();
+
+    expect($order)->not->toBeNull()
+        ->and($order->delivery_type)->toBe(\App\Enums\DeliveryType::Pickup)
+        ->and($order->payment_method)->toBe(\App\Enums\PaymentMethod::Cash)
+        ->and($order->phone_verified)->toBeFalse()
+        ->and($order->phone_verified_at)->toBeNull()
+        ->and($order->needs_callback)->toBeFalse();
+});
+
+it('по-прежнему требует верификацию телефона для доставки', function () {
+    $orderData = [
+        'customer_name' => 'Клиент Доставка',
+        'customer_phone' => '+995599000333',
+        'delivery_type' => \App\Enums\DeliveryType::Delivery->value,
+        'delivery_city' => 'Batumi',
+        'delivery_street' => 'ул. Тестовая',
+        'delivery_house' => '10',
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 18.00,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $this->postJson('/orders', $orderData)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('verification_request_id');
+});
+
 it('сохраняет способ оплаты наличными по умолчанию', function () {
     $verification = PhoneVerification::factory()->verified()->create([
         'phone' => '+995555123456',

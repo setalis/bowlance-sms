@@ -1,3 +1,5 @@
+import { normalizePhone } from './phone';
+
 // Класс для работы с верификацией телефона через Vonage
 export class PhoneVerification {
     constructor() {
@@ -113,19 +115,8 @@ export class PhoneVerification {
         }
     }
 
-    /**
-     * Нормализовать номер телефона
-     */
     normalizePhone(phone) {
-        // Убираем все нецифровые символы кроме +
-        phone = phone.replace(/[^\d+]/g, '');
-        
-        // Если номер не начинается с +, добавляем +
-        if (!phone.startsWith('+')) {
-            phone = '+' + phone.replace(/^0+/, '');
-        }
-        
-        return phone;
+        return normalizePhone(phone);
     }
 
     /**

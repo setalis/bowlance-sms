@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\DeliveryType;
 use App\Models\PhoneVerification;
+use App\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,20 +19,28 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
+            'customer_phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! preg_match('/^\+995\d{9}$/', PhoneNumber::toE164(is_string($value) ? $value : null))) {
+                    $fail('Укажите корректный грузинский номер телефона (+995 XXX XX XX XX)');
+                }
+            }],
             'customer_email' => 'nullable|email|max:255',
-            'delivery_type' => 'required|in:delivery,pickup',
+            'delivery_type' => ['required', Rule::enum(DeliveryType::class)],
             'delivery_time' => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/', Rule::in($this->allowedDeliveryTimeSlots())],
             'delivery_address' => 'nullable|string|max:1000',
             'delivery_city' => 'required_if:delivery_type,delivery|nullable|string|max:255',
             'delivery_street' => 'required_if:delivery_type,delivery|nullable|string|max:500',
-            'delivery_house' => $this->delivery_type === 'delivery'
+            'delivery_house' => $this->delivery_type === DeliveryType::Delivery->value
                 ? 'required|string|max:50'
                 : 'nullable|string|max:50',
             'comment' => 'nullable|string|max:1000',
             'payment_method' => 'nullable|in:cash,bank_transfer',
             'verification_method' => 'nullable|in:sms,telegram,callback',
-            'verification_request_id' => 'required_unless:verification_method,callback|nullable|string',
+            'verification_request_id' => [
+                Rule::requiredIf(fn (): bool => ! $this->skipsPhoneVerification()),
+                'nullable',
+                'string',
+            ],
             'confirm_switch_user' => 'nullable|boolean',
             'items' => 'required|array|min:1',
             'items.*.type' => 'required|in:dish,bowl,drink,breakfast',
@@ -73,8 +83,7 @@ class StoreOrderRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            // При выборе метода "звонок менеджера" верификация телефона не требуется
-            if ($this->verification_method === 'callback') {
+            if ($this->skipsPhoneVerification()) {
                 return;
             }
 
@@ -89,9 +98,9 @@ class StoreOrderRequest extends FormRequest
                 return;
             }
 
-            $normalizedRequest = $this->normalizePhone($this->customer_phone);
-            $normalizedStored = $this->normalizePhone($verification->phone);
-            if ($normalizedRequest !== $normalizedStored) {
+            $normalizedRequest = PhoneNumber::toE164($this->customer_phone);
+            $normalizedStored = PhoneNumber::toE164($verification->phone);
+            if ($normalizedRequest === '' || $normalizedRequest !== $normalizedStored) {
                 $validator->errors()->add(
                     'customer_phone',
                     'Номер телефона не прошёл верификацию'
@@ -118,6 +127,16 @@ class StoreOrderRequest extends FormRequest
         });
     }
 
+    public function skipsPhoneVerification(): bool
+    {
+        if ($this->verification_method === 'callback') {
+            return true;
+        }
+
+        return $this->delivery_type === DeliveryType::Pickup->value
+            && blank($this->verification_request_id);
+    }
+
     protected function allowedDeliveryTimeSlots(): array
     {
         $slots = [];
@@ -126,17 +145,5 @@ class StoreOrderRequest extends FormRequest
         }
 
         return $slots;
-    }
-
-    /**
-     * Нормализация номера до канонического вида (+ и только цифры), как при отправке кода.
-     */
-    protected function normalizePhone(?string $phone): string
-    {
-        $phone = (string) $phone;
-        $digits = preg_replace('/[^\d]/', '', $phone);
-        $digits = ltrim($digits, '0');
-
-        return $digits !== '' ? '+'.$digits : '';
     }
 }
