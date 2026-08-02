@@ -274,25 +274,19 @@
                         return window.normalizePhone(phone);
                     }
 
-                    const digits = String(phone ?? '').replace(/\D+/g, '');
+                    let digits = String(phone ?? '').replace(/\D+/g, '');
 
                     if (!digits) {
                         return '';
                     }
 
-                    if (digits.startsWith('995') && digits.length >= 12) {
-                        return '+' + digits;
+                    if (digits.startsWith('995')) {
+                        digits = digits.slice(3);
                     }
 
-                    if (digits.startsWith('0') && digits.length === 10) {
-                        return '+995' + digits.slice(1);
-                    }
+                    digits = digits.replace(/^0+/, '');
 
-                    if (digits.length === 9) {
-                        return '+995' + digits;
-                    }
-
-                    return '+' + digits;
+                    return digits.length === 9 ? '+995' + digits : '';
                 }
             };
         }

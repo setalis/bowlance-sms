@@ -6,35 +6,23 @@ class PhoneNumber
 {
     public static function toE164(?string $phone): string
     {
-        $phone = trim((string) $phone);
-
-        if ($phone === '') {
-            return '';
-        }
-
-        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+        $digits = preg_replace('/\D+/', '', trim((string) $phone)) ?? '';
 
         if ($digits === '') {
             return '';
         }
 
-        if (str_starts_with($digits, '995') && strlen($digits) >= 12) {
-            return '+'.$digits;
+        if (str_starts_with($digits, '995')) {
+            $digits = substr($digits, 3);
         }
 
-        if (str_starts_with($digits, '0') && strlen($digits) === 10) {
-            return '+995'.substr($digits, 1);
-        }
+        $digits = ltrim($digits, '0');
 
         if (strlen($digits) === 9) {
             return '+995'.$digits;
         }
 
-        if (str_starts_with($phone, '+')) {
-            return '+'.$digits;
-        }
-
-        return '+'.$digits;
+        return '';
     }
 
     /**
@@ -45,19 +33,22 @@ class PhoneNumber
         $canonical = self::toE164($phone);
 
         if ($canonical === '') {
-            return [];
+            return array_values(array_unique(array_filter([
+                trim((string) $phone),
+                preg_replace('/\D+/', '', (string) $phone) ?: null,
+            ])));
         }
 
         $digits = ltrim($canonical, '+');
-        $candidates = [$canonical, $digits];
+        $localNine = substr($digits, 3);
 
-        if (str_starts_with($digits, '995') && strlen($digits) === 12) {
-            $localNine = substr($digits, 3);
-            $candidates[] = '0'.$localNine;
-            $candidates[] = $localNine;
-        }
-
-        return array_values(array_unique($candidates));
+        return array_values(array_unique(array_filter([
+            $canonical,
+            $digits,
+            '0'.$localNine,
+            $localNine,
+            trim((string) $phone),
+        ])));
     }
 
     public static function formatDisplay(?string $phone): string

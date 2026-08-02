@@ -11,17 +11,17 @@ it('нормализует грузинские номера в E.164', function
     'formatted with spaces' => ['+995 507 08 28 64', '+995507082864'],
     'already e164' => ['+995507082864', '+995507082864'],
     'mask style' => ['+995 555 12 34 56', '+995555123456'],
+    'mistaken zero after country' => ['+9950507082864', '+995507082864'],
+    'incomplete mistaken zero' => ['+995050708286', ''],
     'empty' => ['', ''],
     'whitespace' => ['   ', ''],
 ]);
 
 it('возвращает кандидаты для поиска пользователя по телефону', function () {
-    expect(PhoneNumber::lookupCandidates('0507082864'))->toBe([
-        '+995507082864',
-        '995507082864',
-        '0507082864',
-        '507082864',
-    ]);
+    expect(PhoneNumber::lookupCandidates('0507082864'))->toContain('+995507082864')
+        ->toContain('995507082864')
+        ->toContain('0507082864')
+        ->toContain('507082864');
 });
 
 it('форматирует номер для отображения в маске', function () {

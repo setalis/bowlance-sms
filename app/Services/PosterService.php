@@ -62,23 +62,38 @@ class PosterService
             return null;
         }
 
+        $phone = PhoneNumber::toE164($order->customer_phone);
+
+        if ($phone === '') {
+            Log::error('Poster: customer phone is invalid after normalization, order skipped', [
+                'order_id' => $order->id,
+                'customer_phone' => $order->customer_phone,
+            ]);
+
+            return null;
+        }
+
+        // Poster docs send POST as application/x-www-form-urlencoded (sendRequest default $json=false),
+        // not JSON. Nested products are encoded as products[0][product_id]=...
         $payload = [
-            'spot_id' => config('poster.spot_id'),
-            'phone' => PhoneNumber::toE164($order->customer_phone),
-            'first_name' => $order->customer_name,
-            'address' => $order->delivery_address,
-            'comment' => $order->comment,
+            'spot_id' => (int) config('poster.spot_id'),
+            'phone' => $phone,
+            'first_name' => (string) $order->customer_name,
+            'address' => (string) ($order->delivery_address ?? ''),
+            'comment' => (string) ($order->comment ?? ''),
             'service_mode' => $order->delivery_type?->value === 'pickup' ? 2 : 3,
             'products' => $products,
         ];
 
         Log::info('Poster: sending incoming order', [
             'order_id' => $order->id,
+            'phone' => $phone,
+            'service_mode' => $payload['service_mode'],
             'products' => $products,
         ]);
 
         try {
-            $response = Http::post(
+            $response = Http::asForm()->post(
                 'https://joinposter.com/api/incomingOrders.createIncomingOrder?token='.config('poster.token'),
                 $payload
             );

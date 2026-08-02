@@ -71,11 +71,12 @@ it('отправляет заказ в Poster когда блюдо имеет p
 
         return str_contains($request->url(), 'joinposter.com')
             && str_contains($request->url(), 'token=test-token')
-            && $body['spot_id'] === 1
+            && $request->isForm()
+            && (int) $body['spot_id'] === 1
             && $body['phone'] === '+995555123456'
             && count($body['products']) === 1
-            && $body['products'][0]['product_id'] === 169
-            && $body['products'][0]['count'] === 2;
+            && (int) $body['products'][0]['product_id'] === 169
+            && (int) $body['products'][0]['count'] === 2;
     });
 
     expect($result)->not->toBeNull();
