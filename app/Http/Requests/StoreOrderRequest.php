@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\DeliveryType;
 use App\Models\PhoneVerification;
+use App\Rules\ValidPhoneNumber;
 use App\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,11 +20,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_name' => 'required|string|max:255',
-            'customer_phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail): void {
-                if (! preg_match('/^\+995\d{9}$/', PhoneNumber::toE164(is_string($value) ? $value : null))) {
-                    $fail('Укажите корректный грузинский номер телефона (+995 XXX XX XX XX)');
-                }
-            }],
+            'customer_phone' => ['required', 'string', 'max:20', new ValidPhoneNumber],
             'customer_email' => 'nullable|email|max:255',
             'delivery_type' => ['required', Rule::enum(DeliveryType::class)],
             'delivery_time' => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/', Rule::in($this->allowedDeliveryTimeSlots())],

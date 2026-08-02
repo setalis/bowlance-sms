@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PhoneVerification;
+use App\Rules\ValidPhoneNumber;
 use App\Services\TelegramVerifyService;
 use App\Services\VonageVerifyService;
 use App\Support\PhoneNumber;
@@ -19,15 +20,10 @@ class PhoneVerificationController extends Controller
 
     public function send(Request $request): JsonResponse
     {
-        $request->merge([
-            'phone' => PhoneNumber::toE164($request->input('phone')),
-        ]);
-
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|regex:/^\+995\d{9}$/',
+            'phone' => ['required', 'string', new ValidPhoneNumber],
         ], [
             'phone.required' => 'Необходимо указать номер телефона',
-            'phone.regex' => 'Неверный формат номера телефона',
         ]);
 
         if ($validator->fails()) {
@@ -37,7 +33,7 @@ class PhoneVerificationController extends Controller
             ], 422);
         }
 
-        $phone = $request->phone;
+        $phone = PhoneNumber::toE164($request->input('phone'));
 
         $result = $this->verifyService->sendVerificationCode($phone);
 
@@ -57,15 +53,10 @@ class PhoneVerificationController extends Controller
 
     public function telegramStart(Request $request): JsonResponse
     {
-        $request->merge([
-            'phone' => PhoneNumber::toE164($request->input('phone')),
-        ]);
-
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|regex:/^\+995\d{9}$/',
+            'phone' => ['required', 'string', new ValidPhoneNumber],
         ], [
             'phone.required' => 'Необходимо указать номер телефона',
-            'phone.regex' => 'Неверный формат номера телефона',
         ]);
 
         if ($validator->fails()) {
@@ -75,7 +66,7 @@ class PhoneVerificationController extends Controller
             ], 422);
         }
 
-        $phone = $request->phone;
+        $phone = PhoneNumber::toE164($request->input('phone'));
 
         $result = $this->telegramService->initiateVerification($phone);
 

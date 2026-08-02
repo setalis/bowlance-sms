@@ -2,65 +2,106 @@
 
 namespace App\Support;
 
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber as ParsedNumber;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
+
 class PhoneNumber
 {
-    public static function toE164(?string $phone): string
+    public const DEFAULT_REGION = 'GE';
+
+    public static function toE164(?string $phone, string $defaultRegion = self::DEFAULT_REGION): string
     {
-        $digits = preg_replace('/\D+/', '', trim((string) $phone)) ?? '';
+        $parsed = self::parse($phone, $defaultRegion);
 
-        if ($digits === '') {
-            return '';
-        }
+        return $parsed instanceof ParsedNumber
+            ? self::util()->format($parsed, PhoneNumberFormat::E164)
+            : '';
+    }
 
-        if (str_starts_with($digits, '995')) {
-            $digits = substr($digits, 3);
-        }
+    public static function isValid(?string $phone, string $defaultRegion = self::DEFAULT_REGION): bool
+    {
+        return self::parse($phone, $defaultRegion) instanceof ParsedNumber;
+    }
 
-        $digits = ltrim($digits, '0');
+    public static function formatDisplay(?string $phone, string $defaultRegion = self::DEFAULT_REGION): string
+    {
+        $parsed = self::parse($phone, $defaultRegion);
 
-        if (strlen($digits) === 9) {
-            return '+995'.$digits;
-        }
+        return $parsed instanceof ParsedNumber
+            ? self::util()->format($parsed, PhoneNumberFormat::INTERNATIONAL)
+            : '';
+    }
 
-        return '';
+    public static function regionCode(?string $phone, string $defaultRegion = self::DEFAULT_REGION): ?string
+    {
+        $parsed = self::parse($phone, $defaultRegion);
+
+        return $parsed instanceof ParsedNumber
+            ? self::util()->getRegionCodeForNumber($parsed)
+            : null;
     }
 
     /**
+     * Значения, под которыми номер мог быть сохранён в базе до перехода на E.164.
+     *
      * @return list<string>
      */
-    public static function lookupCandidates(?string $phone): array
+    public static function lookupCandidates(?string $phone, string $defaultRegion = self::DEFAULT_REGION): array
     {
-        $canonical = self::toE164($phone);
+        $raw = trim((string) $phone);
+        $parsed = self::parse($phone, $defaultRegion);
 
-        if ($canonical === '') {
-            return array_values(array_unique(array_filter([
-                trim((string) $phone),
-                preg_replace('/\D+/', '', (string) $phone) ?: null,
-            ])));
+        if (! $parsed instanceof ParsedNumber) {
+            return self::uniqueValues([$raw, self::digits($raw)]);
         }
 
-        $digits = ltrim($canonical, '+');
-        $localNine = substr($digits, 3);
+        $e164 = self::util()->format($parsed, PhoneNumberFormat::E164);
+        $national = self::util()->format($parsed, PhoneNumberFormat::NATIONAL);
 
-        return array_values(array_unique(array_filter([
-            $canonical,
-            $digits,
-            '0'.$localNine,
-            $localNine,
-            trim((string) $phone),
-        ])));
+        return self::uniqueValues([
+            $e164,
+            ltrim($e164, '+'),
+            $national,
+            self::digits($national),
+            $raw,
+        ]);
     }
 
-    public static function formatDisplay(?string $phone): string
+    private static function parse(?string $phone, string $defaultRegion): ?ParsedNumber
     {
-        $canonical = self::toE164($phone);
+        $raw = trim((string) $phone);
 
-        if ($canonical === '' || ! preg_match('/^\+995(\d{9})$/', $canonical, $matches)) {
-            return $canonical;
+        if ($raw === '') {
+            return null;
         }
 
-        $local = $matches[1];
+        try {
+            $parsed = self::util()->parse($raw, $defaultRegion);
+        } catch (NumberParseException) {
+            return null;
+        }
 
-        return '+995 '.substr($local, 0, 3).' '.substr($local, 3, 2).' '.substr($local, 5, 2).' '.substr($local, 7, 2);
+        return self::util()->isValidNumber($parsed) ? $parsed : null;
+    }
+
+    private static function digits(string $value): string
+    {
+        return preg_replace('/\D+/', '', $value) ?? '';
+    }
+
+    /**
+     * @param  list<string>  $values
+     * @return list<string>
+     */
+    private static function uniqueValues(array $values): array
+    {
+        return array_values(array_unique(array_filter($values, fn (string $value): bool => $value !== '')));
+    }
+
+    private static function util(): PhoneNumberUtil
+    {
+        return PhoneNumberUtil::getInstance();
     }
 }

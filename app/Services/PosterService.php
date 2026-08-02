@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Log;
 
 class PosterService
 {
+    /**
+     * Poster: "invalid field: Client phone" — номера не существует.
+     */
+    private const ERROR_INVALID_CLIENT_PHONE = 155;
+
     public function isEnabled(): bool
     {
         return (bool) config('poster.enabled') && filled(config('poster.token'));
@@ -66,8 +71,14 @@ class PosterService
         // https://dev.joinposter.com/docs/v3/web/incomingOrders/createIncomingOrder
         // POST application/x-www-form-urlencoded (http_build_query), phone — строка.
         $phone = PhoneNumber::toE164($order->customer_phone);
+
         if ($phone === '') {
-            $phone = trim((string) $order->customer_phone);
+            Log::error('Poster: order phone is not a valid number, order skipped', [
+                'order_id' => $order->id,
+                'customer_phone' => $order->customer_phone,
+            ]);
+
+            return null;
         }
 
         $incomingOrder = [
@@ -112,13 +123,22 @@ class PosterService
 
             // Poster возвращает ошибки с HTTP 200 и полем "error" в теле ответа
             if (isset($json['error'])) {
-                Log::error('Poster API returned error in response body', [
-                    'order_id' => $order->id,
-                    'error' => $json['error'],
-                    'message' => $json['message'] ?? null,
-                    'phone' => $phone,
-                    'body' => $response->body(),
-                ]);
+                $isPhoneRejected = (int) $json['error'] === self::ERROR_INVALID_CLIENT_PHONE;
+
+                Log::error(
+                    $isPhoneRejected
+                        ? 'Poster API rejected the client phone as non-existent'
+                        : 'Poster API returned error in response body',
+                    [
+                        'order_id' => $order->id,
+                        'error' => $json['error'],
+                        'message' => $json['message'] ?? null,
+                        'phone' => $phone,
+                        'phone_region' => $isPhoneRejected ? PhoneNumber::regionCode($phone) : null,
+                        'customer_phone' => $isPhoneRejected ? $order->customer_phone : null,
+                        'body' => $response->body(),
+                    ]
+                );
 
                 return null;
             }

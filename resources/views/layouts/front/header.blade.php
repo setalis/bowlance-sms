@@ -535,23 +535,34 @@
                                 <label class="text-sm font-medium text-base-content/70 mb-1.5 block">
                                     {{ __('frontend.phone') }} <span class="text-error">*</span>
                                 </label>
-                                <div class="relative">
-                                    <span class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-sm font-semibold text-base-content/60 select-none">+995</span>
-                                    <input type="tel"
-                                           x-model="formData.phoneLocal"
-                                           x-mask="999 99 99 99"
-                                           class="input input-bordered w-full rounded-xl focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 pl-14 pr-10"
-                                           required
-                                           placeholder="555 12 34 56"
-                                           inputmode="numeric"
-                                           autocomplete="tel-national"
-                                           :disabled="phoneVerified"
-                                           @input="onPhoneLocalInput($event)">
-                                    <span x-show="phoneVerified"
-                                          x-cloak
-                                          class="absolute right-3 top-1/2 -translate-y-1/2 icon-[tabler--circle-check-filled] size-5 text-emerald-500"></span>
+                                <div class="flex gap-2">
+                                    <select x-model="formData.phoneCountry"
+                                            @change="onPhoneCountryChange()"
+                                            :disabled="phoneVerified"
+                                            aria-label="Код страны"
+                                            class="select select-bordered w-32 shrink-0 rounded-xl focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20">
+                                        <template x-for="country in phoneCountries" :key="country.iso">
+                                            <option :value="country.iso"
+                                                    x-text="countryFlag(country.iso) + ' +' + country.dial"></option>
+                                        </template>
+                                    </select>
+                                    <div class="relative flex-1">
+                                        <input type="tel"
+                                               x-model="formData.phoneLocal"
+                                               class="input input-bordered w-full rounded-xl focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 pr-10"
+                                               required
+                                               :placeholder="selectedPhoneCountry().placeholder"
+                                               inputmode="tel"
+                                               autocomplete="tel-national"
+                                               :disabled="phoneVerified"
+                                               @input="onPhoneLocalInput($event)">
+                                        <span x-show="phoneVerified"
+                                              x-cloak
+                                              class="absolute right-3 top-1/2 -translate-y-1/2 icon-[tabler--circle-check-filled] size-5 text-emerald-500"></span>
+                                    </div>
                                 </div>
-                                <p class="mt-1 text-xs text-base-content/50">Формат: +995 XXX XX XX XX</p>
+                                <p class="mt-1 text-xs text-base-content/50"
+                                   x-text="'Номер будет отправлен как ' + (formData.phone || '+' + selectedPhoneCountry().dial + ' …')"></p>
                             </div>
                         </div>
 
@@ -990,7 +1001,7 @@
                              class="flex items-center gap-3 bg-base-200/50 rounded-2xl px-4 py-3">
                             <span class="icon-[tabler--phone] size-4 text-base-content/40 shrink-0"></span>
                             <p class="text-sm text-base-content/60">
-                                Подтвердите номер <strong class="text-base-content font-semibold" x-text="formData.phone || ('+995 ' + formData.phoneLocal)"></strong>
+                                Подтвердите номер <strong class="text-base-content font-semibold" x-text="formData.phone || ('+' + selectedPhoneCountry().dial + ' ' + formData.phoneLocal)"></strong>
                             </p>
                         </div>
 
@@ -1141,7 +1152,7 @@
                                         <p class="font-semibold text-amber-800 dark:text-amber-200 text-sm">Менеджер перезвонит вам</p>
                                         <p class="text-xs text-amber-700/80 dark:text-amber-300/80 mt-0.5">
                                             Заказ будет создан, и наш менеджер позвонит на номер
-                                            <strong x-text="formData.phone || ('+995 ' + formData.phoneLocal)"></strong> для подтверждения.
+                                            <strong x-text="formData.phone || ('+' + selectedPhoneCountry().dial + ' ' + formData.phoneLocal)"></strong> для подтверждения.
                                         </p>
                                     </div>
                                 </div>

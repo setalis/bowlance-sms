@@ -39,30 +39,9 @@
                                 <label class="label">
                                     <span class="label-text">Телефон <span class="text-error">*</span></span>
                                 </label>
-                                <div class="relative">
-                                    <span class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-sm font-semibold text-base-content/60 select-none">+995</span>
-                                    @php
-                                        $editPhoneSource = old('customer_phone', $order->customer_phone);
-                                        $editPhoneLocal = '';
-                                        $editE164 = \App\Support\PhoneNumber::toE164($editPhoneSource);
-                                        if (preg_match('/^\+995(\d{9})$/', $editE164, $editPhoneMatch)) {
-                                            $editPhoneLocal = $editPhoneMatch[1];
-                                        }
-                                    @endphp
-                                    <div x-data="{ local: @js($editPhoneLocal) }">
-                                        <input type="tel"
-                                               x-model="local"
-                                               x-mask="999 99 99 99"
-                                               class="input input-bordered w-full pl-14 @error('customer_phone') input-error @enderror"
-                                               placeholder="555 12 34 56"
-                                               inputmode="numeric"
-                                               autocomplete="tel-national"
-                                               required>
-                                        <input type="hidden"
-                                               name="customer_phone"
-                                               :value="local ? '+995' + String(local).replace(/\D+/g, '') : ''">
-                                    </div>
-                                </div>
+                                <x-ui.phone-field name="customer_phone"
+                                                  :value="old('customer_phone', $order->customer_phone)"
+                                                  required />
                                 @error('customer_phone')
                                     <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
                                 @enderror
@@ -339,7 +318,7 @@ function orderForm() {
     @endphp
 
     const productsData = @json($productsData);
-    const categoriesData = @json($constructorCategories->map(fn ($category) => [
+    const categoriesData = {!! json_encode($constructorCategories->map(fn ($category) => [
         'id' => $category->id,
         'name' => $category->name,
         'type' => $category->type->value,
@@ -348,7 +327,7 @@ function orderForm() {
             'name' => $product->name,
             'price' => $product->variantFor($category->type)?->price ?? 0,
         ])->values(),
-    ])->values());
+    ])->values()) !!};
     const existingItems = @json($existingItems);
 
     return {

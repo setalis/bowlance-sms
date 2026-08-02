@@ -9,6 +9,7 @@ use App\Models\Discount;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Rules\ValidPhoneNumber;
 use App\Support\PhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -94,7 +95,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
+            'customer_phone' => ['required', 'string', 'max:20', new ValidPhoneNumber],
             'customer_email' => 'nullable|email|max:255',
             'delivery_type' => 'required|in:delivery,pickup',
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string|max:1000',
@@ -219,7 +220,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
+            'customer_phone' => ['required', 'string', 'max:20', new ValidPhoneNumber],
             'customer_email' => 'nullable|email|max:255',
             'delivery_type' => 'required|in:delivery,pickup',
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string|max:1000',

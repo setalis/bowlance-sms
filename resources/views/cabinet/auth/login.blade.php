@@ -37,16 +37,23 @@
                             @csrf
                             <div>
                                 <label class="label-text" for="userPhone">Телефон *</label>
-                                <div class="relative">
-                                    <span class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-sm font-semibold text-base-content/60 select-none">+995</span>
+                                <div class="flex gap-2">
+                                    <select x-model="phoneCountry"
+                                            :disabled="loading"
+                                            aria-label="Код страны"
+                                            class="select w-32 shrink-0">
+                                        <template x-for="country in phoneCountries" :key="country.iso">
+                                            <option :value="country.iso"
+                                                    x-text="countryFlag(country.iso) + ' +' + country.dial"></option>
+                                        </template>
+                                    </select>
                                     <input type="tel"
                                            x-model="phoneLocal"
-                                           x-mask="999 99 99 99"
-                                           placeholder="555 12 34 56"
-                                           class="input w-full pl-14"
+                                           :placeholder="selectedPhoneCountry().placeholder"
+                                           class="input w-full"
                                            id="userPhone"
                                            required
-                                           inputmode="numeric"
+                                           inputmode="tel"
                                            autocomplete="tel-national"
                                            :disabled="loading" />
                                 </div>
@@ -124,7 +131,9 @@
             return {
                 step: 1,
                 phone: '',
+                phoneCountry: window.defaultPhoneCountry || 'GE',
                 phoneLocal: '',
+                phoneCountries: window.phoneCountries || [],
                 code: '',
                 requestId: null,
                 loading: false,
@@ -134,9 +143,20 @@
                     return document.querySelector('meta[name="csrf-token"]')?.content;
                 },
 
+                selectedPhoneCountry() {
+                    return (typeof window.findPhoneCountry === 'function'
+                        ? window.findPhoneCountry(this.phoneCountry)
+                        : null) || { dial: '995', placeholder: '555 12 34 56' };
+                },
+
+                countryFlag(iso) {
+                    return typeof window.countryFlag === 'function' ? window.countryFlag(iso) : '';
+                },
+
                 syncPhoneFromLocal() {
-                    const localDigits = String(this.phoneLocal || '').replace(/\D+/g, '');
-                    this.phone = localDigits ? this.normalizePhone('+995' + localDigits) : '';
+                    this.phone = typeof window.composePhone === 'function'
+                        ? window.composePhone(this.phoneCountry, this.phoneLocal)
+                        : '';
                 },
 
                 async sendCode() {
@@ -267,26 +287,6 @@
                     this.code = '';
                     this.requestId = null;
                     this.errors = {};
-                },
-
-                normalizePhone(phone) {
-                    if (typeof window.normalizePhone === 'function') {
-                        return window.normalizePhone(phone);
-                    }
-
-                    let digits = String(phone ?? '').replace(/\D+/g, '');
-
-                    if (!digits) {
-                        return '';
-                    }
-
-                    if (digits.startsWith('995')) {
-                        digits = digits.slice(3);
-                    }
-
-                    digits = digits.replace(/^0+/, '');
-
-                    return digits.length === 9 ? '+995' + digits : '';
                 }
             };
         }

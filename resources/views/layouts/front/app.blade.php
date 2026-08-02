@@ -209,23 +209,9 @@
         }
 
         normalizePhone(phone) {
-            if (typeof window.normalizePhone === 'function') {
-                return window.normalizePhone(phone);
-            }
-
-            let digits = String(phone ?? '').replace(/\D+/g, '');
-
-            if (!digits) {
-                return '';
-            }
-
-            if (digits.startsWith('995')) {
-                digits = digits.slice(3);
-            }
-
-            digits = digits.replace(/^0+/, '');
-
-            return digits.length === 9 ? '+995' + digits : '';
+            return typeof window.normalizePhone === 'function'
+                ? window.normalizePhone(phone)
+                : String(phone ?? '').trim();
         }
 
         getRequestId() {
@@ -252,6 +238,7 @@
             formData: {
                 name: '',
                 phone: '',
+                phoneCountry: window.defaultPhoneCountry || 'GE',
                 phoneLocal: '',
                 email: '',
                 deliveryType: 'delivery',
@@ -314,46 +301,62 @@
                 }
             },
 
-            onPhoneLocalInput(event) {
-                if (event?.target) {
-                    this.formData.phoneLocal = event.target.value;
-                }
+            phoneCountries: window.phoneCountries || [],
+
+            selectedPhoneCountry() {
+                return (typeof window.findPhoneCountry === 'function'
+                    ? window.findPhoneCountry(this.formData.phoneCountry)
+                    : null) || { dial: '995', placeholder: '555 12 34 56' };
+            },
+
+            countryFlag(iso) {
+                return typeof window.countryFlag === 'function' ? window.countryFlag(iso) : '';
+            },
+
+            onPhoneCountryChange() {
                 this.phoneVerified = false;
                 this.verificationRequestId = null;
                 this.syncPhoneFromLocal();
             },
 
-            localPhoneDigits() {
-                let digits = String(this.formData.phoneLocal || '').replace(/\D+/g, '');
-
-                if (digits.startsWith('995')) {
-                    digits = digits.slice(3);
+            onPhoneLocalInput(event) {
+                if (event?.target) {
+                    this.formData.phoneLocal = event.target.value;
                 }
 
-                digits = digits.replace(/^0+/, '');
+                const typed = String(this.formData.phoneLocal || '').trim();
+                if (typed.startsWith('+') || typed.startsWith('00')) {
+                    this.setPhoneFromFull(typed);
+                }
 
-                return digits.slice(0, 9);
+                this.phoneVerified = false;
+                this.verificationRequestId = null;
+                this.syncPhoneFromLocal();
             },
 
             isPhoneComplete() {
-                return this.localPhoneDigits().length === 9;
+                const digits = String(this.formData.phone || '').replace(/\D+/g, '');
+                const dialLength = this.selectedPhoneCountry().dial.length;
+
+                return digits.length >= dialLength + 6 && digits.length <= 15;
             },
 
             syncPhoneFromLocal() {
-                const localDigits = this.localPhoneDigits();
-                this.formData.phone = localDigits.length === 9 ? '+995' + localDigits : '';
+                this.formData.phone = typeof window.composePhone === 'function'
+                    ? window.composePhone(this.formData.phoneCountry, this.formData.phoneLocal)
+                    : '';
             },
 
             setPhoneFromFull(phone) {
-                const normalized = typeof window.normalizePhone === 'function'
-                    ? window.normalizePhone(phone)
-                    : String(phone || '');
-                const match = normalized.match(/^\+995(\d{9})$/);
+                if (typeof window.splitPhone !== 'function') {
+                    return;
+                }
 
-                this.formData.phone = match ? normalized : '';
-                this.formData.phoneLocal = match
-                    ? `${match[1].slice(0, 3)} ${match[1].slice(3, 5)} ${match[1].slice(5, 7)} ${match[1].slice(7, 9)}`.trim()
-                    : '';
+                const { iso, local } = window.splitPhone(phone, this.formData.phoneCountry);
+
+                this.formData.phoneCountry = iso;
+                this.formData.phoneLocal = local;
+                this.formData.phone = window.composePhone(iso, local);
             },
 
             saveTelegramSession() {
@@ -461,7 +464,7 @@
                 }
 
                 if (!this.isPhoneComplete()) {
-                    this.$store.cart.showNotification('Введите 9 цифр телефона после +995', 'error');
+                    this.$store.cart.showNotification('Проверьте номер телефона и код страны', 'error');
                     return;
                 }
 
@@ -702,6 +705,7 @@
                 this.formData = {
                     name: '',
                     phone: '',
+                    phoneCountry: window.defaultPhoneCountry || 'GE',
                     phoneLocal: '',
                     email: '',
                     deliveryType: 'delivery',

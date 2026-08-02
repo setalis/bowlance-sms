@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\PosterService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 uses(RefreshDatabase::class);
 
@@ -752,7 +753,7 @@ it('отправляет заказ в Poster как form-urlencoded по док
     ]);
 
     $egg = ConstructorProduct::factory()->create(['poster_breakfast_modification_id' => 86]);
-    $order = makePosterOrder(['customer_phone' => '0507082864']);
+    $order = makePosterOrder(['customer_phone' => '+380507082864']);
 
     OrderItem::create([
         'order_id' => $order->id,
@@ -776,11 +777,80 @@ it('отправляет заказ в Poster как form-urlencoded по док
 
         return $request->isForm()
             && $userAgent === 'Poster (http://joinposter.com)'
-            && str_contains($request->body(), 'phone=%2B995507082864')
-            && $body['phone'] === '+995507082864'
+            && str_contains($request->body(), 'phone=%2B380507082864')
+            && $body['phone'] === '+380507082864'
             && (int) $body['products'][0]['product_id'] === 131;
     });
 
     expect($result)->not->toBeNull();
     expect($order->fresh()->poster_order_id)->toBe('77');
+});
+
+it('не отправляет заказ в Poster когда телефон клиента не существует', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake();
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder(['customer_phone' => '0507082864']);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 250.00,
+        'quantity' => 1,
+        'subtotal' => 250.00,
+    ]);
+
+    $result = (new PosterService)->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertNothingSent();
+    expect($result)->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBeNull();
+});
+
+it('логирует отдельную причину когда Poster отклоняет телефон с кодом 155', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'error' => 155,
+            'message' => 'invalid field: Client phone',
+        ]),
+    ]);
+
+    Log::shouldReceive('info')->andReturnNull();
+    Log::shouldReceive('error')
+        ->once()
+        ->withArgs(function (string $message, array $context): bool {
+            return $message === 'Poster API rejected the client phone as non-existent'
+                && $context['error'] === 155
+                && $context['phone'] === '+995555123456'
+                && $context['phone_region'] === 'GE';
+        });
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 250.00,
+        'quantity' => 1,
+        'subtotal' => 250.00,
+    ]);
+
+    expect((new PosterService)->createIncomingOrder($order->load('items.dish')))->toBeNull();
 });
