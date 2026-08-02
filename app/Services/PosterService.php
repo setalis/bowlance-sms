@@ -73,35 +73,41 @@ class PosterService
             return null;
         }
 
-        // Poster docs send POST as application/x-www-form-urlencoded (sendRequest default $json=false),
-        // not JSON. Nested products are encoded as products[0][product_id]=...
-        $payload = [
+        // Как в примере Poster + sendRequest(..., 'post', $params):
+        // form-urlencoded через http_build_query, phone вида '+380680000000'
+        $incomingOrder = [
             'spot_id' => (int) config('poster.spot_id'),
             'phone' => $phone,
-            'first_name' => (string) $order->customer_name,
-            'address' => (string) ($order->delivery_address ?? ''),
-            'comment' => (string) ($order->comment ?? ''),
+            'first_name' => $order->customer_name,
+            'address' => $order->delivery_address,
+            'comment' => $order->comment,
             'service_mode' => $order->delivery_type?->value === 'pickup' ? 2 : 3,
             'products' => $products,
         ];
 
+        $url = 'https://joinposter.com/api/incomingOrders.createIncomingOrder'
+            .'?token='.config('poster.token');
+
         Log::info('Poster: sending incoming order', [
             'order_id' => $order->id,
             'phone' => $phone,
-            'service_mode' => $payload['service_mode'],
+            'service_mode' => $incomingOrder['service_mode'],
+            'content_type' => 'application/x-www-form-urlencoded',
+            'body' => http_build_query($incomingOrder),
             'products' => $products,
         ]);
 
         try {
-            $response = Http::asForm()->post(
-                'https://joinposter.com/api/incomingOrders.createIncomingOrder?token='.config('poster.token'),
-                $payload
-            );
+            // Как sendRequest($url, 'post', $params): http_build_query / form-urlencoded
+            $response = Http::withHeaders([
+                'User-Agent' => 'Poster (http://joinposter.com)',
+            ])->asForm()->post($url, $incomingOrder);
 
             if ($response->failed()) {
                 Log::error('Poster API error', [
                     'order_id' => $order->id,
                     'status' => $response->status(),
+                    'phone' => $phone,
                     'body' => $response->body(),
                 ]);
 
@@ -116,6 +122,7 @@ class PosterService
                     'order_id' => $order->id,
                     'error' => $json['error'],
                     'message' => $json['message'] ?? null,
+                    'phone' => $phone,
                     'body' => $response->body(),
                 ]);
 
@@ -127,6 +134,7 @@ class PosterService
             if (! is_array($data) || empty($data['incoming_order_id'])) {
                 Log::error('Poster API returned unexpected response', [
                     'order_id' => $order->id,
+                    'phone' => $phone,
                     'body' => $response->body(),
                 ]);
 
@@ -138,6 +146,7 @@ class PosterService
             Log::info('Poster: incoming order created', [
                 'order_id' => $order->id,
                 'poster_order_id' => $data['incoming_order_id'],
+                'phone' => $phone,
             ]);
 
             return $data;

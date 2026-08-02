@@ -780,3 +780,45 @@ it('отправляет в Poster локальный грузинский те�
     expect($result)->not->toBeNull();
     expect($order->fresh()->poster_order_id)->toBe('77');
 });
+
+it('отправляет заказ в Poster как form-urlencoded по примеру sendRequest', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '91'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder(['customer_phone' => '+995507082864']);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 250.00,
+        'quantity' => 1,
+        'subtotal' => 250.00,
+    ]);
+
+    $service = new PosterService;
+    $result = $service->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return $request->isForm()
+            && $request->header('User-Agent')[0] === 'Poster (http://joinposter.com)'
+            && $body['phone'] === '+995507082864'
+            && (int) $body['products'][0]['product_id'] === 169;
+    });
+
+    expect($result)->not->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBe('91');
+});
