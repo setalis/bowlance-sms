@@ -259,7 +259,7 @@ it('пропускает bowl и drink элементы при отправке 
         $body = $request->data();
 
         return count($body['products']) === 1
-            && $body['products'][0]['product_id'] === 200;
+            && (int) $body['products'][0]['product_id'] === 200;
     });
 });
 
@@ -304,8 +304,8 @@ it('отправляет боул как конструктор с модифи�
         $modification = json_decode($body['products'][0]['modification'] ?? '', true);
 
         return count($body['products']) === 1
-            && $body['products'][0]['product_id'] === 74
-            && $body['products'][0]['count'] === 2
+            && (int) $body['products'][0]['product_id'] === 74
+            && (int) $body['products'][0]['count'] === 2
             && $modification === [
                 ['m' => 301, 'a' => 1],
                 ['m' => 302, 'a' => 3],
@@ -411,7 +411,7 @@ it('пропускает боул без сопоставленных модиф
         $body = $request->data();
 
         return count($body['products']) === 1
-            && $body['products'][0]['product_id'] === 169;
+            && (int) $body['products'][0]['product_id'] === 169;
     });
 });
 
@@ -498,8 +498,8 @@ it('отправляет смешанный заказ с блюдом и боу
         $modification = json_decode($body['products'][1]['modification'] ?? '', true);
 
         return count($body['products']) === 2
-            && $body['products'][0]['product_id'] === 169
-            && $body['products'][1]['product_id'] === 74
+            && (int) $body['products'][0]['product_id'] === 169
+            && (int) $body['products'][1]['product_id'] === 74
             && $modification === [['m' => 301, 'a' => 2]];
     });
 
@@ -545,7 +545,7 @@ it('отправляет завтрак как конструктор с product
         $modification = json_decode($body['products'][0]['modification'] ?? '', true);
 
         return count($body['products']) === 1
-            && $body['products'][0]['product_id'] === 131
+            && (int) $body['products'][0]['product_id'] === 131
             && $modification === [['m' => 401, 'a' => 1]];
     });
 
@@ -607,8 +607,8 @@ it('отправляет смешанный заказ с боулом и зав
         $breakfastModification = json_decode($body['products'][1]['modification'] ?? '', true);
 
         return count($body['products']) === 2
-            && $body['products'][0]['product_id'] === 74
-            && $body['products'][1]['product_id'] === 131
+            && (int) $body['products'][0]['product_id'] === 74
+            && (int) $body['products'][1]['product_id'] === 131
             && $bowlModification === [['m' => 301, 'a' => 1]]
             && $breakfastModification === [['m' => 401, 'a' => 2]];
     });
@@ -672,8 +672,8 @@ it('для общего продукта использует разные modif
         $breakfastModification = json_decode($body['products'][1]['modification'] ?? '', true);
 
         return count($body['products']) === 2
-            && $body['products'][0]['product_id'] === 74
-            && $body['products'][1]['product_id'] === 131
+            && (int) $body['products'][0]['product_id'] === 74
+            && (int) $body['products'][1]['product_id'] === 131
             && $bowlModification === [['m' => 301, 'a' => 1]]
             && $breakfastModification === [['m' => 501, 'a' => 2]];
     });
@@ -733,11 +733,11 @@ it('не использует bowl modification id для завтрака и н
         $body = $request->data();
 
         return count($body['products']) === 1
-            && $body['products'][0]['product_id'] === 169;
+            && (int) $body['products'][0]['product_id'] === 169;
     });
 });
 
-it('отправляет в Poster локальный грузинский телефон в формате E.164', function () {
+it('отправляет заказ в Poster как form-urlencoded по документации sendRequest', function () {
     config([
         'poster.enabled' => true,
         'poster.token' => 'test-token',
@@ -772,53 +772,15 @@ it('отправляет в Poster локальный грузинский те�
 
     Http::assertSent(function ($request) {
         $body = $request->data();
+        $userAgent = $request->header('User-Agent')[0] ?? '';
 
-        return $body['phone'] === '+995507082864'
-            && $body['products'][0]['product_id'] === 131;
+        return $request->isForm()
+            && $userAgent === 'Poster (http://joinposter.com)'
+            && str_contains($request->body(), 'phone=%2B995507082864')
+            && $body['phone'] === '+995507082864'
+            && (int) $body['products'][0]['product_id'] === 131;
     });
 
     expect($result)->not->toBeNull();
     expect($order->fresh()->poster_order_id)->toBe('77');
-});
-
-it('отправляет заказ в Poster как form-urlencoded по примеру sendRequest', function () {
-    config([
-        'poster.enabled' => true,
-        'poster.token' => 'test-token',
-        'poster.spot_id' => 1,
-    ]);
-
-    Http::fake([
-        'joinposter.com/*' => Http::response([
-            'response' => ['incoming_order_id' => '91'],
-        ]),
-    ]);
-
-    $dish = Dish::factory()->create(['poster_product_id' => 169]);
-    $order = makePosterOrder(['customer_phone' => '+995507082864']);
-
-    OrderItem::create([
-        'order_id' => $order->id,
-        'item_type' => 'dish',
-        'dish_id' => $dish->id,
-        'name' => 'Тестовое блюдо',
-        'price' => 250.00,
-        'quantity' => 1,
-        'subtotal' => 250.00,
-    ]);
-
-    $service = new PosterService;
-    $result = $service->createIncomingOrder($order->load('items.dish'));
-
-    Http::assertSent(function ($request) {
-        $body = $request->data();
-
-        return $request->isForm()
-            && $request->header('User-Agent')[0] === 'Poster (http://joinposter.com)'
-            && $body['phone'] === '+995507082864'
-            && (int) $body['products'][0]['product_id'] === 169;
-    });
-
-    expect($result)->not->toBeNull();
-    expect($order->fresh()->poster_order_id)->toBe('91');
 });

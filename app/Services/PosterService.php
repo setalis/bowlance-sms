@@ -62,19 +62,14 @@ class PosterService
             return null;
         }
 
+        // Как в документации Poster + sendRequest($url, 'post', $incoming_order):
+        // https://dev.joinposter.com/docs/v3/web/incomingOrders/createIncomingOrder
+        // POST application/x-www-form-urlencoded (http_build_query), phone — строка.
         $phone = PhoneNumber::toE164($order->customer_phone);
-
         if ($phone === '') {
-            Log::error('Poster: customer phone is invalid after normalization, order skipped', [
-                'order_id' => $order->id,
-                'customer_phone' => $order->customer_phone,
-            ]);
-
-            return null;
+            $phone = trim((string) $order->customer_phone);
         }
 
-        // Как в примере Poster + sendRequest(..., 'post', $params):
-        // form-urlencoded через http_build_query, phone вида '+380680000000'
         $incomingOrder = [
             'spot_id' => (int) config('poster.spot_id'),
             'phone' => $phone,
@@ -91,17 +86,16 @@ class PosterService
         Log::info('Poster: sending incoming order', [
             'order_id' => $order->id,
             'phone' => $phone,
-            'service_mode' => $incomingOrder['service_mode'],
             'content_type' => 'application/x-www-form-urlencoded',
-            'body' => http_build_query($incomingOrder),
+            'payload' => $incomingOrder,
             'products' => $products,
         ]);
 
         try {
-            // Как sendRequest($url, 'post', $params): http_build_query / form-urlencoded
-            $response = Http::withHeaders([
-                'User-Agent' => 'Poster (http://joinposter.com)',
-            ])->asForm()->post($url, $incomingOrder);
+            // Как sendRequest($url, 'post', $params): http_build_query + User-Agent Poster
+            $response = Http::withUserAgent('Poster (http://joinposter.com)')
+                ->asForm()
+                ->post($url, $incomingOrder);
 
             if ($response->failed()) {
                 Log::error('Poster API error', [
@@ -146,7 +140,6 @@ class PosterService
             Log::info('Poster: incoming order created', [
                 'order_id' => $order->id,
                 'poster_order_id' => $data['incoming_order_id'],
-                'phone' => $phone,
             ]);
 
             return $data;

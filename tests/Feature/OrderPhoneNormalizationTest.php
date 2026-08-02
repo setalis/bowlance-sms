@@ -62,6 +62,7 @@ it('сохраняет и отправляет в Poster локальный те
 
     Http::assertSent(function ($request) {
         return str_contains($request->url(), 'joinposter.com')
+            && $request->isForm()
             && ($request->data()['phone'] ?? null) === '+995507082864';
     });
 });
