@@ -20,7 +20,8 @@
                     <span class="text-base font-bold">+995 500 700 877</span>
                 </div>
                 
-            </a>     
+            </a>  
+            <a href="https://maps.app.goo.gl/MBzMJjTLa977ah886?g_st=ic" target="_blank" class="hover:text-primary">   
             <button type="button" class="flex items-center justify-center gap-3" aria-label="{{ __('frontend.location') }}">
                 <span class="icon-[tabler--live-view] bg-amber-700 size-10"></span>
                 <div class="flex flex-col items-start">                    
@@ -28,7 +29,7 @@
                     <span class="text-base font-bold">{{ __('frontend.location') }}</span>
                 </div>
             </button>
-
+            </a>
             <a href="https://instagram.com/bowlance.ge" target="_blank" class="flex items-center justify-center" aria-label="Instagram">
                 <span class="icon-[tabler--brand-instagram] size-10 bg-linear-65 from-pink-400 to-purple-500"></span>
             </a>
@@ -902,7 +903,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <p class="font-semibold text-sm">Перевод на карту</p>
-                                    <p class="text-xs text-base-content/50">Bank of Georgia</p>
+                                    <p class="text-xs text-base-content/50">Bank of Georgia / TBC Bank</p>
                                 </div>
                                 <span x-show="formData.paymentMethod === 'bank_transfer'" class="icon-[tabler--circle-check-filled] size-5 text-violet-500 shrink-0"></span>
                             </label>
@@ -919,68 +920,27 @@
                                 Реквизиты для перевода
                             </p>
 
-                            <!-- Карта -->
-                            <div x-data="{ copied: false }"
-                                 @click="navigator.clipboard.writeText('GE05BG0000000539887879').then(() => { copied = true; $store.cart.showNotification('Номер карты скопирован!', 'success'); setTimeout(() => copied = false, 2000); })"
-                                 class="relative rounded-2xl cursor-pointer select-none overflow-hidden transition-all active:scale-[0.98] flex flex-col justify-between"
-                                 style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #4c1d95 100%); aspect-ratio: 1.586; padding: 6% 7%;">
+                            <!-- Карты -->
+                            <div class="flex flex-col gap-3">
+                                <x-ui.bank-card
+                                    bank="Bank of Georgia"
+                                    iban="GE05BG0000000539887879"
+                                    iban-formatted="GE05 BG00 0000 0539 8878 79"
+                                    holder="VLADISLAV KRAVCHENKO"
+                                    scheme="mastercard"
+                                    gradient="linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #4c1d95 100%)" />
 
-                                <!-- Декоративные круги -->
-                                <div class="absolute -top-8 -right-8 size-36 rounded-full opacity-20"
-                                     style="background: rgba(255,255,255,0.3);"></div>
-                                <div class="absolute -bottom-6 -left-6 size-28 rounded-full opacity-10"
-                                     style="background: rgba(255,255,255,0.4);"></div>
-
-                                <!-- Верхняя строка: лого банка + иконка платёжной системы -->
-                                <div class="flex items-center justify-between relative z-10">
-                                    <span class="text-white/90 font-bold text-xs tracking-wide">Bank of Georgia</span>
-                                    <div class="flex gap-1 items-center">
-                                        <div class="size-5 rounded-full bg-red-500/80"></div>
-                                        <div class="size-5 rounded-full bg-amber-400/80 -ml-2.5"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Чип -->
-                                <div class="relative z-10">
-                                    <div class="w-8 h-6 rounded-md bg-amber-300/70 flex items-center justify-center">
-                                        <div class="w-6 h-4 rounded-sm border border-amber-400/50 grid grid-cols-3 gap-px p-0.5">
-                                            <div class="bg-amber-400/60 rounded-sm"></div>
-                                            <div class="bg-amber-400/60 rounded-sm"></div>
-                                            <div class="bg-amber-400/60 rounded-sm"></div>
-                                            <div class="bg-amber-400/60 rounded-sm"></div>
-                                            <div class="bg-amber-400/60 rounded-sm"></div>
-                                            <div class="bg-amber-400/60 rounded-sm"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Номер карты -->
-                                <div class="relative z-10">
-                                    <p class="text-white/60 mb-0.5" style="font-size: 10px;">Номер карты</p>
-                                    <p class="text-white font-mono font-bold whitespace-nowrap" style="font-size: clamp(11px, 3vw, 15px); letter-spacing: 0.08em;">
-                                        GE05 BG00 0000 0539 8878 79
-                                    </p>
-                                </div>
-
-                                <!-- Держатель + индикатор копирования -->
-                                <div class="flex items-end justify-between relative z-10">
-                                    <div>
-                                        <p class="text-white/60 uppercase mb-0.5" style="font-size: 9px; letter-spacing: 0.05em;">Держатель</p>
-                                        <p class="text-white font-semibold" style="font-size: clamp(10px, 2.5vw, 13px); letter-spacing: 0.04em;">VLADISLAV KRAVCHENKO</p>
-                                    </div>
-                                    <!-- Индикатор копирования -->
-                                    <div class="flex items-center gap-1 transition-all shrink-0"
-                                         :class="copied ? 'text-white' : 'text-white/60'"
-                                         style="font-size: 10px;">
-                                        <span x-show="!copied" class="icon-[tabler--copy] size-3"></span>
-                                        <span x-show="copied" class="icon-[tabler--check] size-3 text-emerald-300"></span>
-                                        <span x-text="copied ? 'Скопировано!' : 'Копировать'"></span>
-                                    </div>
-                                </div>
+                                <x-ui.bank-card
+                                    bank="TBC Bank"
+                                    iban="GE26TB7836436010100048"
+                                    iban-formatted="GE26 TB78 3643 6010 1000 48"
+                                    holder="VLADISLAV KRAVCHENKO"
+                                    scheme="visa"
+                                    gradient="linear-gradient(135deg, #0c4a6e 0%, #0284c7 45%, #075985 100%)" />
                             </div>
 
                             <p class="text-xs text-base-content/50 mt-2 text-center">
-                                После оплаты сохраните скриншот чека — менеджер может запросить подтверждение.
+                                Переведите на любую из карт. После оплаты сохраните скриншот чека — менеджер может запросить подтверждение.
                             </p>
                         </div>
 

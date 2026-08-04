@@ -27,7 +27,7 @@
                     </a>
                     <div class="flex items-start gap-2">
                         <span class="icon-[tabler--map-pin] size-4 mt-0.5"></span>
-                        <span>{{ __('frontend.location') }}</span>
+                        <a href="https://maps.app.goo.gl/MBzMJjTLa977ah886?g_st=ic" target="_blank" class="hover:text-primary">{{ __('frontend.location') }}</a>
                     </div>
                 </div>
             </div>
@@ -42,12 +42,12 @@
                        aria-label="Instagram">
                         <span class="icon-[tabler--brand-instagram] size-6"></span>
                     </a>
-                    <a href="https://facebook.com/bowlance" 
+                    <!-- <a href="https://facebook.com/bowlance" 
                        target="_blank" 
                        class="btn btn-circle btn-ghost" 
                        aria-label="Facebook">
                         <span class="icon-[tabler--brand-facebook] size-6"></span>
-                    </a>
+                    </a> -->
                     <a href="https://t.me/bowlance" 
                        target="_blank" 
                        class="btn btn-circle btn-ghost" 
