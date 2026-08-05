@@ -86,7 +86,7 @@ class PosterService
             'phone' => $phone,
             'first_name' => $order->customer_name,
             'address' => $order->delivery_address,
-            'comment' => $order->comment,
+            'comment' => $this->buildOrderComment($order),
             'service_mode' => $order->delivery_type?->value === 'pickup' ? 2 : 3,
             'products' => $products,
         ];
@@ -171,6 +171,25 @@ class PosterService
 
             return null;
         }
+    }
+
+    protected function buildOrderComment(Order $order): ?string
+    {
+        $parts = [];
+
+        if (filled($order->promo_code)) {
+            $parts[] = 'Промокод: '.$order->promo_code;
+        }
+
+        if (filled($order->comment)) {
+            $parts[] = $order->comment;
+        }
+
+        if ($parts === []) {
+            return null;
+        }
+
+        return implode("\n", $parts);
     }
 
     /**

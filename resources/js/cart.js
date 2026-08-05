@@ -315,6 +315,7 @@ export function initCart() {
                     receiver_phone: customerData.receiverPhone || null,
                     leave_at_door: customerData.leaveAtDoor || false,
                     comment: customerData.comment || null,
+                    promo_code: customerData.promoCode || customerData.promo_code || null,
                     payment_method: customerData.paymentMethod || customerData.payment_method || 'cash',
                     verification_method: verificationMethod,
                     verification_request_id: skipsPhoneVerification ? null : customerData.verification_request_id,

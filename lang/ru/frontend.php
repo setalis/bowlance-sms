@@ -79,6 +79,8 @@ return [
     'email' => 'Email',
     'delivery_address' => 'Адрес доставки',
     'order_comment' => 'Комментарий к заказу',
+    'promo_code' => 'Промокод',
+    'promo_code_placeholder' => 'Если есть',
     'name_placeholder' => 'Иван Иванов',
     'phone_placeholder' => '+995 555 123 456',
     'email_placeholder' => 'email@example.com',

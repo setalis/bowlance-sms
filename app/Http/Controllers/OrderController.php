@@ -133,6 +133,7 @@ class OrderController extends Controller
                 'receiver_phone' => $request->receiver_phone,
                 'leave_at_door' => $request->boolean('leave_at_door', false),
                 'comment' => $request->comment,
+                'promo_code' => $request->filled('promo_code') ? trim($request->promo_code) : null,
                 'subtotal' => $subtotal,
                 'delivery_fee' => $deliveryFee,
                 'total' => $total,

@@ -79,6 +79,8 @@ return [
     'email' => 'ელფოსტა',
     'delivery_address' => 'მიწოდების მისამართი',
     'order_comment' => 'კომენტარი შეკვეთაზე',
+    'promo_code' => 'პრომოკოდი',
+    'promo_code_placeholder' => 'თუ გაქვთ',
     'name_placeholder' => 'ივანე ივანოვი',
     'phone_placeholder' => '+995 555 123 456',
     'email_placeholder' => 'email@example.com',

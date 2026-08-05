@@ -835,6 +835,15 @@
                             </div>
                         </div>
 
+                        <div>
+                            <label class="text-xs font-medium text-base-content/60 mb-1 block">{{ __('frontend.promo_code') }}</label>
+                            <input type="text"
+                                   x-model="formData.promoCode"
+                                   maxlength="100"
+                                   class="input input-bordered input-sm w-full rounded-xl focus:border-emerald-400"
+                                   placeholder="{{ __('frontend.promo_code_placeholder') }}">
+                        </div>
+
                         <div x-show="orderError"
                              class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
                             <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>

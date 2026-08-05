@@ -71,6 +71,8 @@ return [
     'email' => 'Email',
     'delivery_address' => 'Delivery address',
     'order_comment' => 'Order comment',
+    'promo_code' => 'Promo code',
+    'promo_code_placeholder' => 'If you have one',
     'name_placeholder' => 'John Doe',
     'phone_placeholder' => '+995 555 123 456',
     'email_placeholder' => 'email@example.com',

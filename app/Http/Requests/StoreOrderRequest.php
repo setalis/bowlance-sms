@@ -31,6 +31,7 @@ class StoreOrderRequest extends FormRequest
                 ? 'required|string|max:50'
                 : 'nullable|string|max:50',
             'comment' => 'nullable|string|max:1000',
+            'promo_code' => 'nullable|string|max:100',
             'payment_method' => 'nullable|in:cash,bank_transfer',
             'verification_method' => 'nullable|in:sms,telegram,callback',
             'verification_request_id' => [

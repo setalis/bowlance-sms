@@ -255,6 +255,7 @@
                 receiverPhone: '',
                 leaveAtDoor: false,
                 comment: '',
+                promoCode: '',
                 paymentMethod: 'cash'
             },
             
@@ -722,6 +723,7 @@
                     receiverPhone: '',
                     leaveAtDoor: false,
                     comment: '',
+                    promoCode: '',
                     paymentMethod: 'cash'
                 };
                 this.step = 1;

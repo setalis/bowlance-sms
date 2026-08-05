@@ -119,6 +119,11 @@
             <span class="info-value">{{ $order->payment_method?->label() }}</span>
         </div>
 
+        @if($order->promo_code)
+        <h2>Промокод</h2>
+        <div class="comment-box">{{ $order->promo_code }}</div>
+        @endif
+
         @if($order->comment)
         <h2>Комментарий</h2>
         <div class="comment-box">{{ $order->comment }}</div>

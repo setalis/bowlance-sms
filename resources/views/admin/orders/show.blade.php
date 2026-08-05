@@ -197,6 +197,12 @@
                                 <p>{{ $order->delivery_address }}</p>
                             </div>
                         @endif
+                        @if($order->promo_code)
+                            <div>
+                                <p class="text-xs text-base-content/60 mb-1">Промокод</p>
+                                <p class="text-sm font-semibold">{{ $order->promo_code }}</p>
+                            </div>
+                        @endif
                         @if($order->comment)
                             <div>
                                 <p class="text-xs text-base-content/60 mb-1">Комментарий</p>

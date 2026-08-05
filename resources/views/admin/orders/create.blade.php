@@ -97,6 +97,18 @@
                                 @enderror
                             </div>
 
+                            <div>
+                                <label class="label">
+                                    <span class="label-text">Промокод</span>
+                                </label>
+                                <input type="text" name="promo_code" value="{{ old('promo_code') }}"
+                                       class="input input-bordered w-full @error('promo_code') input-error @enderror"
+                                       maxlength="100">
+                                @error('promo_code')
+                                    <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>
+                                @enderror
+                            </div>
+
                             <div class="md:col-span-2">
                                 <label class="label">
                                     <span class="label-text">Комментарий</span>

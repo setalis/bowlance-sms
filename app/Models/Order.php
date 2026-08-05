@@ -34,6 +34,7 @@ class Order extends Model
         'receiver_phone',
         'leave_at_door',
         'comment',
+        'promo_code',
         'subtotal',
         'delivery_fee',
         'total',
