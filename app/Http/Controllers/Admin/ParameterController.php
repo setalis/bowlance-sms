@@ -12,17 +12,19 @@ class ParameterController extends Controller
 {
     public function index(): View
     {
-        $ordersEnabled = Setting::get('orders_enabled', true);
-
         return view('admin.parameters.index', [
             'title' => 'Параметры',
-            'ordersEnabled' => $ordersEnabled,
+            'ordersEnabled' => Setting::get('orders_enabled', true),
+            'phoneVerificationEnabled' => Setting::get('phone_verification_enabled', true),
+            'woltDeliveryEnabled' => Setting::get('wolt_delivery_enabled', true),
         ]);
     }
 
     public function update(UpdateParameterRequest $request): RedirectResponse
     {
         Setting::set('orders_enabled', $request->boolean('orders_enabled'));
+        Setting::set('phone_verification_enabled', $request->boolean('phone_verification_enabled'));
+        Setting::set('wolt_delivery_enabled', $request->boolean('wolt_delivery_enabled'));
 
         return redirect()
             ->route('admin.parameters.index')

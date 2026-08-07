@@ -28,7 +28,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->setFallbackLocale(config('app.fallback_locale', 'ru'));
 
         View::share('pickupDiscount', $this->getPickupDiscount());
-        View::share('woltDeliveryEnabled', $this->app->make(WoltDriveService::class)->isEnabled());
+        View::share('woltDeliveryEnabled', $this->getWoltDeliveryEnabled());
+        View::share('phoneVerificationEnabled', $this->getPhoneVerificationEnabled());
         View::share('siteOrdersEnabled', $this->getSiteOrdersEnabled());
     }
 
@@ -42,6 +43,28 @@ class AppServiceProvider extends ServiceProvider
             return (bool) Setting::get('orders_enabled', true);
         } catch (\Throwable) {
             return true;
+        }
+    }
+
+    protected function getPhoneVerificationEnabled(): bool
+    {
+        try {
+            if (! Schema::hasTable('settings')) {
+                return true;
+            }
+
+            return (bool) Setting::get('phone_verification_enabled', true);
+        } catch (\Throwable) {
+            return true;
+        }
+    }
+
+    protected function getWoltDeliveryEnabled(): bool
+    {
+        try {
+            return $this->app->make(WoltDriveService::class)->isEnabled();
+        } catch (\Throwable) {
+            return false;
         }
     }
 

@@ -976,6 +976,7 @@
 
                         <!-- Карточки выбора метода -->
                         <div x-show="!codeSent && verificationMethod !== 'callback'" class="space-y-2">
+                            @if($phoneVerificationEnabled ?? true)
                             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">Способ подтверждения</p>
 
                             @if(config('vonage.sms_enabled', true))
@@ -1012,6 +1013,7 @@
                                 </div>
                                 <span x-show="verificationMethod === 'telegram'" class="icon-[tabler--circle-check-filled] size-5 text-sky-500 shrink-0"></span>
                             </button>
+                            @endif
 
                             <button type="button"
                                     @click="verificationMethod = 'callback'"
@@ -1030,6 +1032,7 @@
                             </button>
                         </div>
 
+                        @if($phoneVerificationEnabled ?? true)
                         @if(config('vonage.sms_enabled', true))
                         <!-- Кнопка отправки SMS -->
                         <div x-show="!codeSent && verificationMethod === 'sms'">
@@ -1110,6 +1113,36 @@
                             </button>
                         </div>
 
+                        <!-- Успешная верификация -->
+                        <div x-show="phoneVerified && verificationMethod !== 'callback'"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             class="space-y-4">
+                            <div class="flex flex-col items-center text-center py-4">
+                                <div class="size-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-3">
+                                    <span class="icon-[tabler--circle-check-filled] size-9 text-emerald-500"></span>
+                                </div>
+                                <h4 class="font-bold text-lg">Номер подтверждён!</h4>
+                                <p class="text-sm text-base-content/50 mt-1">Вы можете оформить заказ</p>
+                            </div>
+
+                            <div x-show="orderError"
+                                 class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
+                                <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
+                                <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
+                            </div>
+
+                            <button type="submit"
+                                    class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
+                                    :disabled="loading">
+                                <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
+                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                                <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
+                            </button>
+                        </div>
+                        @endif
+
                         <!-- Callback: карточка + кнопка -->
                         <div x-show="verificationMethod === 'callback'" class="space-y-4">
                             <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4">
@@ -1144,41 +1177,14 @@
                                 <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
                             </button>
 
+                            @if($phoneVerificationEnabled ?? true)
                             <button type="button"
                                     @click="verificationMethod = '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}'"
                                     class="flex items-center justify-center gap-1.5 w-full py-2 text-sm text-base-content/50 hover:text-base-content/70 transition-colors">
                                 <span class="icon-[tabler--arrow-left] size-3.5"></span>
                                 Выбрать другой способ
                             </button>
-                        </div>
-
-                        <!-- Успешная верификация -->
-                        <div x-show="phoneVerified && verificationMethod !== 'callback'"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             class="space-y-4">
-                            <div class="flex flex-col items-center text-center py-4">
-                                <div class="size-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-3">
-                                    <span class="icon-[tabler--circle-check-filled] size-9 text-emerald-500"></span>
-                                </div>
-                                <h4 class="font-bold text-lg">Номер подтверждён!</h4>
-                                <p class="text-sm text-base-content/50 mt-1">Вы можете оформить заказ</p>
-                            </div>
-
-                            <div x-show="orderError"
-                                 class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
-                                <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
-                                <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
-                            </div>
-
-                            <button type="submit"
-                                    class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
-                                    :disabled="loading">
-                                <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                                <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
-                            </button>
+                            @endif
                         </div>
 
                     </div>

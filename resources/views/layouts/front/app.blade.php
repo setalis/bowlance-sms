@@ -23,6 +23,7 @@
 <body class="" x-data data-orders-enabled="{{ $siteOrdersEnabled ? '1' : '0' }}">
     <script>
         window.siteOrdersEnabled = @json($siteOrdersEnabled);
+        window.phoneVerificationEnabled = @json($phoneVerificationEnabled ?? true);
         window.ordersUnavailableMessage = @json(__('frontend.orders_unavailable'));
     </script>
     @if(!$siteOrdersEnabled)
@@ -260,7 +261,8 @@
             },
             
             phoneVerification: null,
-            verificationMethod: '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}',
+            phoneVerificationEnabled: @json($phoneVerificationEnabled ?? true),
+            verificationMethod: '{{ ($phoneVerificationEnabled ?? true) ? (config('vonage.sms_enabled', true) ? 'sms' : 'telegram') : 'callback' }}',
             codeSent: false,
             sendingCode: false,
             verificationCode: '',
@@ -727,7 +729,9 @@
                     paymentMethod: 'cash'
                 };
                 this.step = 1;
-                this.verificationMethod = '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}';
+                this.verificationMethod = this.phoneVerificationEnabled
+                    ? '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}'
+                    : 'callback';
                 this.codeSent = false;
                 this.verificationCode = '';
                 this.phoneVerified = false;

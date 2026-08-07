@@ -17,6 +17,8 @@ it('displays parameters index page for admin', function () {
     $response->assertViewIs('admin.parameters.index');
     $response->assertViewHas('title', 'Параметры');
     $response->assertViewHas('ordersEnabled');
+    $response->assertViewHas('phoneVerificationEnabled');
+    $response->assertViewHas('woltDeliveryEnabled');
 });
 
 it('can update parameters and enable orders', function () {
@@ -24,6 +26,8 @@ it('can update parameters and enable orders', function () {
 
     $response = $this->actingAs($this->admin)->put(route('admin.parameters.update'), [
         'orders_enabled' => '1',
+        'phone_verification_enabled' => '1',
+        'wolt_delivery_enabled' => '1',
     ]);
 
     $response->assertRedirect(route('admin.parameters.index'));
@@ -36,11 +40,26 @@ it('can update parameters and disable orders', function () {
 
     $response = $this->actingAs($this->admin)->put(route('admin.parameters.update'), [
         'orders_enabled' => '0',
+        'phone_verification_enabled' => '1',
+        'wolt_delivery_enabled' => '1',
     ]);
 
     $response->assertRedirect(route('admin.parameters.index'));
     $response->assertSessionHas('success', 'Параметры сохранены.');
     expect(Setting::get('orders_enabled'))->toBeFalse();
+});
+
+it('can update integration settings', function () {
+    $response = $this->actingAs($this->admin)->put(route('admin.parameters.update'), [
+        'orders_enabled' => '1',
+        'phone_verification_enabled' => '0',
+        'wolt_delivery_enabled' => '0',
+    ]);
+
+    $response->assertRedirect(route('admin.parameters.index'));
+    $response->assertSessionHas('success', 'Параметры сохранены.');
+    expect(Setting::get('phone_verification_enabled'))->toBeFalse();
+    expect(Setting::get('wolt_delivery_enabled'))->toBeFalse();
 });
 
 it('forbids non-admin from accessing parameters index', function () {
@@ -56,6 +75,8 @@ it('forbids non-admin from updating parameters', function () {
 
     $response = $this->actingAs($user)->put(route('admin.parameters.update'), [
         'orders_enabled' => '1',
+        'phone_verification_enabled' => '1',
+        'wolt_delivery_enabled' => '1',
     ]);
 
     $response->assertForbidden();

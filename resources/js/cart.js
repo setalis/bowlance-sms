@@ -278,9 +278,10 @@ export function initCart() {
             // Верификация не нужна для самовывоза и метода "звонок менеджера"
             const deliveryType = customerData.deliveryType ?? customerData.delivery_type ?? 'delivery';
             const isPickup = deliveryType === 'pickup';
+            const phoneVerificationEnabled = window.phoneVerificationEnabled !== false;
             const verificationMethod = isPickup
                 ? null
-                : (customerData.verification_method || 'sms');
+                : (customerData.verification_method || (phoneVerificationEnabled ? 'sms' : 'callback'));
             const skipsPhoneVerification = isPickup || verificationMethod === 'callback';
 
             if (!skipsPhoneVerification && !customerData.verification_request_id) {

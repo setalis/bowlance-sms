@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PhoneVerification;
+use App\Models\Setting;
 use App\Rules\ValidPhoneNumber;
 use App\Services\TelegramVerifyService;
 use App\Services\VonageVerifyService;
@@ -20,6 +21,10 @@ class PhoneVerificationController extends Controller
 
     public function send(Request $request): JsonResponse
     {
+        if ($disabled = $this->phoneVerificationDisabledResponse()) {
+            return $disabled;
+        }
+
         $validator = Validator::make($request->all(), [
             'phone' => ['required', 'string', new ValidPhoneNumber],
         ], [
@@ -53,6 +58,10 @@ class PhoneVerificationController extends Controller
 
     public function telegramStart(Request $request): JsonResponse
     {
+        if ($disabled = $this->phoneVerificationDisabledResponse()) {
+            return $disabled;
+        }
+
         $validator = Validator::make($request->all(), [
             'phone' => ['required', 'string', new ValidPhoneNumber],
         ], [
@@ -80,6 +89,10 @@ class PhoneVerificationController extends Controller
 
     public function verify(Request $request): JsonResponse
     {
+        if ($disabled = $this->phoneVerificationDisabledResponse()) {
+            return $disabled;
+        }
+
         $validator = Validator::make($request->all(), [
             'request_id' => 'required|string',
             'code' => 'required|string|digits:6',
@@ -141,5 +154,17 @@ class PhoneVerificationController extends Controller
             'success' => $cancelled,
             'message' => $cancelled ? 'Запрос верификации отменён' : 'Не удалось отменить запрос',
         ]);
+    }
+
+    protected function phoneVerificationDisabledResponse(): ?JsonResponse
+    {
+        if (Setting::get('phone_verification_enabled', true)) {
+            return null;
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Верификация телефона временно недоступна',
+        ], 403);
     }
 }

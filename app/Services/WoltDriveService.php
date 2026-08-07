@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -13,6 +14,10 @@ class WoltDriveService
     public function isEnabled(): bool
     {
         if (! (bool) config('wolt.drive.enabled') || blank(config('wolt.drive.token'))) {
+            return false;
+        }
+
+        if (! Setting::get('wolt_delivery_enabled', true)) {
             return false;
         }
 

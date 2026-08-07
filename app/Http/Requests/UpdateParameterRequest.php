@@ -18,6 +18,8 @@ class UpdateParameterRequest extends FormRequest
     {
         return [
             'orders_enabled' => ['required', 'boolean'],
+            'phone_verification_enabled' => ['required', 'boolean'],
+            'wolt_delivery_enabled' => ['required', 'boolean'],
         ];
     }
 }

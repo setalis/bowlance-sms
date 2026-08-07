@@ -46,7 +46,7 @@ class Setting extends Model
             return null;
         }
 
-        if ($key === 'orders_enabled') {
+        if (in_array($key, ['orders_enabled', 'phone_verification_enabled', 'wolt_delivery_enabled'], true)) {
             return filter_var($value, FILTER_VALIDATE_BOOLEAN);
         }
 

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\DeliveryType;
 use App\Models\PhoneVerification;
+use App\Models\Setting;
 use App\Rules\ValidPhoneNumber;
 use App\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
@@ -73,6 +74,7 @@ class StoreOrderRequest extends FormRequest
             'delivery_street.required_if' => 'Укажите улицу и дом',
             'delivery_house.required_if' => 'Укажите номер дома',
             'verification_request_id.required_unless' => 'Требуется верификация номера телефона',
+            'verification_method.in' => 'Выбранный способ подтверждения недоступен',
             'items.required' => 'Корзина не может быть пустой',
             'items.min' => 'Необходимо добавить хотя бы один товар',
         ];
@@ -81,6 +83,17 @@ class StoreOrderRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            if (! Setting::get('phone_verification_enabled', true)
+                && $this->delivery_type === DeliveryType::Delivery->value
+                && $this->verification_method !== 'callback') {
+                $validator->errors()->add(
+                    'verification_method',
+                    'Для доставки доступен только способ «Звонок менеджера»'
+                );
+
+                return;
+            }
+
             if ($this->skipsPhoneVerification()) {
                 return;
             }
