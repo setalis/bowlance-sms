@@ -207,15 +207,28 @@
                     @php
                         $categoryBadgeColors = ['badge-primary', 'badge-success', 'badge-info', 'badge-warning', 'badge-error'];
                     @endphp
-                    <nav class="sticky {{ $categoryLinksTop }} z-39 flex flex-wrap gap-2 -mx-4 px-4 py-3 mb-6 border-b border-base-content/10 bg-base-100 shadow-sm" aria-label="{{ __('frontend.menu_tab') }}">
-                        @foreach($dishCategories as $category)
-                            <a href="#menu-category-{{ $category->id }}"
-                               @click.prevent="const el = document.querySelector($event.currentTarget.getAttribute('href')); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })"
-                               class="badge badge-soft {{ $categoryBadgeColors[$loop->index % count($categoryBadgeColors)] }} badge-lg gap-1.5 hover:opacity-90 transition-opacity cursor-pointer no-underline">
-                                <span class="{{ $category->icon_class ?: 'icon-[tabler--bowl-chopsticks]' }} size-4"></span>
-                                {{ $category->name }}
-                            </a>
-                        @endforeach
+                    <nav class="sticky {{ $categoryLinksTop }} z-39 -mx-4 px-4 py-3 mb-6 border-b border-base-content/10 bg-base-100 shadow-sm" aria-label="{{ __('frontend.menu_tab') }}">
+                        <div class="menu-category-slider md:hidden overflow-x-auto snap-x snap-mandatory">
+                            <div class="flex w-max min-w-full flex-nowrap gap-2">
+                                @foreach($dishCategories as $category)
+                                    <div class="snap-start shrink-0">
+                                        @include('frontend.partials.menu-category-link', [
+                                            'category' => $category,
+                                            'badgeColor' => $categoryBadgeColors[$loop->index % count($categoryBadgeColors)],
+                                        ])
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="hidden md:flex flex-wrap gap-2">
+                            @foreach($dishCategories as $category)
+                                @include('frontend.partials.menu-category-link', [
+                                    'category' => $category,
+                                    'badgeColor' => $categoryBadgeColors[$loop->index % count($categoryBadgeColors)],
+                                ])
+                            @endforeach
+                        </div>
                     </nav>
                 @endif
                 @if($dishCategories->isEmpty())

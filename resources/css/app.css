@@ -62,3 +62,12 @@ li:not(.menu-title, .menu-disabled)
         1px 1px 1px rgba(0, 0, 0, 0.8),
         0 3px 10px rgba(0, 0, 0, 0.9);
 }
+
+.menu-category-slider {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.menu-category-slider::-webkit-scrollbar {
+    display: none;
+}
