@@ -41,7 +41,7 @@
                 </div>
                 <div class="carousel-slide">
                     <div class="relative h-full w-full">
-                    <img src="{{ asset('storage/images/slider/slider-2-1.jpg') }}" 
+                        <img src="{{ asset('storage/images/slider/slider-2-1.jpg') }}" 
                              alt="Боулы" 
                              class="h-full w-full object-cover md:hidden">
                         <img src="{{ asset('storage/images/slider/slider-2-1-desktop.jpg') }}" 
@@ -85,8 +85,11 @@
                 <div class="carousel-slide">
                     <div class="relative h-full w-full">
                         <img src="{{ asset('storage/images/slider/slider-4.jpg') }}" 
+                             alt="Боулы" 
+                             class="h-full w-full object-cover md:hidden">
+                        <img src="{{ asset('storage/images/slider/slider-4-desktop.jpg') }}" 
                              alt="Собери сам" 
-                             class="h-full w-full object-cover">                        
+                             class="h-full w-full object-cover hidden md:block">                        
                             <div class="absolute inset-0 flex flex-col items-center justify-center">  
                                 <!-- <h2 class="mb-4 text-4xl text-white font-bold sm:text-5xl text-center">{{ __('frontend.slider_4_title') }}</h2>
                                 <p class="text-sm sm:text-2xl text-white">{{ __('frontend.slider_4_desc') }}</p>
