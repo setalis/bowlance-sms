@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\ConstructorProduct;
-use App\Models\Discount;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Rules\ValidPhoneNumber;
+use App\Services\DiscountService;
 use App\Support\PhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,8 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
+    public function __construct(protected DiscountService $discountService) {}
+
     public function index(Request $request): View
     {
         $query = Order::with('items')->latest();
@@ -140,15 +143,9 @@ class OrderController extends Controller
             });
 
             $deliveryFee = 0;
-            $total = $subtotal + $deliveryFee;
-
-            if ($validated['delivery_type'] === 'pickup') {
-                $pickupDiscount = Discount::forPickup()->first();
-                if ($pickupDiscount) {
-                    $discountAmount = $pickupDiscount->calculateDiscountAmount((float) $subtotal);
-                    $total = max(0, round($subtotal - $discountAmount + $deliveryFee, 2));
-                }
-            }
+            $deliveryType = DeliveryType::from($validated['delivery_type']);
+            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType, $deliveryFee);
+            $total = $pricing['total'];
 
             // Создание заказа
             $order = Order::create([
@@ -267,15 +264,9 @@ class OrderController extends Controller
             });
 
             $deliveryFee = $order->delivery_fee;
-            $total = $subtotal + $deliveryFee;
-
-            if ($validated['delivery_type'] === 'pickup') {
-                $pickupDiscount = Discount::forPickup()->first();
-                if ($pickupDiscount) {
-                    $discountAmount = $pickupDiscount->calculateDiscountAmount((float) $subtotal);
-                    $total = max(0, round($subtotal - $discountAmount + $deliveryFee, 2));
-                }
-            }
+            $deliveryType = DeliveryType::from($validated['delivery_type']);
+            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType, (float) $deliveryFee);
+            $total = $pricing['total'];
 
             // Обновление заказа
             $newStatus = OrderStatus::from($validated['status']);

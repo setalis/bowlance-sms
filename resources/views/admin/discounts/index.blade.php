@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-base-content text-2xl font-semibold">Скидки и акции</h2>
-                <p class="text-base-content/70">Управление скидками (например, за самовывоз)</p>
+                <p class="text-base-content/70">Управление скидками за самовывоз и по сумме корзины при доставке</p>
             </div>
             <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary">
                 <span class="icon-[tabler--plus] size-5"></span>
@@ -27,8 +27,9 @@
                             <th>ID</th>
                             <th>Название</th>
                             <th>Размер</th>
-                            <th>Тип</th>
-                            <th>Область</th>
+                            <th>Тип скидки</th>
+                            <th>Тип применения</th>
+                            <th>Порог корзины</th>
                             <th>Статус</th>
                             <th>Создано</th>
                             <th>Действия</th>
@@ -47,7 +48,14 @@
                                     @endif
                                 </td>
                                 <td><span class="badge badge-soft badge-sm">{{ $discount->type->label() }}</span></td>
-                                <td><code class="text-sm">{{ $discount->scope }}</code></td>
+                                <td><span class="badge badge-outline badge-sm">{{ $discount->scope->label() }}</span></td>
+                                <td>
+                                    @if($discount->scope === \App\Enums\DiscountScope::CartTotal && $discount->min_cart_total)
+                                        от {{ number_format($discount->min_cart_total, 2) }} ₾
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>
                                     @if($discount->is_active)
                                         <span class="badge badge-success badge-sm">Активна</span>
@@ -79,12 +87,12 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-8">
+                                <td colspan="9" class="text-center py-8">
                                     <div class="flex flex-col items-center gap-4">
                                         <span class="icon-[tabler--discount] size-12 text-base-content/30"></span>
                                         <div>
                                             <p class="text-base-content/70 text-lg font-medium">Скидок пока нет</p>
-                                            <p class="text-base-content/50 text-sm">Создайте скидку для самовывоза или других акций</p>
+                                            <p class="text-base-content/50 text-sm">Создайте скидку для самовывоза или доставки</p>
                                         </div>
                                         <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary btn-sm">
                                             <span class="icon-[tabler--plus] size-4"></span>

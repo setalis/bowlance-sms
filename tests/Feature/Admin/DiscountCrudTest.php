@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\DiscountScope;
 use App\Models\Discount;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,7 +33,7 @@ it('can create a new discount with percent type', function () {
         'name' => 'Скидка за самовывоз',
         'size' => 10,
         'type' => 'percent',
-        'scope' => 'pickup',
+        'scope' => DiscountScope::Pickup->value,
         'is_active' => '1',
     ];
 
@@ -45,7 +46,7 @@ it('can create a new discount with percent type', function () {
         'name' => 'Скидка за самовывоз',
         'size' => 10,
         'type' => 'percent',
-        'scope' => 'pickup',
+        'scope' => DiscountScope::Pickup->value,
         'is_active' => true,
     ]);
 });
@@ -54,7 +55,7 @@ it('can create a new discount with amount type', function () {
     $data = [
         'size' => 2.5,
         'type' => 'amount',
-        'scope' => 'pickup',
+        'scope' => DiscountScope::Pickup->value,
         'is_active' => '1',
     ];
 
@@ -65,6 +66,42 @@ it('can create a new discount with amount type', function () {
         'size' => 2.5,
         'type' => 'amount',
     ]);
+});
+
+it('can create a new discount with cart total scope', function () {
+    $data = [
+        'name' => 'Скидка от 100 ₾',
+        'size' => 10,
+        'type' => 'percent',
+        'scope' => DiscountScope::CartTotal->value,
+        'min_cart_total' => 100,
+        'is_active' => '1',
+    ];
+
+    $response = $this->actingAs($this->user)->post(route('admin.discounts.store'), $data);
+
+    $response->assertRedirect(route('admin.discounts.index'));
+    $response->assertSessionHas('success', 'Скидка успешно создана.');
+
+    $this->assertDatabaseHas('discounts', [
+        'name' => 'Скидка от 100 ₾',
+        'size' => 10,
+        'type' => 'percent',
+        'scope' => DiscountScope::CartTotal->value,
+        'min_cart_total' => 100,
+        'is_active' => true,
+    ]);
+});
+
+it('requires min cart total for cart total scope', function () {
+    $response = $this->actingAs($this->user)->post(route('admin.discounts.store'), [
+        'size' => 10,
+        'type' => 'percent',
+        'scope' => DiscountScope::CartTotal->value,
+        'is_active' => '1',
+    ]);
+
+    $response->assertSessionHasErrors(['min_cart_total']);
 });
 
 it('validates required fields when creating discount', function () {
@@ -92,7 +129,7 @@ it('can update a discount', function () {
         'name' => 'Обновлённая скидка',
         'size' => 15,
         'type' => 'percent',
-        'scope' => 'pickup',
+        'scope' => DiscountScope::Pickup->value,
         'is_active' => '1',
     ];
 

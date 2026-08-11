@@ -6,12 +6,12 @@ use App\Enums\DeliveryType;
 use App\Enums\OrderStatus;
 use App\Http\Requests\StoreOrderRequest;
 use App\Mail\NewOrderMail;
-use App\Models\Discount;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
 use App\Models\Setting;
+use App\Services\DiscountService;
 use App\Services\PhoneAuthService;
 use App\Services\PosterService;
 use App\Services\WoltDriveService;
@@ -25,7 +25,8 @@ class OrderController extends Controller
     public function __construct(
         protected PhoneAuthService $phoneAuthService,
         protected WoltDriveService $woltDriveService,
-        protected PosterService $posterService
+        protected PosterService $posterService,
+        protected DiscountService $discountService
     ) {}
 
     public function store(StoreOrderRequest $request): JsonResponse
@@ -96,15 +97,9 @@ class OrderController extends Controller
             $subtotal = $resolvedItems->sum(fn ($item) => $item['price'] * $item['quantity']);
 
             $deliveryFee = 0;
-            $total = $subtotal + $deliveryFee;
-
-            if ($isPickup) {
-                $pickupDiscount = Discount::forPickup()->first();
-                if ($pickupDiscount) {
-                    $discountAmount = $pickupDiscount->calculateDiscountAmount((float) $subtotal);
-                    $total = max(0, round($subtotal - $discountAmount + $deliveryFee, 2));
-                }
-            }
+            $deliveryType = DeliveryType::from($request->delivery_type ?? DeliveryType::Delivery->value);
+            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType, $deliveryFee);
+            $total = $pricing['total'];
 
             $deliveryAddress = $request->delivery_address;
             if ($request->delivery_type === DeliveryType::Delivery->value && $request->filled('delivery_city') && $request->filled('delivery_street')) {

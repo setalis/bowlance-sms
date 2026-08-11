@@ -625,10 +625,10 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-0.5">{{ __('frontend.total_to_pay') }}</p>
-                                    <p x-show="formData.deliveryType === 'pickup' && pickupDiscount"
+                                    <p x-show="appliedDiscountMessage"
                                        x-cloak
+                                       x-text="appliedDiscountMessage"
                                        class="text-xs text-emerald-600/70 dark:text-emerald-400/70">
-                                        Скидка за самовывоз применена
                                     </p>
                                 </div>
                                 <p class="text-3xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums"

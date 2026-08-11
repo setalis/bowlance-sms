@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\DiscountScope;
 use App\Enums\DiscountType;
 use App\Models\Discount;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +23,8 @@ class DiscountFactory extends Factory
             'name' => 'Скидка за самовывоз',
             'size' => fake()->randomFloat(2, 5, 15),
             'type' => DiscountType::Percent,
-            'scope' => 'pickup',
+            'scope' => DiscountScope::Pickup,
+            'min_cart_total' => null,
             'is_active' => true,
         ];
     }
@@ -40,6 +42,15 @@ class DiscountFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'type' => DiscountType::Amount,
             'size' => fake()->randomFloat(2, 1, 5),
+        ]);
+    }
+
+    public function cartTotal(float $minCartTotal = 100): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => 'Скидка по сумме корзины',
+            'scope' => DiscountScope::CartTotal,
+            'min_cart_total' => $minCartTotal,
         ]);
     }
 

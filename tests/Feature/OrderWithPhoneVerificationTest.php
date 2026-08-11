@@ -548,7 +548,7 @@ it('применяет скидку за самовывоз при создан�
     Discount::factory()->create([
         'size' => 10,
         'type' => \App\Enums\DiscountType::Percent,
-        'scope' => 'pickup',
+        'scope' => \App\Enums\DiscountScope::Pickup,
         'is_active' => true,
     ]);
 

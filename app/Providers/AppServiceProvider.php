@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->setFallbackLocale(config('app.fallback_locale', 'ru'));
 
         View::share('pickupDiscount', $this->getPickupDiscount());
+        View::share('cartTotalDiscounts', $this->getCartTotalDiscounts());
         View::share('woltDeliveryEnabled', $this->getWoltDeliveryEnabled());
         View::share('phoneVerificationEnabled', $this->getPhoneVerificationEnabled());
         View::share('siteOrdersEnabled', $this->getSiteOrdersEnabled());
@@ -78,6 +79,30 @@ class AppServiceProvider extends ServiceProvider
             return Discount::forPickup()->first();
         } catch (\Throwable) {
             return null;
+        }
+    }
+
+    /**
+     * @return array<int, array{size: float, type: string, min_cart_total: float}>
+     */
+    protected function getCartTotalDiscounts(): array
+    {
+        try {
+            if (! Schema::hasTable('discounts')) {
+                return [];
+            }
+
+            return Discount::forCartTotal()
+                ->get()
+                ->map(fn (Discount $discount) => [
+                    'size' => (float) $discount->size,
+                    'type' => $discount->type->value,
+                    'min_cart_total' => (float) $discount->min_cart_total,
+                ])
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            return [];
         }
     }
 }

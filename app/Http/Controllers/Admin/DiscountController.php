@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DiscountScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDiscountRequest;
 use App\Http\Requests\UpdateDiscountRequest;
@@ -30,11 +31,7 @@ class DiscountController extends Controller
 
     public function store(StoreDiscountRequest $request): RedirectResponse
     {
-        $data = $request->validated();
-        $data['is_active'] = $request->boolean('is_active', true);
-        $data['scope'] = $data['scope'] ?? 'pickup';
-
-        Discount::create($data);
+        Discount::create($this->prepareDiscountData($request->validated(), $request));
 
         return redirect()
             ->route('admin.discounts.index')
@@ -51,11 +48,7 @@ class DiscountController extends Controller
 
     public function update(UpdateDiscountRequest $request, Discount $discount): RedirectResponse
     {
-        $data = $request->validated();
-        $data['is_active'] = $request->boolean('is_active', true);
-        $data['scope'] = $data['scope'] ?? 'pickup';
-
-        $discount->update($data);
+        $discount->update($this->prepareDiscountData($request->validated(), $request));
 
         return redirect()
             ->route('admin.discounts.index')
@@ -69,5 +62,20 @@ class DiscountController extends Controller
         return redirect()
             ->route('admin.discounts.index')
             ->with('success', 'Скидка удалена.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function prepareDiscountData(array $data, StoreDiscountRequest|UpdateDiscountRequest $request): array
+    {
+        $data['is_active'] = $request->boolean('is_active', true);
+
+        if (($data['scope'] ?? null) === DiscountScope::Pickup->value) {
+            $data['min_cart_total'] = null;
+        }
+
+        return $data;
     }
 }

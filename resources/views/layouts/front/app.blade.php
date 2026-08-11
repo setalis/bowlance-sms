@@ -236,6 +236,7 @@
             loading: false,
             step: 1,
             pickupDiscount: @json($pickupDiscount ? ['size' => (float) $pickupDiscount->size, 'type' => $pickupDiscount->type->value] : null),
+            cartTotalDiscounts: @json($cartTotalDiscounts ?? []),
             formData: {
                 name: '',
                 phone: '',
@@ -761,19 +762,59 @@
                 }
             },
             
+            resolveApplicableDiscount() {
+                const base = this.$store.cart.totalPrice;
+
+                if (this.formData.deliveryType === 'pickup' && this.pickupDiscount) {
+                    return this.pickupDiscount;
+                }
+
+                if (this.formData.deliveryType === 'delivery' && this.cartTotalDiscounts?.length) {
+                    return this.cartTotalDiscounts
+                        .filter((discount) => base >= discount.min_cart_total)
+                        .sort((a, b) => b.min_cart_total - a.min_cart_total)[0] ?? null;
+                }
+
+                return null;
+            },
+
+            calculateDiscountAmount(discount, subtotal) {
+                if (!discount) {
+                    return 0;
+                }
+
+                if (discount.type === 'percent') {
+                    return subtotal * (discount.size / 100);
+                }
+
+                return Math.min(parseFloat(discount.size), subtotal);
+            },
+
             get totalToPay() {
                 const base = this.$store.cart.totalPrice;
-                if (this.formData.deliveryType !== 'pickup' || !this.pickupDiscount) {
+                const discount = this.resolveApplicableDiscount();
+
+                if (!discount) {
                     return base;
                 }
-                const d = this.pickupDiscount;
-                let discount = 0;
-                if (d.type === 'percent') {
-                    discount = base * (d.size / 100);
-                } else {
-                    discount = Math.min(parseFloat(d.size), base);
+
+                const discountAmount = this.calculateDiscountAmount(discount, base);
+
+                return Math.max(0, Math.round((base - discountAmount) * 100) / 100);
+            },
+
+            get appliedDiscountMessage() {
+                const discount = this.resolveApplicableDiscount();
+
+                if (!discount) {
+                    return null;
                 }
-                return Math.max(0, Math.round((base - discount) * 100) / 100);
+
+                if (this.formData.deliveryType === 'pickup') {
+                    return 'Скидка за самовывоз применена';
+                }
+
+                return `Скидка от ${discount.min_cart_total.toFixed(2)} ₾ применена`;
             },
             
             // Методы для работы с адресами

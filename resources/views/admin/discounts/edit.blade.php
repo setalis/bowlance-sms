@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="space-y-6">
+    <div class="space-y-6" x-data="{ scope: '{{ old('scope', $discount->scope->value) }}' }">
         <div>
             <a href="{{ route('admin.discounts.index') }}" class="btn btn-text btn-sm mb-4">
                 <span class="icon-[tabler--arrow-left] size-4"></span>
@@ -12,7 +12,7 @@
         <div class="bg-base-100 shadow-base-300/20 w-full space-y-6 rounded-xl p-6 shadow-md lg:p-8">
             <div>
                 <h3 class="text-base-content mb-1.5 text-2xl font-semibold">Редактировать скидку</h3>
-                <p class="text-base-content/80">Обновите размер и тип скидки</p>
+                <p class="text-base-content/80">Обновите параметры скидки</p>
             </div>
 
             <form action="{{ route('admin.discounts.update', $discount) }}" method="POST" class="space-y-6">
@@ -29,6 +29,38 @@
                                id="name"
                                value="{{ old('name', $discount->name) }}" />
                         @error('name')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="label-text" for="scope">Тип применения <span class="text-error">*</span></label>
+                        <select name="scope"
+                                id="scope"
+                                x-model="scope"
+                                class="select select-bordered w-full @error('scope') select-error @enderror"
+                                required>
+                            @foreach (\App\Enums\DiscountScope::cases() as $discountScope)
+                                <option value="{{ $discountScope->value }}" @selected(old('scope', $discount->scope->value) === $discountScope->value)>
+                                    {{ $discountScope->label() }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('scope')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div x-show="scope === 'cart_total'" x-cloak>
+                        <label class="label-text" for="min_cart_total">Минимальная сумма корзины (₾) <span class="text-error">*</span></label>
+                        <input type="number"
+                               name="min_cart_total"
+                               step="0.01"
+                               min="0.01"
+                               class="input @error('min_cart_total') input-error @enderror"
+                               id="min_cart_total"
+                               value="{{ old('min_cart_total', $discount->min_cart_total) }}" />
+                        @error('min_cart_total')
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
@@ -62,18 +94,6 @@
                                 <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="label-text" for="scope">Область применения</label>
-                        <input type="text"
-                               name="scope"
-                               class="input @error('scope') input-error @enderror"
-                               id="scope"
-                               value="{{ old('scope', $discount->scope) }}" />
-                        @error('scope')
-                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
-                        @enderror
                     </div>
 
                     <div class="label cursor-pointer justify-start gap-3">

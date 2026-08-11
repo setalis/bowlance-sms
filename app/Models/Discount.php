@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\DeliveryType;
+use App\Enums\DiscountScope;
 use App\Enums\DiscountType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +18,7 @@ class Discount extends Model
         'size',
         'type',
         'scope',
+        'min_cart_total',
         'is_active',
     ];
 
@@ -23,18 +27,47 @@ class Discount extends Model
         return [
             'size' => 'decimal:2',
             'type' => DiscountType::class,
+            'scope' => DiscountScope::class,
+            'min_cart_total' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }
 
-    public function scopeForPickup($query)
+    public function scopeForPickup(Builder $query): Builder
     {
-        return $query->where('scope', 'pickup')->where('is_active', true);
+        return $query
+            ->where('scope', DiscountScope::Pickup)
+            ->where('is_active', true);
     }
 
-    /**
-     * Рассчитать сумму скидки от заданной суммы.
-     */
+    public function scopeForCartTotal(Builder $query): Builder
+    {
+        return $query
+            ->where('scope', DiscountScope::CartTotal)
+            ->where('is_active', true)
+            ->orderByDesc('min_cart_total');
+    }
+
+    public function appliesTo(DeliveryType $deliveryType, float $subtotal): bool
+    {
+        return match ($this->scope) {
+            DiscountScope::Pickup => $deliveryType === DeliveryType::Pickup,
+            DiscountScope::CartTotal => $deliveryType === DeliveryType::Delivery
+                && $this->min_cart_total !== null
+                && $subtotal >= (float) $this->min_cart_total,
+        };
+    }
+
+    public static function resolveForOrder(DeliveryType $deliveryType, float $subtotal): ?self
+    {
+        return match ($deliveryType) {
+            DeliveryType::Pickup => self::forPickup()->first(),
+            DeliveryType::Delivery => self::forCartTotal()
+                ->get()
+                ->first(fn (self $discount) => $discount->appliesTo($deliveryType, $subtotal)),
+        };
+    }
+
     public function calculateDiscountAmount(float $subtotal): float
     {
         return match ($this->type) {
