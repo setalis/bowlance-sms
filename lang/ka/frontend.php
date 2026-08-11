@@ -79,6 +79,10 @@ return [
     'total_pickup_preview' => 'თვითმიღებით',
     'total_delivery_preview' => 'მიწოდებით',
     'choose_delivery_on_next_step' => 'ჯამი დამოკიდებულია მიღების საშუალებაზე',
+    'delivery_fee_line' => 'მიწოდება',
+    'delivery_fee_hint' => 'მიწოდება :fee ₾, უფასო :freeFrom ₾-დან',
+    'delivery_fee_free' => 'უფასო',
+    'delivery_fee_add_more' => 'უფასო მიწოდება :freeFrom ₾-დან. დაამატეთ კიდევ :remaining ₾',
     'checkout' => 'შეკვეთის გაფორმება',
 
     // Checkout

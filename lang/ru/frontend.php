@@ -79,6 +79,10 @@ return [
     'total_pickup_preview' => 'При самовывозе',
     'total_delivery_preview' => 'При доставке',
     'choose_delivery_on_next_step' => 'Итог зависит от способа получения',
+    'delivery_fee_line' => 'Доставка',
+    'delivery_fee_hint' => 'Доставка :fee ₾, бесплатно от :freeFrom ₾',
+    'delivery_fee_free' => 'Бесплатно',
+    'delivery_fee_add_more' => 'Бесплатная доставка от :freeFrom ₾. Добавьте ещё :remaining ₾',
     'checkout' => 'Оформить заказ',
 
     // Checkout

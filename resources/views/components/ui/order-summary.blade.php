@@ -9,6 +9,17 @@
               x-text="(typeof subtotal !== 'undefined' ? subtotal : $store.cart.subtotal).toFixed(2) + ' ₾'"></span>
     </div>
 
+    <div class="flex items-start gap-2 text-xs text-sky-700/80 dark:text-sky-300/80">
+        <span class="icon-[tabler--truck-delivery] size-4 shrink-0 mt-0.5"></span>
+        <span x-text="$store.cart.deliveryFeeHint?.label"></span>
+    </div>
+
+    <div x-show="!$store.cart.deliveryFeeHint?.isFree && $store.cart.deliveryFeeHint?.addMoreLabel"
+         x-cloak
+         class="text-xs text-amber-700/80 dark:text-amber-300/80 pl-6"
+         x-text="$store.cart.deliveryFeeHint?.addMoreLabel">
+    </div>
+
     <div x-show="$store.cart.pickupHint"
          x-cloak
          class="flex items-start gap-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
@@ -19,7 +30,7 @@
     <div x-show="$store.cart.deliveryHint"
          x-cloak
          class="flex items-start gap-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
-        <span class="icon-[tabler--truck-delivery] size-4 shrink-0 mt-0.5"></span>
+        <span class="icon-[tabler--discount-2] size-4 shrink-0 mt-0.5"></span>
         <span x-text="$store.cart.deliveryHint?.label"></span>
     </div>
 
@@ -30,6 +41,15 @@
             <span class="text-emerald-700 dark:text-emerald-300">{{ __('frontend.discount_line') }}</span>
             <span class="font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums"
                   x-text="'−' + discountAmount.toFixed(2) + ' ₾'"></span>
+        </div>
+
+        <div x-show="typeof showFinalTotal !== 'undefined' && showFinalTotal && formData.deliveryType === 'delivery'"
+             x-cloak
+             class="flex items-center justify-between gap-3 text-sm">
+            <span class="text-base-content/70">{{ __('frontend.delivery_fee_line') }}</span>
+            <span class="font-semibold tabular-nums"
+                  :class="deliveryFee > 0 ? 'text-base-content' : 'text-emerald-700 dark:text-emerald-300'"
+                  x-text="deliveryFee > 0 ? deliveryFee.toFixed(2) + ' ₾' : '{{ __('frontend.delivery_fee_free') }}'"></span>
         </div>
 
         <div class="flex items-center justify-between gap-3 pt-1 border-t border-emerald-200/60 dark:border-emerald-800/40">
@@ -51,16 +71,12 @@
         </div>
     @else
         <div class="grid grid-cols-1 gap-2 pt-1 border-t border-emerald-200/60 dark:border-emerald-800/40">
-            <div x-show="$store.cart.pickupHint"
-                 x-cloak
-                 class="flex items-center justify-between gap-3 text-sm">
+            <div class="flex items-center justify-between gap-3 text-sm">
                 <span class="text-base-content/70">{{ __('frontend.total_pickup_preview') }}</span>
                 <span class="font-bold text-emerald-700 dark:text-emerald-300 tabular-nums"
                       x-text="$store.cart.pickupTotalPreview.toFixed(2) + ' ₾'"></span>
             </div>
-            <div x-show="$store.cart.deliveryHint"
-                 x-cloak
-                 class="flex items-center justify-between gap-3 text-sm">
+            <div class="flex items-center justify-between gap-3 text-sm">
                 <span class="text-base-content/70">{{ __('frontend.total_delivery_preview') }}</span>
                 <span class="font-bold text-emerald-700 dark:text-emerald-300 tabular-nums"
                       x-text="$store.cart.deliveryTotalPreview.toFixed(2) + ' ₾'"></span>

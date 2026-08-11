@@ -72,6 +72,10 @@ return [
     'total_pickup_preview' => 'Pickup total',
     'total_delivery_preview' => 'Delivery total',
     'choose_delivery_on_next_step' => 'Total depends on delivery method',
+    'delivery_fee_line' => 'Delivery',
+    'delivery_fee_hint' => 'Delivery :fee ₾, free from :freeFrom ₾',
+    'delivery_fee_free' => 'Free',
+    'delivery_fee_add_more' => 'Free delivery from :freeFrom ₾. Add :remaining ₾ more',
     'checkout' => 'Checkout',
 
     // Checkout

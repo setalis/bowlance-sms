@@ -43,8 +43,62 @@ export function resolveDiscountForType(deliveryType, subtotal, pickupDiscount, c
 export function calculateTotalForType(deliveryType, subtotal, pickupDiscount, cartTotalDiscounts = []) {
     const discount = resolveDiscountForType(deliveryType, subtotal, pickupDiscount, cartTotalDiscounts);
     const discountAmount = calculateDiscountAmount(discount, subtotal);
+    const deliveryFee = calculateDeliveryFee(subtotal, deliveryType);
 
-    return roundMoney(subtotal - discountAmount);
+    return roundMoney(subtotal - discountAmount + deliveryFee);
+}
+
+export function getDeliveryConfig() {
+    return window.deliveryConfig ?? { fee: 5, freeFrom: 50 };
+}
+
+export function calculateDeliveryFee(subtotal, deliveryType = 'delivery') {
+    if (deliveryType !== 'delivery') {
+        return 0;
+    }
+
+    const { fee, freeFrom } = getDeliveryConfig();
+
+    if (subtotal >= freeFrom) {
+        return 0;
+    }
+
+    return fee;
+}
+
+export function buildDeliveryFeeHint(subtotal, labels = {}) {
+    const { fee, freeFrom } = getDeliveryConfig();
+    const currentFee = calculateDeliveryFee(subtotal, 'delivery');
+
+    if (currentFee === 0) {
+        return {
+            label: labels.deliveryFeeFree ?? 'Доставка бесплатно',
+            fee: 0,
+            isFree: true,
+        };
+    }
+
+    const remaining = roundMoney(freeFrom - subtotal);
+
+    return {
+        label: fillTemplate(
+            labels.deliveryFeeHint ?? 'Доставка :fee ₾, бесплатно от :freeFrom ₾',
+            {
+                fee: fee.toFixed(2),
+                freeFrom: freeFrom.toFixed(0),
+            }
+        ),
+        fee: currentFee,
+        isFree: false,
+        remaining,
+        addMoreLabel: fillTemplate(
+            labels.deliveryFeeAddMore ?? 'Бесплатная доставка от :freeFrom ₾. Добавьте ещё :remaining ₾',
+            {
+                freeFrom: freeFrom.toFixed(0),
+                remaining: remaining.toFixed(2),
+            }
+        ),
+    };
 }
 
 function fillTemplate(template, replacements) {

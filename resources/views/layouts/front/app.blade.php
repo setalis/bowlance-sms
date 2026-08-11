@@ -33,6 +33,9 @@
             'totalPickupPreview' => __('frontend.total_pickup_preview'),
             'totalDeliveryPreview' => __('frontend.total_delivery_preview'),
             'chooseDeliveryOnNextStep' => __('frontend.choose_delivery_on_next_step'),
+            'deliveryFeeHint' => __('frontend.delivery_fee_hint'),
+            'deliveryFeeFree' => __('frontend.delivery_fee_free'),
+            'deliveryFeeAddMore' => __('frontend.delivery_fee_add_more'),
         ];
     @endphp
     <script>
@@ -42,6 +45,10 @@
         window.discountConfig = {
             pickup: @json($pickupDiscount ? ['size' => (float) $pickupDiscount->size, 'type' => $pickupDiscount->type->value] : null),
             cartTotal: @json($cartTotalDiscounts ?? []),
+        };
+        window.deliveryConfig = {
+            fee: @json((float) config('delivery.fee', 5)),
+            freeFrom: @json((float) config('delivery.free_from', 50)),
         };
         window.discountLabels = @json($discountLabels);
     </script>
@@ -800,6 +807,18 @@
 
             get deliveryHint() {
                 return this.$store.cart.deliveryHint;
+            },
+
+            get deliveryFeeHint() {
+                return this.$store.cart.deliveryFeeHint;
+            },
+
+            get deliveryFee() {
+                if (!this.showFinalTotal || this.formData.deliveryType !== 'delivery') {
+                    return 0;
+                }
+
+                return this.$store.cart.deliveryFee;
             },
 
             get showFinalTotal() {

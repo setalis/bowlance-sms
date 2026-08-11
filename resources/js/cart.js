@@ -1,7 +1,9 @@
 // Глобальное управление корзиной
 import {
     buildDeliveryHint,
+    buildDeliveryFeeHint,
     buildPickupHint,
+    calculateDeliveryFee,
     calculateTotalForType,
     getDiscountConfig,
     getDiscountLabels,
@@ -219,6 +221,14 @@ export function initCart() {
             const { pickup, cartTotal } = getDiscountConfig();
 
             return calculateTotalForType('delivery', this.subtotal, pickup, cartTotal);
+        },
+
+        get deliveryFee() {
+            return calculateDeliveryFee(this.subtotal, 'delivery');
+        },
+
+        get deliveryFeeHint() {
+            return buildDeliveryFeeHint(this.subtotal, getDiscountLabels());
         },
 
         get pickupHint() {

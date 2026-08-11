@@ -5,8 +5,10 @@ import mask from '@alpinejs/mask';
 import { initCart } from './cart';
 import {
     buildDeliveryHint,
+    buildDeliveryFeeHint,
     buildPickupHint,
     calculateDiscountAmount,
+    calculateDeliveryFee,
     calculateTotalForType,
     formatDiscountLabel,
     getDiscountConfig,
@@ -34,7 +36,8 @@ window.findPhoneCountry = findPhoneCountry;
 window.composePhone = composePhone;
 window.splitPhone = splitPhone;
 window.countryFlag = countryFlag;
-window.buildPickupHint = buildPickupHint;
+window.buildDeliveryFeeHint = buildDeliveryFeeHint;
+window.calculateDeliveryFee = calculateDeliveryFee;
 window.buildDeliveryHint = buildDeliveryHint;
 window.calculateDiscountAmount = calculateDiscountAmount;
 window.calculateTotalForType = calculateTotalForType;

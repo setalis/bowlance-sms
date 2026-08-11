@@ -654,6 +654,8 @@
                                     <div>
                                         <p class="font-semibold text-sm leading-tight">Доставка</p>
                                         <p class="text-xs text-base-content/50 leading-tight">Wolt Drive</p>
+                                        <p x-text="deliveryFeeHint?.label"
+                                           class="text-[11px] leading-snug mt-1 text-sky-600 dark:text-sky-400"></p>
                                         <p x-show="deliveryHint"
                                            x-cloak
                                            x-text="deliveryHint?.label"
@@ -762,7 +764,7 @@
                                         <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl px-3 py-2">
                                             <span class="icon-[tabler--circle-check] size-4 shrink-0"></span>
                                             <span>
-                                                <span x-show="woltEstimate.fee">Доставка <strong x-text="woltEstimate.fee ? woltEstimate.fee.amount.toFixed(2) + ' ₾' : ''"></strong></span>
+                                                <span x-text="deliveryFeeHint?.label"></span>
                                                 <span x-show="woltEstimate.eta_minutes" x-text="' · ~' + woltEstimate.eta_minutes + ' мин'"></span>
                                             </span>
                                         </div>

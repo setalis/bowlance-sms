@@ -47,6 +47,6 @@ it('renders order summary component in cart drawer', function () {
 
     $response->assertSuccessful();
     $response->assertSee(__('frontend.cart_subtotal'), false);
-    $response->assertSee(__('frontend.total_pickup_preview'), false);
-    $response->assertSee(__('frontend.total_delivery_preview'), false);
+    $response->assertSee(__('frontend.delivery_fee_line'), false);
+    $response->assertSee('window.deliveryConfig', false);
 });

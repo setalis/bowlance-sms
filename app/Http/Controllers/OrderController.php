@@ -96,9 +96,9 @@ class OrderController extends Controller
 
             $subtotal = $resolvedItems->sum(fn ($item) => $item['price'] * $item['quantity']);
 
-            $deliveryFee = 0;
             $deliveryType = DeliveryType::from($request->delivery_type ?? DeliveryType::Delivery->value);
-            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType, $deliveryFee);
+            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType);
+            $deliveryFee = $pricing['delivery_fee'];
             $total = $pricing['total'];
 
             $deliveryAddress = $request->delivery_address;

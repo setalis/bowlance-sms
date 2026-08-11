@@ -142,9 +142,9 @@ class OrderController extends Controller
                 return $price * $item['quantity'];
             });
 
-            $deliveryFee = 0;
             $deliveryType = DeliveryType::from($validated['delivery_type']);
-            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType, $deliveryFee);
+            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType);
+            $deliveryFee = $pricing['delivery_fee'];
             $total = $pricing['total'];
 
             // Создание заказа
@@ -263,9 +263,9 @@ class OrderController extends Controller
                 return $price * $item['quantity'];
             });
 
-            $deliveryFee = $order->delivery_fee;
             $deliveryType = DeliveryType::from($validated['delivery_type']);
-            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType, (float) $deliveryFee);
+            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType);
+            $deliveryFee = $pricing['delivery_fee'];
             $total = $pricing['total'];
 
             // Обновление заказа
