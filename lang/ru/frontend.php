@@ -70,6 +70,15 @@ return [
     'nutrition_fats' => 'Жиры',
     'nutrition_carbs' => 'Углев.',
     'total_price' => 'Итого:',
+    'cart_subtotal' => 'Сумма товаров',
+    'discount_line' => 'Скидка',
+    'discount_pickup_hint' => 'Скидка :discount при самовывозе → :total ₾',
+    'discount_delivery_applied' => 'Скидка :discount при заказе от :threshold ₾ → :total ₾',
+    'discount_delivery_add_more' => 'Скидка :discount при заказе от :threshold ₾. Добавьте ещё :remaining ₾',
+    'discount_applied' => 'Скидка :discount применена',
+    'total_pickup_preview' => 'При самовывозе',
+    'total_delivery_preview' => 'При доставке',
+    'choose_delivery_on_next_step' => 'Итог зависит от способа получения',
     'checkout' => 'Оформить заказ',
 
     // Checkout

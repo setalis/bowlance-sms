@@ -4,6 +4,17 @@ import Alpine from 'alpinejs';
 import mask from '@alpinejs/mask';
 import { initCart } from './cart';
 import {
+    buildDeliveryHint,
+    buildPickupHint,
+    calculateDiscountAmount,
+    calculateTotalForType,
+    formatDiscountLabel,
+    getDiscountConfig,
+    getDiscountLabels,
+    resolveDiscountForType,
+    roundMoney,
+} from './discounts';
+import {
     composePhone,
     countryFlag,
     DEFAULT_PHONE_COUNTRY,
@@ -23,6 +34,15 @@ window.findPhoneCountry = findPhoneCountry;
 window.composePhone = composePhone;
 window.splitPhone = splitPhone;
 window.countryFlag = countryFlag;
+window.buildPickupHint = buildPickupHint;
+window.buildDeliveryHint = buildDeliveryHint;
+window.calculateDiscountAmount = calculateDiscountAmount;
+window.calculateTotalForType = calculateTotalForType;
+window.formatDiscountLabel = formatDiscountLabel;
+window.resolveDiscountForType = resolveDiscountForType;
+window.roundMoney = roundMoney;
+window.getDiscountConfig = getDiscountConfig;
+window.getDiscountLabels = getDiscountLabels;
 
 Alpine.plugin(mask);
 

@@ -21,10 +21,29 @@
 </head>
 
 <body class="" x-data data-orders-enabled="{{ $siteOrdersEnabled ? '1' : '0' }}">
+    @php
+        $discountLabels = [
+            'cartSubtotal' => __('frontend.cart_subtotal'),
+            'discountLine' => __('frontend.discount_line'),
+            'totalToPay' => __('frontend.total_to_pay'),
+            'pickupHint' => __('frontend.discount_pickup_hint'),
+            'deliveryApplied' => __('frontend.discount_delivery_applied'),
+            'deliveryAddMore' => __('frontend.discount_delivery_add_more'),
+            'discountApplied' => __('frontend.discount_applied'),
+            'totalPickupPreview' => __('frontend.total_pickup_preview'),
+            'totalDeliveryPreview' => __('frontend.total_delivery_preview'),
+            'chooseDeliveryOnNextStep' => __('frontend.choose_delivery_on_next_step'),
+        ];
+    @endphp
     <script>
         window.siteOrdersEnabled = @json($siteOrdersEnabled);
         window.phoneVerificationEnabled = @json($phoneVerificationEnabled ?? true);
         window.ordersUnavailableMessage = @json(__('frontend.orders_unavailable'));
+        window.discountConfig = {
+            pickup: @json($pickupDiscount ? ['size' => (float) $pickupDiscount->size, 'type' => $pickupDiscount->type->value] : null),
+            cartTotal: @json($cartTotalDiscounts ?? []),
+        };
+        window.discountLabels = @json($discountLabels);
     </script>
     @if(!$siteOrdersEnabled)
         <div class="fixed top-0 left-0 right-0 z-[60] min-h-14 bg-warning/95 text-warning-content py-2 px-3 text-center text-sm font-medium shadow-md flex items-center justify-center" role="alert">
@@ -235,8 +254,6 @@
             open: false,
             loading: false,
             step: 1,
-            pickupDiscount: @json($pickupDiscount ? ['size' => (float) $pickupDiscount->size, 'type' => $pickupDiscount->type->value] : null),
-            cartTotalDiscounts: @json($cartTotalDiscounts ?? []),
             formData: {
                 name: '',
                 phone: '',
@@ -763,58 +780,79 @@
             },
             
             resolveApplicableDiscount() {
-                const base = this.$store.cart.totalPrice;
+                const { pickup, cartTotal } = window.discountConfig ?? { pickup: null, cartTotal: [] };
 
-                if (this.formData.deliveryType === 'pickup' && this.pickupDiscount) {
-                    return this.pickupDiscount;
-                }
-
-                if (this.formData.deliveryType === 'delivery' && this.cartTotalDiscounts?.length) {
-                    return this.cartTotalDiscounts
-                        .filter((discount) => base >= discount.min_cart_total)
-                        .sort((a, b) => b.min_cart_total - a.min_cart_total)[0] ?? null;
-                }
-
-                return null;
+                return window.resolveDiscountForType(
+                    this.formData.deliveryType,
+                    this.$store.cart.totalPrice,
+                    pickup,
+                    cartTotal
+                );
             },
 
-            calculateDiscountAmount(discount, subtotal) {
+            get subtotal() {
+                return this.$store.cart.totalPrice;
+            },
+
+            get pickupHint() {
+                return this.$store.cart.pickupHint;
+            },
+
+            get deliveryHint() {
+                return this.$store.cart.deliveryHint;
+            },
+
+            get showFinalTotal() {
+                return this.step >= 2;
+            },
+
+            get discountAmount() {
+                const discount = this.resolveApplicableDiscount();
+
                 if (!discount) {
                     return 0;
                 }
 
-                if (discount.type === 'percent') {
-                    return subtotal * (discount.size / 100);
-                }
-
-                return Math.min(parseFloat(discount.size), subtotal);
+                return window.roundMoney(window.calculateDiscountAmount(discount, this.subtotal));
             },
 
             get totalToPay() {
-                const base = this.$store.cart.totalPrice;
-                const discount = this.resolveApplicableDiscount();
-
-                if (!discount) {
-                    return base;
+                if (!this.showFinalTotal) {
+                    return this.subtotal;
                 }
 
-                const discountAmount = this.calculateDiscountAmount(discount, base);
+                const { pickup, cartTotal } = window.discountConfig ?? { pickup: null, cartTotal: [] };
 
-                return Math.max(0, Math.round((base - discountAmount) * 100) / 100);
+                return window.calculateTotalForType(
+                    this.formData.deliveryType,
+                    this.subtotal,
+                    pickup,
+                    cartTotal
+                );
             },
 
             get appliedDiscountMessage() {
+                if (!this.showFinalTotal) {
+                    return null;
+                }
+
                 const discount = this.resolveApplicableDiscount();
 
                 if (!discount) {
                     return null;
                 }
 
+                const labels = window.discountLabels ?? {};
+                const discountLabel = window.formatDiscountLabel(discount);
+
                 if (this.formData.deliveryType === 'pickup') {
-                    return 'Скидка за самовывоз применена';
+                    return (labels.discountApplied ?? 'Скидка :discount применена').replace(':discount', discountLabel);
                 }
 
-                return `Скидка от ${discount.min_cart_total.toFixed(2)} ₾ применена`;
+                const threshold = parseFloat(discount.min_cart_total).toFixed(2);
+
+                return (labels.discountApplied ?? 'Скидка :discount применена')
+                    .replace(':discount', `${discountLabel} (${threshold} ₾)`);
             },
             
             // Методы для работы с адресами

@@ -63,6 +63,15 @@ return [
     'nutrition_fats' => 'Fat',
     'nutrition_carbs' => 'Carbs',
     'total_price' => 'Total:',
+    'cart_subtotal' => 'Subtotal',
+    'discount_line' => 'Discount',
+    'discount_pickup_hint' => ':discount off for pickup → :total ₾',
+    'discount_delivery_applied' => ':discount off for orders from :threshold ₾ → :total ₾',
+    'discount_delivery_add_more' => ':discount off for orders from :threshold ₾. Add :remaining ₾ more',
+    'discount_applied' => ':discount applied',
+    'total_pickup_preview' => 'Pickup total',
+    'total_delivery_preview' => 'Delivery total',
+    'choose_delivery_on_next_step' => 'Total depends on delivery method',
     'checkout' => 'Checkout',
 
     // Checkout

@@ -1,4 +1,12 @@
 // Глобальное управление корзиной
+import {
+    buildDeliveryHint,
+    buildPickupHint,
+    calculateTotalForType,
+    getDiscountConfig,
+    getDiscountLabels,
+} from './discounts';
+
 export function initCart() {
     return {
         items: [],
@@ -195,6 +203,34 @@ export function initCart() {
         // Получить общую сумму
         get totalPrice() {
             return this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        },
+
+        get subtotal() {
+            return this.totalPrice;
+        },
+
+        get pickupTotalPreview() {
+            const { pickup, cartTotal } = getDiscountConfig();
+
+            return calculateTotalForType('pickup', this.subtotal, pickup, cartTotal);
+        },
+
+        get deliveryTotalPreview() {
+            const { pickup, cartTotal } = getDiscountConfig();
+
+            return calculateTotalForType('delivery', this.subtotal, pickup, cartTotal);
+        },
+
+        get pickupHint() {
+            const { pickup } = getDiscountConfig();
+
+            return buildPickupHint(this.subtotal, pickup, getDiscountLabels());
+        },
+
+        get deliveryHint() {
+            const { cartTotal } = getDiscountConfig();
+
+            return buildDeliveryHint(this.subtotal, cartTotal, getDiscountLabels());
         },
 
         // Получить общую пищевую ценность

@@ -70,6 +70,15 @@ return [
     'nutrition_fats' => 'ცხიმები',
     'nutrition_carbs' => 'ნახშირწყლები',
     'total_price' => 'სულ:',
+    'cart_subtotal' => 'პროდუქტების ღირებულება',
+    'discount_line' => 'ფასდაკლება',
+    'discount_pickup_hint' => 'ფასდაკლება :discount თვითმიღებაზე → :total ₾',
+    'discount_delivery_applied' => 'ფასდაკლება :discount :threshold ₾-დან → :total ₾',
+    'discount_delivery_add_more' => 'ფასდაკლება :discount :threshold ₾-დან. დაამატეთ კიდევ :remaining ₾',
+    'discount_applied' => 'ფასდაკლება :discount გამოყენებულია',
+    'total_pickup_preview' => 'თვითმიღებით',
+    'total_delivery_preview' => 'მიწოდებით',
+    'choose_delivery_on_next_step' => 'ჯამი დამოკიდებულია მიღების საშუალებაზე',
     'checkout' => 'შეკვეთის გაფორმება',
 
     // Checkout

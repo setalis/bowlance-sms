@@ -392,11 +392,8 @@
                 </div>
 
                 <!-- Итог и кнопка -->
-                <div class="px-4 pb-5 pt-3">
-                    <div class="flex items-baseline justify-between mb-4">
-                        <span class="text-sm text-base-content/60 font-medium">{{ __('frontend.total_price') }}</span>
-                        <span class="text-3xl font-black text-emerald-600 tabular-nums" x-text="$store.cart.totalPrice.toFixed(2) + ' ₾'"></span>
-                    </div>
+                <div class="px-4 pb-5 pt-3 space-y-4">
+                    <x-ui.order-summary context="cart" />
 
                     @if($siteOrdersEnabled)
                         <button type="button"
@@ -620,22 +617,6 @@
                             </div>
                         </div>
 
-                        <!-- Итоговая сумма -->
-                        <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 dark:from-emerald-950/30 dark:to-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/40 p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-0.5">{{ __('frontend.total_to_pay') }}</p>
-                                    <p x-show="appliedDiscountMessage"
-                                       x-cloak
-                                       x-text="appliedDiscountMessage"
-                                       class="text-xs text-emerald-600/70 dark:text-emerald-400/70">
-                                    </p>
-                                </div>
-                                <p class="text-3xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums"
-                                   x-text="totalToPay.toFixed(2) + ' ₾'"></p>
-                            </div>
-                        </div>
-
                         <!-- Кнопка далее -->
                         <button type="button"
                                 @click="goToStep2()"
@@ -673,6 +654,11 @@
                                     <div>
                                         <p class="font-semibold text-sm leading-tight">Доставка</p>
                                         <p class="text-xs text-base-content/50 leading-tight">Wolt Drive</p>
+                                        <p x-show="deliveryHint"
+                                           x-cloak
+                                           x-text="deliveryHint?.label"
+                                           class="text-[11px] leading-snug mt-1"
+                                           :class="deliveryHint?.applied ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'"></p>
                                     </div>
                                 </label>
                                 <!-- Самовывоз -->
@@ -692,6 +678,10 @@
                                     <div>
                                         <p class="font-semibold text-sm leading-tight">Самовывоз</p>
                                         <p class="text-xs text-base-content/50 leading-tight">Из заведения</p>
+                                        <p x-show="pickupHint"
+                                           x-cloak
+                                           x-text="pickupHint?.label"
+                                           class="text-[11px] leading-snug mt-1 text-emerald-600 dark:text-emerald-400"></p>
                                     </div>
                                 </label>
                             </div>
@@ -1189,6 +1179,10 @@
 
                     </div>
                 </form>
+            </div>
+
+            <div class="flex-none border-t border-base-200 px-6 py-4 bg-base-100">
+                <x-ui.order-summary context="checkout" />
             </div>
         </div>
     </div>
