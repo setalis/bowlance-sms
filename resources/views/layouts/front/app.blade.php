@@ -799,14 +799,16 @@
 
                 return window.resolveDiscountForType(
                     this.formData.deliveryType,
-                    this.$store.cart.totalPrice,
+                    this.subtotal,
                     pickup,
                     cartTotal
                 );
             },
 
             get subtotal() {
-                return this.$store.cart.totalPrice;
+                void this.$store.cart.pricingVersion;
+
+                return window.calculateSubtotalFromItems(this.$store.cart.items);
             },
 
             get pickupHint() {
@@ -826,7 +828,7 @@
                     return 0;
                 }
 
-                return this.$store.cart.deliveryFee;
+                return window.calculateDeliveryFee(this.subtotal, 'delivery');
             },
 
             get pickupBadge() {
@@ -852,17 +854,21 @@
             },
 
             get footerTotal() {
+                void this.$store.cart.pricingVersion;
+
                 if (this.showFinalTotal) {
                     return this.totalToPay;
                 }
 
-                return this.$store.cart.minTotalPreview;
+                return window.getFooterTotalBeforeSelection(this.subtotal);
             },
 
             get footerDeliveryFee() {
                 if (!this.showFinalTotal) {
                     return this.$store.cart.footerDeliveryFee;
                 }
+
+                void this.$store.cart.pricingVersion;
 
                 return this.deliveryFee;
             },

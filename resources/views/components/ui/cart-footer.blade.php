@@ -3,7 +3,8 @@
 ])
 
 <div {{ $attributes->merge(['class' => 'border-t border-base-200 bg-base-100']) }}
-     x-data="{ detailsOpen: false }">
+     x-data="{ detailsOpen: false }"
+     x-effect="void $store.cart.pricingVersion">
     <div class="px-4 pt-3 pb-3 pb-safe">
         <button type="button"
                 x-show="typeof hasSummaryDetails !== 'undefined' ? hasSummaryDetails : $store.cart.hasSummaryDetails"

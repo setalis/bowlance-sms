@@ -229,80 +229,83 @@
                                     </div>
 
                                     <!-- Информация -->
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-start justify-between gap-1 mb-1">
-                                            <div class="flex-1 min-w-0">
-                                                <h4 class="font-semibold text-sm leading-tight truncate" x-text="item.name"></h4>
-                                                <template x-if="(item.type === 'bowl' || item.type === 'breakfast') && item.products">
-                                                    <p class="text-xs text-base-content/50 mt-0.5">
-                                                        <span x-text="item.products.length"></span> {{ __('frontend.ingredients') }}
-                                                    </p>
-                                                </template>
-                                                <template x-if="item.weight">
-                                                    <p class="text-xs text-base-content/40 mt-0.5" x-text="item.weight"></p>
-                                                </template>
-                                                <template x-if="item.volume">
-                                                    <p class="text-xs text-base-content/40 mt-0.5" x-text="item.volume"></p>
-                                                </template>
-                                                <!-- Соус -->
-                                                <template x-if="item.sauce_name">
-                                                    <p class="text-xs text-emerald-600 mt-0.5 flex items-center gap-1">
-                                                        <span class="icon-[tabler--bottle] size-3"></span>
-                                                        + <span x-text="item.sauce_name"></span>
-                                                    </p>
-                                                </template>
-                                                <template x-if="item.addons && item.addons.length">
-                                                    <div class="mt-1 space-y-0.5">
-                                                        <template x-for="addon in item.addons" :key="addon.id">
-                                                            <p class="text-xs text-primary">
-                                                                + <span x-text="addon.name"></span>
-                                                                <span x-show="addon.quantity > 1" x-text="' ×' + addon.quantity"></span>
-                                                                <span x-text="' (' + (addon.price * addon.quantity).toFixed(2) + ' ₾)'"></span>
-                                                            </p>
-                                                        </template>
-                                                    </div>
-                                                </template>
-                                            </div>
+                                    <div class="flex-1 min-w-0 space-y-2">
+                                        <!-- Строка 1: Название -->
+                                        <div class="flex items-start justify-between gap-2">
+                                            <h4 class="font-semibold text-base leading-snug line-clamp-2 min-w-0" x-text="item.name"></h4>
                                             <button type="button"
                                                     @click="$store.cart.removeItem(index)"
-                                                    class="btn btn-circle size-7 min-h-0 h-7 text-base-content/50 hover:text-error bg-white hover:bg-error/10 shrink-0"
+                                                    class="btn btn-circle size-8 min-h-0 h-8 text-base-content/50 hover:text-error bg-white hover:bg-error/10 shrink-0"
                                                     aria-label="{{ __('frontend.remove') }}">
-                                                <span class="icon-[tabler--x] size-3.5"></span>
+                                                <span class="icon-[tabler--x] size-4"></span>
                                             </button>
                                         </div>
 
-                                        <!-- Нижняя строка: КБЖУ-тоггл + количество + цена -->
-                                        <div class="flex items-center justify-between mt-2 gap-2">
-                                            <!-- Кнопка КБЖУ -->
-                                            <template x-if="item.calories > 0">
-                                                <button type="button"
-                                                        @click="showNutrition = !showNutrition"
-                                                        class="flex items-center gap-1 text-md text-base-content/40 hover:text-emerald-600 transition-colors">
-                                                    <span class="icon-[tabler--flame] size-5"></span>
-                                                    <span x-text="Math.round((item.calories || 0) + (item.sauce_calories || 0))"></span>
-                                                    <span>{{ __('frontend.calories') }}</span>
-                                                    <span class="icon-[tabler--chevron-down] size-5 transition-transform" :class="showNutrition ? 'rotate-180' : ''"></span>
-                                                </button>
+                                        <!-- Строка 2: Вес слева / Калории справа -->
+                                        <div class="space-y-1">
+                                            <div class="flex items-center justify-between gap-3 text-sm text-base-content/55">
+                                                <div class="min-w-0 truncate">
+                                                    <template x-if="item.weight">
+                                                        <span x-text="item.weight"></span>
+                                                    </template>
+                                                    <template x-if="item.volume">
+                                                        <span x-text="item.volume"></span>
+                                                    </template>
+                                                    <template x-if="(item.type === 'bowl' || item.type === 'breakfast') && item.products">
+                                                        <span>
+                                                            <span x-text="item.products.length"></span> {{ __('frontend.ingredients') }}
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                                <template x-if="item.calories > 0">
+                                                    <button type="button"
+                                                            @click="showNutrition = !showNutrition"
+                                                            class="inline-flex shrink-0 items-center gap-1.5 text-base-content/55 hover:text-emerald-600 transition-colors">
+                                                        <span class="icon-[tabler--flame] size-4"></span>
+                                                        <span x-text="Math.round((item.calories || 0) + (item.sauce_calories || 0))"></span>
+                                                        <span>{{ __('frontend.calories') }}</span>
+                                                        <span class="icon-[tabler--chevron-down] size-3.5 transition-transform"
+                                                              :class="showNutrition ? 'rotate-180' : ''"></span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                            <template x-if="item.sauce_name">
+                                                <p class="text-sm text-emerald-600 flex items-center gap-1.5">
+                                                    <span class="icon-[tabler--bottle] size-3.5 shrink-0"></span>
+                                                    <span>+ <span x-text="item.sauce_name"></span></span>
+                                                </p>
                                             </template>
+                                            <template x-if="item.addons && item.addons.length">
+                                                <div class="space-y-0.5">
+                                                    <template x-for="addon in item.addons" :key="addon.id">
+                                                        <p class="text-sm text-primary leading-snug">
+                                                            + <span x-text="addon.name"></span>
+                                                            <span x-show="addon.quantity > 1" x-text="' ×' + addon.quantity"></span>
+                                                            <span x-text="' (' + (addon.price * addon.quantity).toFixed(2) + ' ₾)'"></span>
+                                                        </p>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
 
-                                            <!-- Управление количеством (pill) -->
-                                            <div class="flex items-center gap-1.5 bg-base-200 rounded-full px-1.5 py-1 ml-auto">
+                                        <!-- Строка 3: Количество + Цена -->
+                                        <div class="flex items-center justify-between gap-3 pt-1">
+                                            <div class="flex items-center gap-2 bg-base-200 rounded-full px-2 py-1.5">
                                                 <button type="button"
                                                         @click="$store.cart.decreaseQuantity(index)"
                                                         :disabled="item.quantity <= 1"
-                                                        class="size-6 rounded-full bg-base-100 shadow-sm flex items-center justify-center text-base-content/60 hover:text-error disabled:opacity-30 transition-colors">
-                                                    <span class="icon-[tabler--minus] size-3"></span>
+                                                        class="size-9 rounded-full bg-base-100 shadow-sm flex items-center justify-center text-base-content/60 hover:text-error disabled:opacity-30 transition-colors active:scale-95">
+                                                    <span class="icon-[tabler--minus] size-4"></span>
                                                 </button>
-                                                <span class="min-w-5 text-center text-xs font-bold tabular-nums" x-text="item.quantity"></span>
+                                                <span class="min-w-6 text-center text-base font-bold tabular-nums" x-text="item.quantity"></span>
                                                 <button type="button"
                                                         @click="$store.cart.increaseQuantity(index)"
-                                                        class="size-6 rounded-full bg-emerald-500 text-white shadow-sm flex items-center justify-center hover:bg-emerald-600 transition-colors">
-                                                    <span class="icon-[tabler--plus] size-3"></span>
+                                                        class="size-9 rounded-full bg-emerald-500 text-white shadow-sm flex items-center justify-center hover:bg-emerald-600 transition-colors active:scale-95">
+                                                    <span class="icon-[tabler--plus] size-4"></span>
                                                 </button>
                                             </div>
-
-                                            <!-- Цена -->
-                                            <p class="font-bold text-sm text-primary tabular-nums shrink-0" x-text="(item.price * item.quantity).toFixed(2) + ' ₾'"></p>
+                                            <p class="font-bold text-lg text-primary tabular-nums shrink-0"
+                                               x-text="(item.price * item.quantity).toFixed(2) + ' ₾'"></p>
                                         </div>
                                     </div>
                                 </div>

@@ -12,9 +12,11 @@ import {
     buildSummaryChips,
     calculateDiscountAmount,
     calculateDeliveryFee,
+    calculateSubtotalFromItems,
     calculateTotalForType,
     formatDiscountLabel,
     getDiscountConfig,
+    getFooterTotalBeforeSelection,
     getDiscountLabels,
     resolveDiscountForType,
     roundMoney,
@@ -43,7 +45,9 @@ window.buildDeliveryFeeHint = buildDeliveryFeeHint;
 window.buildSummaryChips = buildSummaryChips;
 window.buildDeliveryMethodSummary = buildDeliveryMethodSummary;
 window.buildPickupMethodSummary = buildPickupMethodSummary;
+window.getFooterTotalBeforeSelection = getFooterTotalBeforeSelection;
 window.calculateDeliveryFee = calculateDeliveryFee;
+window.calculateSubtotalFromItems = calculateSubtotalFromItems;
 window.buildDeliveryHint = buildDeliveryHint;
 window.calculateDiscountAmount = calculateDiscountAmount;
 window.calculateTotalForType = calculateTotalForType;

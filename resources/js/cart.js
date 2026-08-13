@@ -10,22 +10,27 @@ import {
     buildPickupMethodSummary,
     buildSummaryChips,
     calculateDeliveryFee,
+    calculateSubtotalFromItems,
     calculateTotalForType,
     getDiscountAmountForType,
     getDiscountConfig,
     getDiscountLabels,
-    getFooterDeliveryFee,
-    getFooterDiscountAmount,
-    getFooterPreviewPath,
+    getFooterDeliveryFeeBeforeSelection,
+    getFooterDiscountAmountBeforeSelection,
+    getFooterTotalBeforeSelection,
 } from './discounts';
 
 export function initCart() {
     return {
         items: [],
         isOpen: false,
+        pricingVersion: 0,
+
+        touchPricing() {
+            this.pricingVersion++;
+        },
 
         init() {
-            // Загружаем корзину из localStorage при инициализации
             const savedCart = localStorage.getItem('bowlance_cart');
             if (savedCart) {
                 try {
@@ -94,6 +99,7 @@ export function initCart() {
             }
 
             this.saveCart();
+            this.touchPricing();
             this.showNotification('Блюдо добавлено в корзину');
         },
 
@@ -131,6 +137,7 @@ export function initCart() {
             }
             
             this.saveCart();
+            this.touchPricing();
             this.showNotification('Напиток добавлен в корзину');
         },
 
@@ -167,6 +174,7 @@ export function initCart() {
             });
 
             this.saveCart();
+            this.touchPricing();
             this.showNotification(isBreakfast ? 'Завтрак добавлен в корзину' : 'Боул добавлен в корзину');
         },
 
@@ -174,6 +182,8 @@ export function initCart() {
         increaseQuantity(index) {
             if (this.items[index]) {
                 this.items[index].quantity++;
+                this.items = [...this.items];
+                this.touchPricing();
                 this.saveCart();
             }
         },
@@ -182,6 +192,8 @@ export function initCart() {
         decreaseQuantity(index) {
             if (this.items[index] && this.items[index].quantity > 1) {
                 this.items[index].quantity--;
+                this.items = [...this.items];
+                this.touchPricing();
                 this.saveCart();
             }
         },
@@ -189,6 +201,8 @@ export function initCart() {
         // Удалить товар
         removeItem(index) {
             this.items.splice(index, 1);
+            this.items = [...this.items];
+            this.touchPricing();
             this.saveCart();
             this.showNotification('Товар удален из корзины');
         },
@@ -197,6 +211,7 @@ export function initCart() {
         clearCart() {
             if (confirm('Вы уверены, что хотите очистить корзину?')) {
                 this.items = [];
+                this.touchPricing();
                 this.saveCart();
                 this.showNotification('Корзина очищена');
             }
@@ -209,12 +224,16 @@ export function initCart() {
 
         // Получить общее количество товаров
         get totalItems() {
+            void this.pricingVersion;
+
             return this.items.reduce((sum, item) => sum + item.quantity, 0);
         },
 
         // Получить общую сумму
         get totalPrice() {
-            return this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            void this.pricingVersion;
+
+            return calculateSubtotalFromItems(this.items);
         },
 
         get subtotal() {
@@ -290,19 +309,25 @@ export function initCart() {
         },
 
         get footerPreviewPath() {
-            return getFooterPreviewPath(this.subtotal, this.pickupTotalPreview, this.deliveryTotalPreview);
+            return this.deliveryTotalPreview <= this.pickupTotalPreview ? 'delivery' : 'pickup';
         },
 
         get footerDeliveryFee() {
-            return getFooterDeliveryFee(this.subtotal, this.pickupTotalPreview, this.deliveryTotalPreview);
+            void this.pricingVersion;
+
+            return getFooterDeliveryFeeBeforeSelection(this.subtotal);
         },
 
         get footerDiscountAmount() {
-            return getFooterDiscountAmount(this.subtotal, this.pickupTotalPreview, this.deliveryTotalPreview);
+            void this.pricingVersion;
+
+            return getFooterDiscountAmountBeforeSelection();
         },
 
         get footerTotal() {
-            return this.minTotalPreview;
+            void this.pricingVersion;
+
+            return getFooterTotalBeforeSelection(this.subtotal);
         },
 
         get deliveryMethodSummary() {

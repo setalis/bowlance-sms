@@ -26,6 +26,12 @@ export function roundMoney(value) {
     return Math.max(0, Math.round(value * 100) / 100);
 }
 
+export function calculateSubtotalFromItems(items = []) {
+    return roundMoney(
+        items.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0)
+    );
+}
+
 export function resolveDiscountForType(deliveryType, subtotal, pickupDiscount, cartTotalDiscounts = []) {
     if (deliveryType === 'pickup') {
         return pickupDiscount ?? null;
@@ -318,20 +324,16 @@ export function getDiscountAmountForType(deliveryType, subtotal) {
     return roundMoney(calculateDiscountAmount(discount, subtotal));
 }
 
-export function getFooterPreviewPath(subtotal, pickupTotal, deliveryTotal) {
-    return deliveryTotal <= pickupTotal ? 'delivery' : 'pickup';
+export function getFooterDeliveryFeeBeforeSelection(subtotal) {
+    return calculateDeliveryFee(subtotal, 'delivery');
 }
 
-export function getFooterDeliveryFee(subtotal, pickupTotal, deliveryTotal) {
-    const path = getFooterPreviewPath(subtotal, pickupTotal, deliveryTotal);
-
-    return path === 'delivery' ? calculateDeliveryFee(subtotal, 'delivery') : 0;
+export function getFooterDiscountAmountBeforeSelection() {
+    return 0;
 }
 
-export function getFooterDiscountAmount(subtotal, pickupTotal, deliveryTotal) {
-    const path = getFooterPreviewPath(subtotal, pickupTotal, deliveryTotal);
-
-    return getDiscountAmountForType(path, subtotal);
+export function getFooterTotalBeforeSelection(subtotal) {
+    return roundMoney(subtotal + calculateDeliveryFee(subtotal, 'delivery'));
 }
 
 export function getDiscountConfig() {
