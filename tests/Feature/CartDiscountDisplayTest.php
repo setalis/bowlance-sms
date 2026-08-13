@@ -36,7 +36,7 @@ it('exposes active discounts in discount config on homepage', function () {
     $response->assertSee('"min_cart_total":100', false);
 });
 
-it('renders order summary component in cart drawer', function () {
+it('renders three column cart footer with accordion in cart drawer', function () {
     Discount::factory()->create([
         'size' => 15,
         'type' => DiscountType::Percent,
@@ -46,7 +46,36 @@ it('renders order summary component in cart drawer', function () {
     $response = $this->get('/');
 
     $response->assertSuccessful();
-    $response->assertSee(__('frontend.cart_subtotal'), false);
+    $response->assertSee(__('frontend.order_details'), false);
+    $response->assertSee(__('frontend.order_details_hide'), false);
+    $response->assertSee(__('frontend.total_to_pay'), false);
     $response->assertSee(__('frontend.delivery_fee_line'), false);
-    $response->assertSee('window.deliveryConfig', false);
+    $response->assertSee(__('frontend.discount_line'), false);
+    $response->assertSee(__('frontend.cart_subtotal'), false);
+    $response->assertSee(__('frontend.promotions_section'), false);
+    $response->assertSee('deliveryProviderWolt', false);
+    $response->assertSee('footerDeliveryFee', false);
+    $response->assertSee('footerDiscountAmount', false);
+    $response->assertDontSee(__('frontend.discount_pickup_hint', ['discount' => '−15%', 'total' => '85.00']), false);
+});
+
+it('renders delivery and pickup method summaries in checkout', function () {
+    Discount::factory()->create([
+        'size' => 15,
+        'type' => DiscountType::Percent,
+        'scope' => DiscountScope::Pickup,
+    ]);
+
+    Discount::factory()->cartTotal(100)->create([
+        'size' => 10,
+        'type' => DiscountType::Percent,
+    ]);
+
+    $response = $this->get('/');
+
+    $response->assertSuccessful();
+    $response->assertSee(__('frontend.delivery_method_title'), false);
+    $response->assertSee(__('frontend.pickup_method_title'), false);
+    $response->assertSee('deliveryMethodSummary', false);
+    $response->assertSee('pickupMethodSummary', false);
 });

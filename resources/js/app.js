@@ -6,7 +6,10 @@ import { initCart } from './cart';
 import {
     buildDeliveryHint,
     buildDeliveryFeeHint,
+    buildDeliveryMethodSummary,
     buildPickupHint,
+    buildPickupMethodSummary,
+    buildSummaryChips,
     calculateDiscountAmount,
     calculateDeliveryFee,
     calculateTotalForType,
@@ -37,6 +40,9 @@ window.composePhone = composePhone;
 window.splitPhone = splitPhone;
 window.countryFlag = countryFlag;
 window.buildDeliveryFeeHint = buildDeliveryFeeHint;
+window.buildSummaryChips = buildSummaryChips;
+window.buildDeliveryMethodSummary = buildDeliveryMethodSummary;
+window.buildPickupMethodSummary = buildPickupMethodSummary;
 window.calculateDeliveryFee = calculateDeliveryFee;
 window.buildDeliveryHint = buildDeliveryHint;
 window.calculateDiscountAmount = calculateDiscountAmount;

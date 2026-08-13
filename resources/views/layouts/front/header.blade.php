@@ -369,8 +369,8 @@
             <!-- Footer -->
             <div class="flex-none bg-base-100" x-show="$store.cart.items.length > 0" x-cloak>
                 <!-- КБЖУ итого -->
-                <div class="px-5 pt-4 pb-2 border-t border-base-200">
-                    <div class="flex items-center justify-between gap-3">
+                <div class="px-4 py-2 border-t border-base-200">
+                    <div class="flex items-center justify-between gap-2 text-[11px] text-base-content/50">
                         <div class="flex items-center gap-1 text-xs text-base-content/50">
                             <span class="icon-[tabler--flame] size-3 text-amber-500"></span>
                             <span x-text="Math.round($store.cart.totalNutrition.calories)"></span>
@@ -392,21 +392,19 @@
                 </div>
 
                 <!-- Итог и кнопка -->
-                <div class="px-4 pb-5 pt-3 space-y-4">
-                    <x-ui.order-summary context="cart" />
-
+                <x-ui.cart-footer context="cart">
                     @if($siteOrdersEnabled)
                         <button type="button"
-                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                                class="w-full h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-sm flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
                                 :disabled="$store.cart.items.length === 0"
                                 @click="$dispatch('open-checkout-modal')">
-                            <span class="icon-[tabler--arrow-right] size-5"></span>
                             {{ __('frontend.checkout') }}
+                            <span class="icon-[tabler--arrow-right] size-4"></span>
                         </button>
                     @else
-                        <p class="text-warning text-center text-sm font-medium py-3">{{ __('frontend.orders_unavailable') }}</p>
+                        <p class="text-warning text-xs font-medium">{{ __('frontend.orders_unavailable') }}</p>
                     @endif
-                </div>
+                </x-ui.cart-footer>
             </div>
             <!-- END Footer -->
         </div>
@@ -638,7 +636,7 @@
                             </p>
                             <div class="grid grid-cols-2 gap-3">
                                 <!-- Доставка -->
-                                <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
+                                <label class="flex items-start gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
                                        :class="formData.deliveryType === 'delivery' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
                                     <input type="radio"
                                            x-model="formData.deliveryType"
@@ -646,25 +644,19 @@
                                            name="delivery_type"
                                            class="hidden"
                                            @change="fetchWoltEstimate()">
-                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all mt-0.5"
                                          :class="formData.deliveryType === 'delivery' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
                                         <span class="icon-[tabler--truck-delivery] size-5"
                                               :class="formData.deliveryType === 'delivery' ? 'text-emerald-600' : 'text-base-content/40'"></span>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-sm leading-tight">Доставка</p>
-                                        <p class="text-xs text-base-content/50 leading-tight">Wolt Drive</p>
-                                        <p x-text="deliveryFeeHint?.label"
-                                           class="text-[11px] leading-snug mt-1 text-sky-600 dark:text-sky-400"></p>
-                                        <p x-show="deliveryHint"
-                                           x-cloak
-                                           x-text="deliveryHint?.label"
-                                           class="text-[11px] leading-snug mt-1"
-                                           :class="deliveryHint?.applied ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'"></p>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-sm leading-tight">{{ __('frontend.delivery_method_title') }}</p>
+                                        <p class="text-xs text-base-content/50 leading-snug mt-0.5"
+                                           x-text="deliveryMethodSummary"></p>
                                     </div>
                                 </label>
                                 <!-- Самовывоз -->
-                                <label class="flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
+                                <label class="flex items-start gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all"
                                        :class="formData.deliveryType === 'pickup' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
                                     <input type="radio"
                                            x-model="formData.deliveryType"
@@ -672,18 +664,15 @@
                                            name="delivery_type"
                                            class="hidden"
                                            @change="woltEstimate = { loading: false, available: null, fee: null, eta_minutes: null, message: null }">
-                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                    <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all mt-0.5"
                                          :class="formData.deliveryType === 'pickup' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
                                         <span class="icon-[tabler--walk] size-5"
                                               :class="formData.deliveryType === 'pickup' ? 'text-emerald-600' : 'text-base-content/40'"></span>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-sm leading-tight">Самовывоз</p>
-                                        <p class="text-xs text-base-content/50 leading-tight">Из заведения</p>
-                                        <p x-show="pickupHint"
-                                           x-cloak
-                                           x-text="pickupHint?.label"
-                                           class="text-[11px] leading-snug mt-1 text-emerald-600 dark:text-emerald-400"></p>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-sm leading-tight">{{ __('frontend.pickup_method_title') }}</p>
+                                        <p class="text-xs text-base-content/50 leading-snug mt-0.5"
+                                           x-text="pickupMethodSummary"></p>
                                     </div>
                                 </label>
                             </div>
@@ -763,10 +752,11 @@
                                     <template x-if="!woltEstimate.loading && woltEstimate.available === true">
                                         <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl px-3 py-2">
                                             <span class="icon-[tabler--circle-check] size-4 shrink-0"></span>
-                                            <span>
-                                                <span x-text="deliveryFeeHint?.label"></span>
-                                                <span x-show="woltEstimate.eta_minutes" x-text="' · ~' + woltEstimate.eta_minutes + ' мин'"></span>
-                                            </span>
+                                            <span x-show="woltEstimate.eta_minutes"
+                                                  x-text="'~' + woltEstimate.eta_minutes + ' мин'"
+                                                  class="text-sm"></span>
+                                            <span x-show="!woltEstimate.eta_minutes"
+                                                  class="text-sm">Доставка доступна</span>
                                         </div>
                                     </template>
                                     <div x-show="!woltEstimate.loading && woltEstimate.available === false"
@@ -1183,9 +1173,7 @@
                 </form>
             </div>
 
-            <div class="flex-none border-t border-base-200 px-6 py-4 bg-base-100">
-                <x-ui.order-summary context="checkout" />
-            </div>
+            <x-ui.cart-footer context="checkout" class="flex-none" />
         </div>
     </div>
 </div>

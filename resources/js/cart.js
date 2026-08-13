@@ -1,12 +1,22 @@
 // Глобальное управление корзиной
 import {
+    buildDeliveryBadge,
+    buildDeliveryFeeBadge,
     buildDeliveryHint,
     buildDeliveryFeeHint,
+    buildDeliveryMethodSummary,
+    buildPickupBadge,
     buildPickupHint,
+    buildPickupMethodSummary,
+    buildSummaryChips,
     calculateDeliveryFee,
     calculateTotalForType,
+    getDiscountAmountForType,
     getDiscountConfig,
     getDiscountLabels,
+    getFooterDeliveryFee,
+    getFooterDiscountAmount,
+    getFooterPreviewPath,
 } from './discounts';
 
 export function initCart() {
@@ -241,6 +251,66 @@ export function initCart() {
             const { cartTotal } = getDiscountConfig();
 
             return buildDeliveryHint(this.subtotal, cartTotal, getDiscountLabels());
+        },
+
+        get minTotalPreview() {
+            return Math.min(this.pickupTotalPreview, this.deliveryTotalPreview);
+        },
+
+        get pickupBadge() {
+            const { pickup } = getDiscountConfig();
+
+            return buildPickupBadge(pickup, getDiscountLabels());
+        },
+
+        get deliveryBadge() {
+            const { cartTotal } = getDiscountConfig();
+
+            return buildDeliveryBadge(this.subtotal, cartTotal, getDiscountLabels());
+        },
+
+        get deliveryFeeBadge() {
+            return buildDeliveryFeeBadge(this.subtotal, getDiscountLabels());
+        },
+
+        get summaryChips() {
+            return buildSummaryChips(this.subtotal, getDiscountLabels(), 'all');
+        },
+
+        get hasSummaryDetails() {
+            return this.summaryChips.length > 0 || this.subtotal > 0;
+        },
+
+        get pickupDiscountAmount() {
+            return getDiscountAmountForType('pickup', this.subtotal);
+        },
+
+        get deliveryDiscountAmount() {
+            return getDiscountAmountForType('delivery', this.subtotal);
+        },
+
+        get footerPreviewPath() {
+            return getFooterPreviewPath(this.subtotal, this.pickupTotalPreview, this.deliveryTotalPreview);
+        },
+
+        get footerDeliveryFee() {
+            return getFooterDeliveryFee(this.subtotal, this.pickupTotalPreview, this.deliveryTotalPreview);
+        },
+
+        get footerDiscountAmount() {
+            return getFooterDiscountAmount(this.subtotal, this.pickupTotalPreview, this.deliveryTotalPreview);
+        },
+
+        get footerTotal() {
+            return this.minTotalPreview;
+        },
+
+        get deliveryMethodSummary() {
+            return buildDeliveryMethodSummary(this.subtotal, getDiscountLabels());
+        },
+
+        get pickupMethodSummary() {
+            return buildPickupMethodSummary(this.subtotal, getDiscountLabels());
         },
 
         // Получить общую пищевую ценность

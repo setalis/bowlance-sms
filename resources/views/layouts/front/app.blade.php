@@ -36,6 +36,14 @@
             'deliveryFeeHint' => __('frontend.delivery_fee_hint'),
             'deliveryFeeFree' => __('frontend.delivery_fee_free'),
             'deliveryFeeAddMore' => __('frontend.delivery_fee_add_more'),
+            'badgePickup' => __('frontend.badge_pickup'),
+            'badgeDeliveryThreshold' => __('frontend.badge_delivery'),
+            'badgeDeliveryFeeShort' => __('frontend.badge_delivery_fee'),
+            'badgeDeliveryFreeShort' => __('frontend.badge_delivery_free'),
+            'deliveryProviderWolt' => __('frontend.delivery_provider_wolt'),
+            'pickupFromStore' => __('frontend.pickup_from_store'),
+            'summaryNoDiscount' => __('frontend.summary_no_discount'),
+            'promotionsSection' => __('frontend.promotions_section'),
         ];
     @endphp
     <script>
@@ -819,6 +827,64 @@
                 }
 
                 return this.$store.cart.deliveryFee;
+            },
+
+            get pickupBadge() {
+                return this.$store.cart.pickupBadge;
+            },
+
+            get deliveryBadge() {
+                return this.$store.cart.deliveryBadge;
+            },
+
+            get deliveryFeeBadge() {
+                return this.$store.cart.deliveryFeeBadge;
+            },
+
+            get activeSummaryChips() {
+                if (!this.showFinalTotal) {
+                    return this.$store.cart.summaryChips;
+                }
+
+                const scope = this.formData.deliveryType === 'pickup' ? 'pickup' : 'delivery';
+
+                return window.buildSummaryChips(this.subtotal, window.discountLabels ?? {}, scope);
+            },
+
+            get footerTotal() {
+                if (this.showFinalTotal) {
+                    return this.totalToPay;
+                }
+
+                return this.$store.cart.minTotalPreview;
+            },
+
+            get footerDeliveryFee() {
+                if (!this.showFinalTotal) {
+                    return this.$store.cart.footerDeliveryFee;
+                }
+
+                return this.deliveryFee;
+            },
+
+            get footerDiscountAmount() {
+                if (!this.showFinalTotal) {
+                    return this.$store.cart.footerDiscountAmount;
+                }
+
+                return this.discountAmount;
+            },
+
+            get deliveryMethodSummary() {
+                return this.$store.cart.deliveryMethodSummary;
+            },
+
+            get pickupMethodSummary() {
+                return this.$store.cart.pickupMethodSummary;
+            },
+
+            get footerTotalIsFrom() {
+                return !this.showFinalTotal;
             },
 
             get showFinalTotal() {

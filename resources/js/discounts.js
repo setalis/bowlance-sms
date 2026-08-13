@@ -188,6 +188,152 @@ export function buildDeliveryHint(subtotal, cartTotalDiscounts = [], labels = {}
     };
 }
 
+export function buildPickupBadge(pickupDiscount, labels = {}) {
+    if (!pickupDiscount) {
+        return null;
+    }
+
+    const discountLabel = formatDiscountLabel(pickupDiscount);
+
+    return {
+        text: discountLabel,
+        title: fillTemplate(labels.badgePickup ?? ':discount самовывоз', { discount: discountLabel }),
+        tone: 'emerald',
+    };
+}
+
+export function buildDeliveryBadge(subtotal, cartTotalDiscounts = [], labels = {}) {
+    if (!cartTotalDiscounts?.length) {
+        return null;
+    }
+
+    const applicable = resolveDiscountForType('delivery', subtotal, null, cartTotalDiscounts);
+    const tier = applicable ?? getNextDeliveryTier(subtotal, cartTotalDiscounts);
+
+    if (!tier) {
+        return null;
+    }
+
+    const discountLabel = formatDiscountLabel(tier);
+    const threshold = parseFloat(tier.min_cart_total).toFixed(0);
+    const hint = buildDeliveryHint(subtotal, cartTotalDiscounts, labels);
+
+    if (applicable) {
+        return {
+            text: discountLabel,
+            title: hint?.label ?? '',
+            tone: 'emerald',
+        };
+    }
+
+    return {
+        text: fillTemplate(labels.badgeDeliveryThreshold ?? ':discount от :threshold ₾', {
+            discount: discountLabel,
+            threshold,
+        }),
+        title: hint?.label ?? '',
+        tone: 'amber',
+    };
+}
+
+export function buildDeliveryFeeBadge(subtotal, labels = {}) {
+    const hint = buildDeliveryFeeHint(subtotal, labels);
+    const { fee } = getDeliveryConfig();
+
+    if (hint.isFree) {
+        return {
+            text: labels.badgeDeliveryFreeShort ?? '0 ₾',
+            title: hint.label,
+            tone: 'emerald',
+        };
+    }
+
+    return {
+        text: fillTemplate(labels.badgeDeliveryFeeShort ?? ':fee ₾', { fee: fee.toFixed(0) }),
+        title: hint.label,
+        tone: 'sky',
+    };
+}
+
+export function buildSummaryChips(subtotal, labels = {}, scope = 'all') {
+    const { pickup, cartTotal } = getDiscountConfig();
+    const chips = [];
+
+    const pickupBadge = buildPickupBadge(pickup, labels);
+    if (pickupBadge && (scope === 'all' || scope === 'pickup')) {
+        chips.push({ ...pickupBadge, key: 'pickup' });
+    }
+
+    const deliveryFeeBadge = buildDeliveryFeeBadge(subtotal, labels);
+    if (deliveryFeeBadge && (scope === 'all' || scope === 'delivery')) {
+        chips.push({ ...deliveryFeeBadge, key: 'delivery-fee' });
+    }
+
+    const deliveryBadge = buildDeliveryBadge(subtotal, cartTotal, labels);
+    if (deliveryBadge && (scope === 'all' || scope === 'delivery')) {
+        chips.push({ ...deliveryBadge, key: 'delivery-discount' });
+    }
+
+    return chips;
+}
+
+export function buildDeliveryMethodSummary(subtotal, labels = {}) {
+    const { cartTotal } = getDiscountConfig();
+    const parts = [];
+    const feeBadge = buildDeliveryFeeBadge(subtotal, labels);
+
+    if (feeBadge) {
+        parts.push(feeBadge.text);
+    }
+
+    parts.push(labels.deliveryProviderWolt ?? 'Wolt Drive');
+
+    const deliveryBadge = buildDeliveryBadge(subtotal, cartTotal, labels);
+
+    if (deliveryBadge) {
+        parts.push(deliveryBadge.text);
+    }
+
+    return parts.join(', ');
+}
+
+export function buildPickupMethodSummary(subtotal, labels = {}) {
+    const { pickup } = getDiscountConfig();
+    const parts = [];
+    const pickupBadge = buildPickupBadge(pickup, labels);
+
+    if (pickupBadge) {
+        parts.push(pickupBadge.text);
+    }
+
+    parts.push(labels.pickupFromStore ?? 'Из заведения');
+
+    return parts.join(', ');
+}
+
+export function getDiscountAmountForType(deliveryType, subtotal) {
+    const { pickup, cartTotal } = getDiscountConfig();
+    const discount = resolveDiscountForType(deliveryType, subtotal, pickup, cartTotal);
+
+    return roundMoney(calculateDiscountAmount(discount, subtotal));
+}
+
+export function getFooterPreviewPath(subtotal, pickupTotal, deliveryTotal) {
+    return deliveryTotal <= pickupTotal ? 'delivery' : 'pickup';
+}
+
+export function getFooterDeliveryFee(subtotal, pickupTotal, deliveryTotal) {
+    const path = getFooterPreviewPath(subtotal, pickupTotal, deliveryTotal);
+
+    return path === 'delivery' ? calculateDeliveryFee(subtotal, 'delivery') : 0;
+}
+
+export function getFooterDiscountAmount(subtotal, pickupTotal, deliveryTotal) {
+    const path = getFooterPreviewPath(subtotal, pickupTotal, deliveryTotal);
+
+    return getDiscountAmountForType(path, subtotal);
+}
+
 export function getDiscountConfig() {
     return window.discountConfig ?? { pickup: null, cartTotal: [] };
 }
