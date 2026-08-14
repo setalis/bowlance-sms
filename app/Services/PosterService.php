@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\DeliveryType;
+use App\Enums\DiscountScope;
+use App\Enums\DiscountType;
 use App\Models\ConstructorProduct;
+use App\Models\Discount;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Support\PhoneNumber;
@@ -16,6 +20,8 @@ class PosterService
      * Poster: "invalid field: Client phone" — номера не существует.
      */
     private const ERROR_INVALID_CLIENT_PHONE = 155;
+
+    public function __construct(protected DiscountService $discountService) {}
 
     public function isEnabled(): bool
     {
@@ -173,23 +179,74 @@ class PosterService
         }
     }
 
-    protected function buildOrderComment(Order $order): ?string
+    protected function buildOrderComment(Order $order): string
     {
-        $parts = [];
+        $parts = $this->buildPricingCommentLines($order);
+        $customerParts = [];
 
         if (filled($order->promo_code)) {
-            $parts[] = 'Промокод: '.$order->promo_code;
+            $customerParts[] = 'Промокод: '.$order->promo_code;
         }
 
         if (filled($order->comment)) {
-            $parts[] = $order->comment;
+            $customerParts[] = 'Комментарий клиента: '.$order->comment;
         }
 
-        if ($parts === []) {
-            return null;
+        if ($customerParts !== []) {
+            $parts[] = '---';
+            $parts = array_merge($parts, $customerParts);
         }
 
         return implode("\n", $parts);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function buildPricingCommentLines(Order $order): array
+    {
+        $deliveryType = $order->delivery_type ?? DeliveryType::Delivery;
+        $pricing = $this->discountService->calculateTotal((float) $order->subtotal, $deliveryType);
+        $deliveryFee = (float) $order->delivery_fee;
+
+        $lines = [
+            'Сумма товаров: '.$this->formatMoney((float) $order->subtotal).' ₾',
+        ];
+
+        if ($pricing['discount_amount'] > 0 && $pricing['discount'] instanceof Discount) {
+            $lines[] = 'Скидка: −'.$this->formatMoney($pricing['discount_amount']).' ₾ ('.$this->formatDiscountScopeLabel($pricing['discount']).')';
+        }
+
+        if ($deliveryType === DeliveryType::Pickup) {
+            $lines[] = 'Доставка: —';
+        } elseif ($deliveryFee > 0) {
+            $lines[] = 'Доставка: '.$this->formatMoney($deliveryFee).' ₾';
+        } else {
+            $lines[] = 'Доставка: Бесплатно';
+        }
+
+        $lines[] = 'Итого к оплате: '.$this->formatMoney((float) $order->total).' ₾';
+        $lines[] = 'Способ: '.($deliveryType === DeliveryType::Pickup ? 'самовывоз' : 'доставка');
+
+        return $lines;
+    }
+
+    protected function formatDiscountScopeLabel(Discount $discount): string
+    {
+        $label = match ($discount->type) {
+            DiscountType::Percent => '−'.(float) $discount->size.'%',
+            DiscountType::Amount => '−'.$this->formatMoney((float) $discount->size).' ₾',
+        };
+
+        return match ($discount->scope) {
+            DiscountScope::Pickup => 'самовывоз '.$label,
+            DiscountScope::CartTotal => 'доставка '.$label.' от '.$this->formatMoney((float) $discount->min_cart_total, 0).' ₾',
+        };
+    }
+
+    protected function formatMoney(float $amount, int $decimals = 2): string
+    {
+        return number_format($amount, $decimals, '.', '');
     }
 
     /**

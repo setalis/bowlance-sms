@@ -121,8 +121,7 @@ it('sends dish modifications to Poster for selected addons', function () {
         ],
     ]);
 
-    $service = new PosterService;
-    $service->createIncomingOrder($order->load('items.dish'));
+    app(PosterService::class)->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
         $body = $request->data();
@@ -175,8 +174,7 @@ it('does not add modification key for dish without addons', function () {
         'dish_addons' => null,
     ]);
 
-    $service = new PosterService;
-    $service->createIncomingOrder($order->load('items.dish'));
+    app(PosterService::class)->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
         $body = $request->data();

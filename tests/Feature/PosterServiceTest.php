@@ -1,9 +1,12 @@
 <?php
 
 use App\Enums\DeliveryType;
+use App\Enums\DiscountScope;
+use App\Enums\DiscountType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Models\ConstructorProduct;
+use App\Models\Discount;
 use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -14,6 +17,11 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 uses(RefreshDatabase::class);
+
+function posterService(): PosterService
+{
+    return app(PosterService::class);
+}
 
 function makePosterOrder(array $orderAttributes = []): Order
 {
@@ -64,7 +72,7 @@ it('отправляет заказ в Poster когда блюдо имеет p
         'subtotal' => 500.00,
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -106,7 +114,7 @@ it('не отправляет заказ в Poster когда у блюда не
         'subtotal' => 250.00,
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertNothingSent();
@@ -136,7 +144,7 @@ it('не отправляет заказ в Poster когда интеграци
         'subtotal' => 250.00,
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertNothingSent();
@@ -165,7 +173,7 @@ it('не отправляет заказ в Poster когда токен не з
         'subtotal' => 250.00,
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertNothingSent();
@@ -199,7 +207,7 @@ it('логирует ошибку когда Poster возвращает error �
         'subtotal' => 250.00,
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     expect($result)->toBeNull();
@@ -253,7 +261,7 @@ it('пропускает bowl и drink элементы при отправке 
         'subtotal' => 100.00,
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -297,7 +305,7 @@ it('отправляет боул как конструктор с модифи�
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -350,7 +358,7 @@ it('сортирует модификаторы по m перед отправк
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -405,7 +413,7 @@ it('пропускает боул без сопоставленных модиф
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -442,7 +450,7 @@ it('пропускает боул когда constructor_product_id не нас�
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertNothingSent();
@@ -491,7 +499,7 @@ it('отправляет смешанный заказ с блюдом и боу
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -538,7 +546,7 @@ it('отправляет завтрак как конструктор с product
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -599,7 +607,7 @@ it('отправляет смешанный заказ с боулом и зав
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -664,7 +672,7 @@ it('для общего продукта использует разные modif
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -727,7 +735,7 @@ it('не использует bowl modification id для завтрака и н
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -768,7 +776,7 @@ it('отправляет заказ в Poster как form-urlencoded по док
         ],
     ]);
 
-    $service = new PosterService;
+    $service = posterService();
     $result = $service->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
@@ -808,7 +816,7 @@ it('не отправляет заказ в Poster когда телефон к�
         'subtotal' => 250.00,
     ]);
 
-    $result = (new PosterService)->createIncomingOrder($order->load('items.dish'));
+    $result = posterService()->createIncomingOrder($order->load('items.dish'));
 
     Http::assertNothingSent();
     expect($result)->toBeNull();
@@ -852,5 +860,145 @@ it('логирует отдельную причину когда Poster отк�
         'subtotal' => 250.00,
     ]);
 
-    expect((new PosterService)->createIncomingOrder($order->load('items.dish')))->toBeNull();
+    expect(posterService()->createIncomingOrder($order->load('items.dish')))->toBeNull();
+});
+
+it('передаёт скидку самовывоза в comment Poster', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '88'],
+        ]),
+    ]);
+
+    Discount::factory()->create([
+        'size' => 15,
+        'type' => DiscountType::Percent,
+        'scope' => DiscountScope::Pickup,
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_type' => DeliveryType::Pickup,
+        'subtotal' => 100.00,
+        'delivery_fee' => 0,
+        'total' => 85.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $comment = $request->data()['comment'] ?? '';
+
+        return str_contains($comment, 'Скидка: −15.00 ₾ (самовывоз −15%)')
+            && str_contains($comment, 'Доставка: —')
+            && str_contains($comment, 'Итого к оплате: 85.00 ₾')
+            && str_contains($comment, 'Способ: самовывоз');
+    });
+});
+
+it('передаёт стоимость доставки без скидки в comment Poster', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '89'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_type' => DeliveryType::Delivery,
+        'subtotal' => 40.00,
+        'delivery_fee' => 5.00,
+        'total' => 45.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $comment = $request->data()['comment'] ?? '';
+
+        return str_contains($comment, 'Сумма товаров: 40.00 ₾')
+            && str_contains($comment, 'Доставка: 5.00 ₾')
+            && ! str_contains($comment, 'Скидка:')
+            && str_contains($comment, 'Итого к оплате: 45.00 ₾')
+            && str_contains($comment, 'Способ: доставка');
+    });
+});
+
+it('передаёт скидку доставки от суммы корзины в comment Poster', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '90'],
+        ]),
+    ]);
+
+    Discount::factory()->cartTotal(100)->create([
+        'size' => 10,
+        'type' => DiscountType::Percent,
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_type' => DeliveryType::Delivery,
+        'subtotal' => 100.00,
+        'delivery_fee' => 0,
+        'total' => 90.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 100.00,
+        'quantity' => 1,
+        'subtotal' => 100.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $comment = $request->data()['comment'] ?? '';
+
+        return str_contains($comment, 'Скидка: −10.00 ₾ (доставка −10% от 100 ₾)')
+            && str_contains($comment, 'Доставка: Бесплатно')
+            && str_contains($comment, 'Итого к оплате: 90.00 ₾');
+    });
 });

@@ -138,14 +138,19 @@ it('передаёт промокод в комментарий Poster', functio
         'subtotal' => 250.00,
     ]);
 
-    $result = (new PosterService)->createIncomingOrder($order->load('items.dish'));
+    $result = app(PosterService::class)->createIncomingOrder($order->load('items.dish'));
 
     expect($result)->not->toBeNull();
 
     Http::assertSent(function ($request) {
-        $body = $request->data();
+        $comment = $request->data()['comment'] ?? '';
 
-        return ($body['comment'] ?? null) === "Промокод: FRIEND2026\nБез лука";
+        return str_contains($comment, 'Сумма товаров: 250.00 ₾')
+            && str_contains($comment, 'Доставка: Бесплатно')
+            && str_contains($comment, 'Итого к оплате: 250.00 ₾')
+            && str_contains($comment, 'Способ: доставка')
+            && str_contains($comment, "---\nПромокод: FRIEND2026")
+            && str_contains($comment, 'Комментарий клиента: Без лука');
     });
 });
 
@@ -192,9 +197,16 @@ it('передаёт только промокод в Poster если комме
         'subtotal' => 100.00,
     ]);
 
-    (new PosterService)->createIncomingOrder($order->load('items.dish'));
+    app(PosterService::class)->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
-        return ($request->data()['comment'] ?? null) === 'Промокод: ONLY-PROMO';
+        $comment = $request->data()['comment'] ?? '';
+
+        return str_contains($comment, 'Сумма товаров: 100.00 ₾')
+            && str_contains($comment, 'Доставка: —')
+            && str_contains($comment, 'Итого к оплате: 100.00 ₾')
+            && str_contains($comment, 'Способ: самовывоз')
+            && str_contains($comment, "---\nПромокод: ONLY-PROMO")
+            && ! str_contains($comment, 'Комментарий клиента:');
     });
 });
