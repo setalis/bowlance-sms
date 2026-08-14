@@ -66,7 +66,7 @@
                     <div class="relative h-full w-full">
                         <img src="{{ asset('storage/images/slider/slider-m-3.jpg') }}" 
                              alt="Скидка 15% на самовывоз" 
-                             class="h-full w-full object-cover">
+                             class="h-full w-full object-cover md:hidden">
                         <img src="{{ asset('storage/images/slider/slider-d-3.jpg') }}" 
                              alt="Скидка 15% на самовывоз" 
                              class="h-full w-full object-cover hidden md:block">
@@ -84,29 +84,7 @@
                                 </div>
                         </div>                         -->
                     </div>
-                </div>
-                <div class="carousel-slide">
-                    <div class="relative h-full w-full">
-                        <img src="{{ asset('storage/images/slider/slider-4.jpg') }}" 
-                             alt="Боулы" 
-                             class="h-full w-full object-cover md:hidden">
-                        <img src="{{ asset('storage/images/slider/slider-4-desktop.jpg') }}" 
-                             alt="Собери сам" 
-                             class="h-full w-full object-cover hidden md:block">                        
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">  
-                                <!-- <h2 class="mb-4 text-4xl text-white font-bold sm:text-5xl text-center">{{ __('frontend.slider_4_title') }}</h2>
-                                <p class="text-sm sm:text-2xl text-white">{{ __('frontend.slider_4_desc') }}</p>
-                                <div class="flex flex-col gap-2 mt-4">
-                                    <a href="#constructor-tab" 
-                                        @click.prevent="document.getElementById('constructor-tab').click(); setTimeout(() => document.getElementById('constructor-content').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)"
-                                        type="button" 
-                                        class="border border-white text-white bg-black/20 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer uppercase">
-                                        {{ __('frontend.slider_4_button') }}
-                                    </a>         
-                                </div>                             -->
-                        </div>
-                    </div>
-                </div>
+                </div>                
             </div>
         </div>
 
