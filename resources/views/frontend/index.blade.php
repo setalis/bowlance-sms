@@ -11,16 +11,16 @@
             <div class="carousel-body h-full opacity-0">
                 <div class="carousel-slide active">
                     <div class="relative h-full w-full">
-                        <img src="{{ asset('storage/images/slider/slider-1-2.jpg') }}" 
-                             alt="Боулы" 
+                        <img src="{{ asset('storage/images/slider/slider-m-1.jpg') }}" 
+                             alt="Доставка по Батуми - бесплатно!" 
                              class="h-full w-full object-cover md:hidden">
-                        <img src="{{ asset('storage/images/slider/slider-1-desktop.png') }}" 
-                             alt="Боулы" 
+                        <img src="{{ asset('storage/images/slider/slider-d-1.jpg') }}" 
+                             alt="Доставка по Батуми - бесплатно!" 
                              class="h-full w-full object-cover hidden md:block">
                         <!-- Градиентная подложка -->
-                        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div>
+                        <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div> -->
                         <!-- Текстовый блок без размытия -->
-                        <div class="absolute inset-0 flex flex-col items-top justify-start pt-10">
+                        <!-- <div class="absolute inset-0 flex flex-col items-top justify-start pt-10">
                             <div class="text-left text-white max-w-4xl mx-4 px-6 md:px-20">
                             <p class="text-base sm:text-2xl mb-3">Попробуй в Батуми!</p>    
                             <h2 class="text-2xl font-bold sm:text-3xl uppercase">Авторское меню</h2>
@@ -36,19 +36,19 @@
                                class="border border-white text-white bg-black/20 backdrop-blur-xs px-6 py-3 rounded-full hover:bg-white/10 transition-colors cursor-pointer">
                                 Посмотреть меню
                             </a>                          
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="carousel-slide">
                     <div class="relative h-full w-full">
-                        <img src="{{ asset('storage/images/slider/slider-2-1.jpg') }}" 
-                             alt="Боулы" 
+                        <img src="{{ asset('storage/images/slider/slider-m-2.jpg') }}" 
+                             alt="Скидка 10% от 100 лари" 
                              class="h-full w-full object-cover md:hidden">
-                        <img src="{{ asset('storage/images/slider/slider-2-1-desktop.jpg') }}" 
-                             alt="Боулы" 
+                        <img src="{{ asset('storage/images/slider/slider-d-2.jpg') }}" 
+                             alt="Скидка 10% от 100 лари" 
                              class="h-full w-full object-cover hidden md:block">
 
-                             <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
+                        <!-- <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
                             <h2 class="mb-4 text-4xl font-black sm:text-5xl">{{ __('frontend.slider_2_title') }}</h2>
                             <p class="text-sm sm:text-2xl">{{ __('frontend.slider_2_desc') }}</p>
                                 <div class="flex flex-col gap-2 mt-4">
@@ -59,16 +59,19 @@
                                         Заказать
                                     </a>         
                                 </div>
-                        </div>                       
+                        </div>                        -->
                     </div>
                 </div>
                 <div class="carousel-slide">
                     <div class="relative h-full w-full">
-                        <img src="{{ asset('storage/images/slider/slider-3.jpg') }}" 
-                             alt="Собери сам" 
+                        <img src="{{ asset('storage/images/slider/slider-m-3.jpg') }}" 
+                             alt="Скидка 15% на самовывоз" 
                              class="h-full w-full object-cover">
+                        <img src="{{ asset('storage/images/slider/slider-d-3.jpg') }}" 
+                             alt="Скидка 15% на самовывоз" 
+                             class="h-full w-full object-cover hidden md:block">
 
-                         <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
+                         <!-- <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
                             <h2 class="mb-4 text-4xl font-black sm:text-5xl">{{ __('frontend.slider_3_title') }}</h2>
                             <p class="text-sm sm:text-2xl">{{ __('frontend.slider_3_desc') }}</p>
                                 <div class="flex flex-col gap-2 mt-4">
@@ -79,7 +82,7 @@
                                         {{ __('frontend.slider_3_button') }}
                                     </a>         
                                 </div>
-                        </div>                        
+                        </div>                         -->
                     </div>
                 </div>
                 <div class="carousel-slide">
