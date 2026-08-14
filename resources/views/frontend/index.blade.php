@@ -170,7 +170,7 @@
                         $categoryBadgeColors = ['badge-primary', 'badge-success', 'badge-info', 'badge-warning', 'badge-error'];
                     @endphp
                     <nav class="sticky {{ $categoryLinksTop }} z-39 -mx-4 px-4 py-3 mb-6 border-b border-base-content/10 bg-base-100 shadow-sm" aria-label="{{ __('frontend.menu_tab') }}">
-                        <div class="menu-category-slider md:hidden overflow-x-auto snap-x snap-mandatory">
+                        <div class="menu-category-slider md:hidden overflow-x-auto overscroll-x-contain snap-x snap-mandatory">
                             <div class="flex w-max min-w-full flex-nowrap gap-2">
                                 @foreach($dishCategories as $category)
                                     <div class="snap-start shrink-0">

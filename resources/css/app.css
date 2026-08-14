@@ -25,6 +25,12 @@ li:not(.menu-title, .menu-disabled)
 :root {
     --color-primary: #096;
 }
+
+html, body {
+    max-width: 100%;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+}
 /* body {
     color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
 } */
@@ -66,6 +72,7 @@ li:not(.menu-title, .menu-disabled)
 .menu-category-slider {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    overscroll-behavior-x: contain;
 }
 
 .menu-category-slider::-webkit-scrollbar {

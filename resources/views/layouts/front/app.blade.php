@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light" class="overflow-x-clip overscroll-x-none max-w-full">
 
 <head>
     <meta charset="utf-8" />
@@ -20,7 +20,7 @@
     
 </head>
 
-<body class="" x-data data-orders-enabled="{{ $siteOrdersEnabled ? '1' : '0' }}">
+<body class="overflow-x-clip overscroll-x-none max-w-full" x-data data-orders-enabled="{{ $siteOrdersEnabled ? '1' : '0' }}">
     @php
         $discountLabels = [
             'cartSubtotal' => __('frontend.cart_subtotal'),

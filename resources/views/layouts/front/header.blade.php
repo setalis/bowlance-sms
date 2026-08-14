@@ -1,4 +1,4 @@
-<header class="navbar h-20 fixed z-50 border-b border-base-content/10 {{ !$siteOrdersEnabled ? 'top-14' : 'top-0' }}">
+<header class="navbar h-20 fixed inset-x-0 w-full z-50 border-b border-base-content/10 {{ !$siteOrdersEnabled ? 'top-14' : 'top-0' }}">
     <div class="container mx-auto flex items-center justify-between gap-6 md:gap-6">
         <!-- Логотип -->
         <div class="navbar-start">
