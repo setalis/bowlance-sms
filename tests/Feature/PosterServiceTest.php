@@ -8,6 +8,7 @@ use App\Enums\PaymentMethod;
 use App\Models\ConstructorProduct;
 use App\Models\Discount;
 use App\Models\Dish;
+use App\Models\Drink;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
@@ -15,6 +16,7 @@ use App\Services\PosterService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
@@ -212,6 +214,106 @@ it('логирует ошибку когда Poster возвращает error �
 
     expect($result)->toBeNull();
     expect($order->fresh()->poster_order_id)->toBeNull();
+});
+
+it('отправляет напиток в Poster когда есть poster_product_id', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '77'],
+        ]),
+    ]);
+
+    $drink = Drink::factory()->create(['poster_product_id' => 501]);
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'drink',
+        'drink_id' => $drink->id,
+        'name' => 'Вода',
+        'price' => 50.00,
+        'quantity' => 2,
+        'subtotal' => 100.00,
+    ]);
+
+    $service = posterService();
+    $result = $service->createIncomingOrder($order->load('items.drink'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return count($body['products']) === 1
+            && (int) $body['products'][0]['product_id'] === 501
+            && (int) $body['products'][0]['count'] === 2;
+    });
+
+    expect($result)->not->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBe('77');
+});
+
+it('не отправляет напиток в Poster когда нет poster_product_id', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake();
+
+    $drink = Drink::factory()->create(['poster_product_id' => null]);
+    $order = makePosterOrder();
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'drink',
+        'drink_id' => $drink->id,
+        'name' => 'Вода',
+        'price' => 50.00,
+        'quantity' => 1,
+        'subtotal' => 50.00,
+    ]);
+
+    $service = posterService();
+    $result = $service->createIncomingOrder($order->load('items.drink'));
+
+    Http::assertNothingSent();
+    expect($result)->toBeNull();
+    expect($order->fresh()->poster_order_id)->toBeNull();
+});
+
+it('сохраняет drink_id при создании заказа с напитком', function () {
+    Mail::fake();
+    Http::fake();
+    $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+    $drink = Drink::factory()->create(['poster_product_id' => 501]);
+
+    $this->postJson('/orders', [
+        'customer_name' => 'Тест',
+        'customer_phone' => '+995555123456',
+        'delivery_type' => 'pickup',
+        'items' => [
+            [
+                'type' => 'drink',
+                'id' => $drink->id,
+                'name' => 'Вода',
+                'price' => 5.00,
+                'quantity' => 1,
+            ],
+        ],
+    ])->assertCreated();
+
+    $this->assertDatabaseHas('order_items', [
+        'item_type' => 'drink',
+        'drink_id' => $drink->id,
+        'name' => 'Вода',
+    ]);
 });
 
 it('пропускает bowl и drink элементы при отправке в Poster', function () {

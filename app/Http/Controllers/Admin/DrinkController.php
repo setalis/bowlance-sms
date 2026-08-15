@@ -7,6 +7,7 @@ use App\Http\Requests\StoreDrinkRequest;
 use App\Http\Requests\UpdateDrinkRequest;
 use App\Models\Drink;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DrinkController extends Controller
@@ -42,13 +43,13 @@ class DrinkController extends Controller
      */
     public function store(StoreDrinkRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['image']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('drinks', 'public');
         }
 
-        $drink = Drink::create($data);
+        Drink::create($data);
 
         return redirect()
             ->route('admin.drinks.index')
@@ -71,11 +72,11 @@ class DrinkController extends Controller
      */
     public function update(UpdateDrinkRequest $request, Drink $drink): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['image']);
 
         if ($request->hasFile('image')) {
             if ($drink->image) {
-                \Storage::disk('public')->delete($drink->image);
+                Storage::disk('public')->delete($drink->image);
             }
             $data['image'] = $request->file('image')->store('drinks', 'public');
         }
@@ -93,7 +94,7 @@ class DrinkController extends Controller
     public function destroy(Drink $drink): RedirectResponse
     {
         if ($drink->image) {
-            \Storage::disk('public')->delete($drink->image);
+            Storage::disk('public')->delete($drink->image);
         }
 
         $drink->delete();

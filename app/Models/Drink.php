@@ -27,6 +27,7 @@ class Drink extends Model
         'carbohydrates',
         'fiber',
         'sort_order',
+        'poster_product_id',
     ];
 
     protected function casts(): array
@@ -38,7 +39,23 @@ class Drink extends Model
             'fats' => 'decimal:2',
             'carbohydrates' => 'decimal:2',
             'fiber' => 'decimal:2',
+            'poster_product_id' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Drink $drink): void {
+            $attributes = $drink->getAttributes();
+
+            if (filled($attributes['name_ru'] ?? null)) {
+                $drink->setAttribute('name', $attributes['name_ru']);
+            }
+
+            if (array_key_exists('description_ru', $attributes)) {
+                $drink->setAttribute('description', $attributes['description_ru']);
+            }
+        });
     }
 
     /**

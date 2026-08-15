@@ -14,6 +14,7 @@ class OrderItem extends Model
         'order_id',
         'item_type',
         'dish_id',
+        'drink_id',
         'name',
         'price',
         'quantity',
@@ -47,5 +48,10 @@ class OrderItem extends Model
     public function dish(): BelongsTo
     {
         return $this->belongsTo(Dish::class);
+    }
+
+    public function drink(): BelongsTo
+    {
+        return $this->belongsTo(Drink::class);
     }
 }

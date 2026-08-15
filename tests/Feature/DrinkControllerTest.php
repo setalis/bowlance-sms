@@ -27,13 +27,13 @@ it('displays create drink form', function () {
 
     $response->assertSuccessful();
     $response->assertViewIs('admin.drinks.create');
+    $response->assertSee('Poster Product ID');
 });
 
 it('can create a new drink', function () {
     $data = [
-        'name' => 'Coca-Cola',
         'name_ru' => 'Кока-Кола',
-        'description' => 'Классический газированный напиток',
+        'name_ka' => 'კოკა-კოლა',
         'description_ru' => 'Классический газированный напиток',
         'price' => 150.00,
         'volume' => '330 мл',
@@ -43,6 +43,7 @@ it('can create a new drink', function () {
         'carbohydrates' => 35,
         'fiber' => 0,
         'sort_order' => 10,
+        'poster_product_id' => 42,
     ];
 
     $response = $this->actingAs($this->user)->post(route('admin.drinks.store'), $data);
@@ -51,10 +52,13 @@ it('can create a new drink', function () {
     $response->assertSessionHas('success', 'Напиток успешно создан.');
 
     $this->assertDatabaseHas('drinks', [
-        'name' => 'Coca-Cola',
+        'name' => 'Кока-Кола',
         'name_ru' => 'Кока-Кола',
+        'name_ka' => 'კოკა-კოლა',
         'description' => 'Классический газированный напиток',
+        'description_ru' => 'Классический газированный напиток',
         'price' => 150.00,
+        'poster_product_id' => 42,
     ]);
 });
 
@@ -64,7 +68,6 @@ it('can upload image when creating drink', function () {
     $image = UploadedFile::fake()->image('drink.jpg');
 
     $data = [
-        'name' => 'Pepsi',
         'name_ru' => 'Пепси',
         'price' => 140.00,
         'image' => $image,
@@ -75,7 +78,7 @@ it('can upload image when creating drink', function () {
 
     $response->assertRedirect(route('admin.drinks.index'));
 
-    $drink = Drink::where('name', 'Pepsi')->first();
+    $drink = Drink::where('name_ru', 'Пепси')->first();
     expect($drink->image)->not->toBeNull();
     Storage::disk('public')->assertExists($drink->image);
 });
@@ -133,6 +136,7 @@ it('displays edit drink form', function () {
     $response->assertSuccessful();
     $response->assertViewIs('admin.drinks.edit');
     $response->assertViewHas('drink', $drink);
+    $response->assertSee('Poster Product ID');
 });
 
 it('can update drink', function () {
@@ -143,14 +147,13 @@ it('can update drink', function () {
     ]);
 
     $data = [
-        'name' => 'Новое название',
         'name_ru' => 'Новое название',
-        'description' => 'Новое описание',
         'description_ru' => 'Новое описание',
         'price' => 200.00,
         'volume' => '500 мл',
         'calories' => 200,
         'sort_order' => 20,
+        'poster_product_id' => 88,
     ];
 
     $response = $this->actingAs($this->user)->put(route('admin.drinks.update', $drink), $data);
@@ -160,11 +163,13 @@ it('can update drink', function () {
 
     $drink->refresh();
     expect($drink->name_ru)->toBe('Новое название');
+    expect($drink->getRawOriginal('name'))->toBe('Новое название');
     expect($drink->description_ru)->toBe('Новое описание');
     expect($drink->price)->toBe('200.00');
     expect($drink->volume)->toBe('500 мл');
     expect($drink->calories)->toBe(200);
     expect($drink->sort_order)->toBe(20);
+    expect($drink->poster_product_id)->toBe(88);
 });
 
 it('can update drink image', function () {
@@ -177,7 +182,6 @@ it('can update drink image', function () {
     $newImage = UploadedFile::fake()->image('new.jpg');
 
     $data = [
-        'name' => $drink->name,
         'name_ru' => $drink->name_ru,
         'price' => $drink->price,
         'image' => $newImage,

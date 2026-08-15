@@ -40,13 +40,21 @@ class PosterService
             return null;
         }
 
-        $order->loadMissing(['items.dish.addons']);
+        $order->loadMissing(['items.dish.addons', 'items.drink']);
 
         $products = $order->items
             ->filter(fn ($item) => $item->item_type === 'dish' && $item->dish?->poster_product_id)
             ->map(fn ($item) => $this->buildDishProduct($item))
             ->values()
             ->all();
+
+        foreach ($order->items->where('item_type', 'drink') as $drinkItem) {
+            $drinkProduct = $this->buildDrinkProduct($drinkItem);
+
+            if ($drinkProduct !== null) {
+                $products[] = $drinkProduct;
+            }
+        }
 
         foreach ($order->items->whereIn('item_type', ['bowl', 'breakfast']) as $bowlItem) {
             $bowlProduct = $this->buildBowlProduct($bowlItem);
@@ -64,7 +72,8 @@ class PosterService
                 'items' => $order->items->map(fn ($item) => [
                     'item_type' => $item->item_type,
                     'dish_id' => $item->dish_id,
-                    'poster_product_id' => $item->dish?->poster_product_id,
+                    'drink_id' => $item->drink_id,
+                    'poster_product_id' => $item->dish?->poster_product_id ?? $item->drink?->poster_product_id,
                     'bowl_product_ids' => collect($item->bowl_products ?? [])->pluck('id')->all(),
                     'dish_addon_ids' => collect($item->dish_addons ?? [])->pluck('id')->all(),
                 ])->all(),
@@ -266,6 +275,21 @@ class PosterService
         }
 
         return $product;
+    }
+
+    /**
+     * @return array{product_id: int, count: int}|null
+     */
+    protected function buildDrinkProduct(OrderItem $item): ?array
+    {
+        if (! $item->drink?->poster_product_id) {
+            return null;
+        }
+
+        return [
+            'product_id' => (int) $item->drink->poster_product_id,
+            'count' => $item->quantity,
+        ];
     }
 
     /**

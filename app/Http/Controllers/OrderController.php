@@ -144,6 +144,7 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'item_type' => $item['type'],
                     'dish_id' => $item['type'] === 'dish' ? $item['id'] : null,
+                    'drink_id' => $item['type'] === 'drink' ? $item['id'] : null,
                     'name' => $item['name'],
                     'price' => $item['price'],
                     'quantity' => $item['quantity'],
@@ -187,7 +188,7 @@ class OrderController extends Controller
 
             Mail::to(config('mail.admin_email'))->send(new NewOrderMail($order->load('items')));
 
-            $this->posterService->createIncomingOrder($order->fresh('items.dish'));
+            $this->posterService->createIncomingOrder($order->fresh(['items.dish', 'items.drink']));
             $this->woltDriveService->createDeliveryForOrder($order->fresh('items'));
             $order->refresh();
 

@@ -268,6 +268,20 @@
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
+
+                    <div>
+                        <label class="label-text" for="poster_product_id">Poster Product ID</label>
+                        <input type="number"
+                               name="poster_product_id"
+                               placeholder="ID товара в Poster"
+                               class="input @error('poster_product_id') input-error @enderror"
+                               id="poster_product_id"
+                               value="{{ old('poster_product_id', $drink->poster_product_id) }}"
+                               min="1" />
+                        @error('poster_product_id')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-3 pt-2">
