@@ -102,9 +102,15 @@ class PosterService
             'first_name' => $order->customer_name,
             'address' => $order->delivery_address,
             'comment' => $this->buildOrderComment($order),
-            'service_mode' => $order->delivery_type?->value === 'pickup' ? 2 : 3,
+            'service_mode' => $this->posterServiceMode($order),
             'products' => $products,
         ];
+
+        $deliveryPrice = $this->posterDeliveryPrice($order);
+
+        if ($deliveryPrice !== null) {
+            $incomingOrder['delivery_price'] = $deliveryPrice;
+        }
 
         $url = 'https://joinposter.com/api/incomingOrders.createIncomingOrder'
             .'?token='.config('poster.token');
@@ -186,6 +192,30 @@ class PosterService
 
             return null;
         }
+    }
+
+    protected function isPosterDelivery(Order $order): bool
+    {
+        return $order->delivery_type === DeliveryType::Delivery
+            && filled($order->delivery_address);
+    }
+
+    protected function posterServiceMode(Order $order): int
+    {
+        return $this->isPosterDelivery($order) ? 3 : 2;
+    }
+
+    protected function posterDeliveryPrice(Order $order): ?int
+    {
+        if (! $this->isPosterDelivery($order)) {
+            return null;
+        }
+
+        if ((float) $order->subtotal >= (float) config('delivery.free_from', 50)) {
+            return null;
+        }
+
+        return (int) round((float) config('delivery.fee', 5) * 100);
     }
 
     protected function buildOrderComment(Order $order): string

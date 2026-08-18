@@ -1186,3 +1186,136 @@ it('не передаёт время в comment Poster если клиент в�
         return ! str_contains($comment, 'Ко времени:');
     });
 });
+
+it('передаёт service_mode самовывоза в Poster без delivery_price', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '93'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_type' => DeliveryType::Pickup,
+        'delivery_address' => null,
+        'subtotal' => 40.00,
+        'delivery_fee' => 0,
+        'total' => 40.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return (int) $body['service_mode'] === 2
+            && ! array_key_exists('delivery_price', $body);
+    });
+});
+
+it('передаёт service_mode доставки и delivery_price в копейках если сумма меньше порога', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'delivery.fee' => 5,
+        'delivery.free_from' => 50,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '94'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_type' => DeliveryType::Delivery,
+        'delivery_address' => 'ул. Тестовая, 1',
+        'subtotal' => 40.00,
+        'delivery_fee' => 5.00,
+        'total' => 45.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return (int) $body['service_mode'] === 3
+            && (int) $body['delivery_price'] === 500;
+    });
+});
+
+it('не передаёт delivery_price в Poster если сумма доставки от порога бесплатной', function (float $subtotal) {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+        'delivery.fee' => 5,
+        'delivery.free_from' => 50,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '95'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_type' => DeliveryType::Delivery,
+        'delivery_address' => 'ул. Тестовая, 1',
+        'subtotal' => $subtotal,
+        'delivery_fee' => 0,
+        'total' => $subtotal,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => $subtotal,
+        'quantity' => 1,
+        'subtotal' => $subtotal,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+
+        return (int) $body['service_mode'] === 3
+            && ! array_key_exists('delivery_price', $body);
+    });
+})->with([
+    'ровно порог' => [50.00],
+    'выше порога' => [100.00],
+]);
