@@ -1141,7 +1141,7 @@ it('передаёт выбранное клиентом время в comment P
 
     posterService()->createIncomingOrder($order->load('items.dish'));
 
-    $expectedDeliveryTime = now()->copy()->setTime(14, 30)->getTimestamp();
+    $expectedDeliveryTime = now()->copy()->setTime(14, 30)->format('Y-m-d H:i:s');
 
     Http::assertSent(function ($request) use ($expectedDeliveryTime) {
         $body = $request->data();
@@ -1149,7 +1149,7 @@ it('передаёт выбранное клиентом время в comment P
 
         return str_contains($comment, "---\nКо времени: 14:30")
             && str_contains($comment, 'Комментарий клиента: Без лука')
-            && (int) $body['delivery_time'] === $expectedDeliveryTime;
+            && $body['delivery_time'] === $expectedDeliveryTime;
     });
 });
 
@@ -1230,10 +1230,10 @@ it('передаёт delivery_time в Poster на следующий день е
 
     posterService()->createIncomingOrder($order->load('items.dish'));
 
-    $expectedDeliveryTime = now()->copy()->addDay()->setTime(14, 30)->getTimestamp();
+    $expectedDeliveryTime = now()->copy()->addDay()->setTime(14, 30)->format('Y-m-d H:i:s');
 
     Http::assertSent(function ($request) use ($expectedDeliveryTime) {
-        return (int) $request->data()['delivery_time'] === $expectedDeliveryTime;
+        return $request->data()['delivery_time'] === $expectedDeliveryTime;
     });
 });
 

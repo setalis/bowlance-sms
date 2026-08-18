@@ -224,7 +224,7 @@ class PosterService
         return (int) round((float) config('delivery.fee', 5) * 100);
     }
 
-    protected function posterDeliveryTime(Order $order): ?int
+    protected function posterDeliveryTime(Order $order): ?string
     {
         if (blank($order->delivery_time)) {
             return null;
@@ -236,7 +236,7 @@ class PosterService
             $deliveryAt = $deliveryAt->addDay();
         }
 
-        return $deliveryAt->getTimestamp();
+        return $deliveryAt->format('Y-m-d H:i:s');
     }
 
     protected function buildOrderComment(Order $order): string
