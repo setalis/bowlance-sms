@@ -112,6 +112,12 @@ class PosterService
             $incomingOrder['delivery_price'] = $deliveryPrice;
         }
 
+        $deliveryTime = $this->posterDeliveryTime($order);
+
+        if ($deliveryTime !== null) {
+            $incomingOrder['delivery_time'] = $deliveryTime;
+        }
+
         $url = 'https://joinposter.com/api/incomingOrders.createIncomingOrder'
             .'?token='.config('poster.token');
 
@@ -216,6 +222,21 @@ class PosterService
         }
 
         return (int) round((float) config('delivery.fee', 5) * 100);
+    }
+
+    protected function posterDeliveryTime(Order $order): ?int
+    {
+        if (blank($order->delivery_time)) {
+            return null;
+        }
+
+        $deliveryAt = now()->setTimeFromTimeString($order->delivery_time);
+
+        if ($deliveryAt->lte(now())) {
+            $deliveryAt = $deliveryAt->addDay();
+        }
+
+        return $deliveryAt->getTimestamp();
     }
 
     protected function buildOrderComment(Order $order): string

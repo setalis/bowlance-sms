@@ -1112,6 +1112,8 @@ it('передаёт выбранное клиентом время в comment P
         'poster.spot_id' => 1,
     ]);
 
+    $this->travelTo(now()->setTime(12, 0));
+
     Http::fake([
         'joinposter.com/*' => Http::response([
             'response' => ['incoming_order_id' => '91'],
@@ -1139,11 +1141,15 @@ it('передаёт выбранное клиентом время в comment P
 
     posterService()->createIncomingOrder($order->load('items.dish'));
 
-    Http::assertSent(function ($request) {
-        $comment = $request->data()['comment'] ?? '';
+    $expectedDeliveryTime = now()->copy()->setTime(14, 30)->getTimestamp();
+
+    Http::assertSent(function ($request) use ($expectedDeliveryTime) {
+        $body = $request->data();
+        $comment = $body['comment'] ?? '';
 
         return str_contains($comment, "---\nКо времени: 14:30")
-            && str_contains($comment, 'Комментарий клиента: Без лука');
+            && str_contains($comment, 'Комментарий клиента: Без лука')
+            && (int) $body['delivery_time'] === $expectedDeliveryTime;
     });
 });
 
@@ -1181,9 +1187,53 @@ it('не передаёт время в comment Poster если клиент в�
     posterService()->createIncomingOrder($order->load('items.dish'));
 
     Http::assertSent(function ($request) {
-        $comment = $request->data()['comment'] ?? '';
+        $body = $request->data();
+        $comment = $body['comment'] ?? '';
 
-        return ! str_contains($comment, 'Ко времени:');
+        return ! str_contains($comment, 'Ко времени:')
+            && ! array_key_exists('delivery_time', $body);
+    });
+});
+
+it('передаёт delivery_time в Poster на следующий день если выбранное время уже прошло', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    $this->travelTo(now()->setTime(16, 0));
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '96'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_time' => '14:30',
+        'subtotal' => 40.00,
+        'delivery_fee' => 5.00,
+        'total' => 45.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    $expectedDeliveryTime = now()->copy()->addDay()->setTime(14, 30)->getTimestamp();
+
+    Http::assertSent(function ($request) use ($expectedDeliveryTime) {
+        return (int) $request->data()['delivery_time'] === $expectedDeliveryTime;
     });
 });
 
