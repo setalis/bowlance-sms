@@ -193,6 +193,10 @@ class PosterService
         $parts = $this->buildPricingCommentLines($order);
         $customerParts = [];
 
+        if (filled($order->delivery_time)) {
+            $customerParts[] = 'Ко времени: '.$order->delivery_time;
+        }
+
         if (filled($order->promo_code)) {
             $customerParts[] = 'Промокод: '.$order->promo_code;
         }
