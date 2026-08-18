@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DeliveryType;
 use App\Enums\DiscountScope;
 use App\Enums\DiscountType;
+use App\Enums\PaymentMethod;
 use App\Models\ConstructorProduct;
 use App\Models\Discount;
 use App\Models\Order;
@@ -103,6 +104,7 @@ class PosterService
             'address' => $order->delivery_address,
             'comment' => $this->buildOrderComment($order),
             'service_mode' => $this->posterServiceMode($order),
+            'fiscal_method' => $this->posterFiscalMethod($order),
             'products' => $products,
         ];
 
@@ -211,6 +213,14 @@ class PosterService
         return $this->isPosterDelivery($order) ? 3 : 2;
     }
 
+    protected function posterFiscalMethod(Order $order): string
+    {
+        return match ($order->payment_method) {
+            PaymentMethod::BankTransfer => 'card',
+            default => 'cash',
+        };
+    }
+
     protected function posterDeliveryPrice(Order $order): ?int
     {
         if (! $this->isPosterDelivery($order)) {
@@ -250,6 +260,10 @@ class PosterService
 
         if (filled($order->promo_code)) {
             $customerParts[] = 'Промокод: '.$order->promo_code;
+        }
+
+        if (filled($order->courier_comment)) {
+            $customerParts[] = 'Комментарий курьеру: '.$order->courier_comment;
         }
 
         if (filled($order->comment)) {

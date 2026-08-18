@@ -1369,3 +1369,86 @@ it('не передаёт delivery_price в Poster если сумма дост�
     'ровно порог' => [50.00],
     'выше порога' => [100.00],
 ]);
+
+it('передаёт комментарий курьеру с сайта в comment Poster', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '97'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'courier_comment' => 'Позвоните за 5 минут',
+        'comment' => 'Без лука',
+        'subtotal' => 40.00,
+        'delivery_fee' => 5.00,
+        'total' => 45.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $comment = $request->data()['comment'] ?? '';
+
+        return str_contains($comment, 'Комментарий курьеру: Позвоните за 5 минут')
+            && str_contains($comment, 'Комментарий клиента: Без лука');
+    });
+});
+
+it('передаёт fiscal_method в Poster по способу оплаты', function (PaymentMethod $paymentMethod, string $fiscalMethod) {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '98'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'payment_method' => $paymentMethod,
+        'subtotal' => 40.00,
+        'delivery_fee' => 5.00,
+        'total' => 45.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) use ($fiscalMethod) {
+        return $request->data()['fiscal_method'] === $fiscalMethod;
+    });
+})->with([
+    'наличными' => [PaymentMethod::Cash, 'cash'],
+    'перевод на карту' => [PaymentMethod::BankTransfer, 'card'],
+]);
