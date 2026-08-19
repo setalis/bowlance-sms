@@ -20,6 +20,10 @@ class UpdateDishAddonRequest extends FormRequest
             'name_ru' => ['required', 'string', 'max:255'],
             'name_ka' => ['nullable', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'calories' => ['nullable', 'integer', 'min:0'],
+            'proteins' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'fats' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
+            'carbohydrates' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
             'sort_order' => ['integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
         ];

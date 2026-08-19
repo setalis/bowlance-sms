@@ -8,12 +8,28 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+it('shows nutrition fields on the addon create form', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)
+        ->get(route('admin.dish-addons.create'))
+        ->assertSuccessful()
+        ->assertSee('Калории (ккал)')
+        ->assertSee('Белки (г)')
+        ->assertSee('Жиры (г)')
+        ->assertSee('Углеводы (г)');
+});
+
 it('creates a dish addon in admin', function () {
     $admin = User::factory()->admin()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.dish-addons.store'), [
         'name_ru' => 'Креветки',
         'price' => 5.50,
+        'calories' => 87,
+        'proteins' => 12.50,
+        'fats' => 3.10,
+        'carbohydrates' => 1.40,
         'sort_order' => 1,
         'is_active' => true,
     ]);
@@ -23,7 +39,43 @@ it('creates a dish addon in admin', function () {
     $this->assertDatabaseHas('dish_addons', [
         'name_ru' => 'Креветки',
         'price' => 5.50,
+        'calories' => 87,
+        'proteins' => 12.50,
+        'fats' => 3.10,
+        'carbohydrates' => 1.40,
         'is_active' => true,
+    ]);
+});
+
+it('updates dish addon nutrition in admin', function () {
+    $admin = User::factory()->admin()->create();
+    $addon = DishAddon::factory()->create([
+        'name_ru' => 'Хлеб',
+        'calories' => 10,
+        'proteins' => 1,
+        'fats' => 0.5,
+        'carbohydrates' => 2,
+    ]);
+
+    $response = $this->actingAs($admin)->put(route('admin.dish-addons.update', $addon), [
+        'name_ru' => 'Хлеб',
+        'price' => $addon->price,
+        'calories' => 120,
+        'proteins' => 4.20,
+        'fats' => 1.10,
+        'carbohydrates' => 22.00,
+        'sort_order' => $addon->sort_order,
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('admin.dish-addons.index'));
+
+    $this->assertDatabaseHas('dish_addons', [
+        'id' => $addon->id,
+        'calories' => 120,
+        'proteins' => 4.20,
+        'fats' => 1.10,
+        'carbohydrates' => 22.00,
     ]);
 });
 

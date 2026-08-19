@@ -230,6 +230,10 @@ class OrderController extends Controller
         $basePrice = (float) ($dish->discount_price ?? $dish->price);
         $addonsData = [];
         $addonsTotal = 0.0;
+        $addonCalories = 0;
+        $addonProteins = 0.0;
+        $addonFats = 0.0;
+        $addonCarbs = 0.0;
 
         foreach ($item['addons'] ?? [] as $addonInput) {
             $attached = $dish->addons->firstWhere('id', (int) ($addonInput['id'] ?? 0));
@@ -241,18 +245,30 @@ class OrderController extends Controller
             $quantity = max(1, (int) ($addonInput['quantity'] ?? 1));
             $addonPrice = (float) ($attached->pivot->price ?? $attached->price);
             $addonsTotal += $addonPrice * $quantity;
+            $addonCalories += (int) ($attached->calories ?? 0) * $quantity;
+            $addonProteins += (float) ($attached->proteins ?? 0) * $quantity;
+            $addonFats += (float) ($attached->fats ?? 0) * $quantity;
+            $addonCarbs += (float) ($attached->carbohydrates ?? 0) * $quantity;
 
             $addonsData[] = [
                 'id' => $attached->id,
                 'name' => $attached->name,
                 'price' => $addonPrice,
                 'quantity' => $quantity,
+                'calories' => $attached->calories,
+                'proteins' => $attached->proteins,
+                'fats' => $attached->fats,
+                'carbs' => $attached->carbohydrates,
             ];
         }
 
         $item['price'] = round($basePrice + $addonsTotal, 2);
         $item['addons'] = $addonsData !== [] ? $addonsData : null;
         $item['name'] = $dish->name;
+        $item['calories'] = (int) ($dish->calories ?? 0) + $addonCalories;
+        $item['proteins'] = (float) ($dish->proteins ?? 0) + $addonProteins;
+        $item['fats'] = (float) ($dish->fats ?? 0) + $addonFats;
+        $item['carbs'] = (float) ($dish->carbohydrates ?? 0) + $addonCarbs;
 
         return $item;
     }

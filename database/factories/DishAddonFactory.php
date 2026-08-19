@@ -19,6 +19,10 @@ class DishAddonFactory extends Factory
             'name_ru' => fake('ru_RU')->words(2, true),
             'name_ka' => fake()->words(2, true),
             'price' => fake()->randomFloat(2, 1, 15),
+            'calories' => fake()->numberBetween(10, 200),
+            'proteins' => fake()->randomFloat(2, 0, 30),
+            'fats' => fake()->randomFloat(2, 0, 20),
+            'carbohydrates' => fake()->randomFloat(2, 0, 25),
             'sort_order' => fake()->numberBetween(0, 100),
             'is_active' => true,
         ];

@@ -26,8 +26,19 @@ it('saves dish addons and recalculates price on checkout', function () {
         'price' => 20.00,
         'discount_price' => null,
         'name_ru' => 'Суп',
+        'calories' => 400,
+        'proteins' => 10.00,
+        'fats' => 5.00,
+        'carbohydrates' => 20.00,
     ]);
-    $addon = DishAddon::factory()->create(['name_ru' => 'Хлеб', 'price' => 2.00]);
+    $addon = DishAddon::factory()->create([
+        'name_ru' => 'Хлеб',
+        'price' => 2.00,
+        'calories' => 80,
+        'proteins' => 6.50,
+        'fats' => 2.00,
+        'carbohydrates' => 1.00,
+    ]);
     $dish->addons()->attach($addon->id, [
         'poster_modification_id' => 901,
         'price' => null,
@@ -59,11 +70,48 @@ it('saves dish addons and recalculates price on checkout', function () {
 
     expect($orderItem)->not->toBeNull()
         ->and((float) $orderItem->price)->toBe(24.0)
+        ->and($orderItem->calories)->toBe(560)
+        ->and((float) $orderItem->proteins)->toBe(23.0)
+        ->and((float) $orderItem->fats)->toBe(9.0)
+        ->and((float) $orderItem->carbohydrates)->toBe(22.0)
         ->and($orderItem->dish_addons)->toHaveCount(1)
         ->and($orderItem->dish_addons[0]['id'])->toBe($addon->id)
         ->and($orderItem->dish_addons[0]['name'])->toBe('Хлеб')
         ->and((float) $orderItem->dish_addons[0]['price'])->toBe(2.0)
-        ->and($orderItem->dish_addons[0]['quantity'])->toBe(2);
+        ->and($orderItem->dish_addons[0]['quantity'])->toBe(2)
+        ->and($orderItem->dish_addons[0]['calories'])->toBe(80);
+});
+
+it('includes addon nutrition in the homepage dish payload', function () {
+    $category = DishCategory::factory()->active()->create();
+    $dish = Dish::factory()->create([
+        'dish_category_id' => $category->id,
+        'calories' => 400,
+        'proteins' => 10,
+        'fats' => 5,
+        'carbohydrates' => 20,
+    ]);
+    $addon = DishAddon::factory()->create([
+        'name_ru' => 'Креветки',
+        'calories' => 187,
+        'proteins' => 12.5,
+        'fats' => 3.1,
+        'carbohydrates' => 1.4,
+        'is_active' => true,
+    ]);
+    $dish->addons()->attach($addon->id, [
+        'poster_modification_id' => 1,
+        'price' => null,
+        'sort_order' => 0,
+    ]);
+
+    $content = $this->get('/')->assertSuccessful()->getContent();
+
+    expect($content)
+        ->toContain('187')
+        ->toContain('12.5')
+        ->toContain('3.1')
+        ->toContain('1.4');
 });
 
 it('sends dish modifications to Poster for selected addons', function () {

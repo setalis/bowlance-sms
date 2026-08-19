@@ -27,6 +27,7 @@
                             <th>ID</th>
                             <th>Название</th>
                             <th>Цена</th>
+                            <th>Ккал</th>
                             <th>Сортировка</th>
                             <th>Статус</th>
                             <th>Действия</th>
@@ -38,6 +39,7 @@
                                 <td>{{ $addon->id }}</td>
                                 <td class="font-medium">{{ $addon->name }}</td>
                                 <td>{{ number_format($addon->price, 2) }} ₾</td>
+                                <td>{{ $addon->calories !== null ? $addon->calories.' ккал' : '—' }}</td>
                                 <td>{{ $addon->sort_order }}</td>
                                 <td>
                                     @if($addon->is_active)
@@ -69,7 +71,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-8 text-base-content/60">Добавок пока нет</td>
+                                <td colspan="7" class="text-center py-8 text-base-content/60">Добавок пока нет</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -328,6 +328,10 @@
                                                                         'id' => $addon->id,
                                                                         'name' => $addon->name,
                                                                         'price' => (float) ($addon->pivot->price ?? $addon->price),
+                                                                        'calories' => (int) ($addon->calories ?? 0),
+                                                                        'proteins' => (float) ($addon->proteins ?? 0),
+                                                                        'fats' => (float) ($addon->fats ?? 0),
+                                                                        'carbs' => (float) ($addon->carbohydrates ?? 0),
                                                                     ])->values())
                                                                 };
                                                                 if (dishPayload.availableAddons.length) {
@@ -498,7 +502,12 @@
                                    class="checkbox"
                                    :checked="addon.quantity > 0"
                                    @change="toggleAddon(addon.id, $event.target.checked)">
-                            <span class="font-medium truncate" x-text="addon.name"></span>
+                            <span class="min-w-0">
+                                <span class="font-medium truncate block" x-text="addon.name"></span>
+                                <span class="text-xs text-base-content/50"
+                                      x-show="addon.calories > 0"
+                                      x-text="addon.calories + ' {{ __('frontend.calories') }}'"></span>
+                            </span>
                         </label>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="text-sm font-semibold text-primary" x-text="parseFloat(addon.price).toFixed(2) + ' ₾'"></span>

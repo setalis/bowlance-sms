@@ -60,6 +60,10 @@ export function initCart() {
                     name: addon.name,
                     price: parseFloat(addon.price),
                     quantity: Math.max(1, parseInt(addon.quantity, 10) || 1),
+                    calories: addon.calories || 0,
+                    proteins: addon.proteins || 0,
+                    fats: addon.fats || 0,
+                    carbs: addon.carbs || 0,
                 }));
 
             const basePrice = parseFloat(dish.basePrice ?? dish.price);
@@ -109,6 +113,30 @@ export function initCart() {
                 .map(addon => `${addon.id}:${addon.quantity || 1}`)
                 .sort()
                 .join('|');
+        },
+
+        addonsNutrition(addons = []) {
+            return addons.reduce((totals, addon) => {
+                const quantity = addon.quantity || 1;
+
+                totals.calories += (addon.calories || 0) * quantity;
+                totals.proteins += (addon.proteins || 0) * quantity;
+                totals.fats += (addon.fats || 0) * quantity;
+                totals.carbs += (addon.carbs || 0) * quantity;
+
+                return totals;
+            }, { calories: 0, proteins: 0, fats: 0, carbs: 0 });
+        },
+
+        itemNutrition(item) {
+            const addons = this.addonsNutrition(item.addons || []);
+
+            return {
+                calories: (item.calories || 0) + (item.sauce_calories || 0) + addons.calories,
+                proteins: (item.proteins || 0) + (item.sauce_proteins || 0) + addons.proteins,
+                fats: (item.fats || 0) + (item.sauce_fats || 0) + addons.fats,
+                carbs: (item.carbs || 0) + (item.sauce_carbs || 0) + addons.carbs,
+            };
         },
 
         // Добавить напиток в корзину
@@ -345,28 +373,16 @@ export function initCart() {
 
         // Получить общую пищевую ценность
         get totalNutrition() {
-            return {
-                calories: this.items.reduce((sum, item) => {
-                    const dishCalories = (item.calories || 0) * item.quantity;
-                    const sauceCalories = (item.sauce_calories || 0) * item.quantity;
-                    return sum + dishCalories + sauceCalories;
-                }, 0),
-                proteins: this.items.reduce((sum, item) => {
-                    const dishProteins = (item.proteins || 0) * item.quantity;
-                    const sauceProteins = (item.sauce_proteins || 0) * item.quantity;
-                    return sum + dishProteins + sauceProteins;
-                }, 0),
-                fats: this.items.reduce((sum, item) => {
-                    const dishFats = (item.fats || 0) * item.quantity;
-                    const sauceFats = (item.sauce_fats || 0) * item.quantity;
-                    return sum + dishFats + sauceFats;
-                }, 0),
-                carbs: this.items.reduce((sum, item) => {
-                    const dishCarbs = (item.carbs || 0) * item.quantity;
-                    const sauceCarbs = (item.sauce_carbs || 0) * item.quantity;
-                    return sum + dishCarbs + sauceCarbs;
-                }, 0)
-            };
+            return this.items.reduce((totals, item) => {
+                const nutrition = this.itemNutrition(item);
+
+                totals.calories += nutrition.calories * item.quantity;
+                totals.proteins += nutrition.proteins * item.quantity;
+                totals.fats += nutrition.fats * item.quantity;
+                totals.carbs += nutrition.carbs * item.quantity;
+
+                return totals;
+            }, { calories: 0, proteins: 0, fats: 0, carbs: 0 });
         },
 
         // Показать уведомление

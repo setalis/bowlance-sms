@@ -17,6 +17,10 @@ class DishAddon extends Model
         'name_ru',
         'name_ka',
         'price',
+        'calories',
+        'proteins',
+        'fats',
+        'carbohydrates',
         'sort_order',
         'is_active',
     ];
@@ -25,6 +29,9 @@ class DishAddon extends Model
     {
         return [
             'price' => 'decimal:2',
+            'proteins' => 'decimal:2',
+            'fats' => 'decimal:2',
+            'carbohydrates' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

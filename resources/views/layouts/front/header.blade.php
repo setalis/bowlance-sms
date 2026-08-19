@@ -257,12 +257,12 @@
                                                         </span>
                                                     </template>
                                                 </div>
-                                                <template x-if="item.calories > 0">
+                                                <template x-if="$store.cart.itemNutrition(item).calories > 0">
                                                     <button type="button"
                                                             @click="showNutrition = !showNutrition"
                                                             class="inline-flex shrink-0 items-center gap-1.5 text-base-content/55 hover:text-emerald-600 transition-colors">
                                                         <span class="icon-[tabler--flame] size-4"></span>
-                                                        <span x-text="Math.round((item.calories || 0) + (item.sauce_calories || 0))"></span>
+                                                        <span x-text="Math.round($store.cart.itemNutrition(item).calories)"></span>
                                                         <span>{{ __('frontend.calories') }}</span>
                                                         <span class="icon-[tabler--chevron-down] size-3.5 transition-transform"
                                                               :class="showNutrition ? 'rotate-180' : ''"></span>
@@ -318,19 +318,19 @@
                                      class="mt-3 pt-3 border-t border-base-200">
                                     <div class="grid grid-cols-4 gap-2 text-center">
                                         <div class="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-1.5">
-                                            <p class="text-xs text-amber-600 font-bold" x-text="Math.round((item.calories||0)+(item.sauce_calories||0))"></p>
+                                            <p class="text-xs text-amber-600 font-bold" x-text="Math.round($store.cart.itemNutrition(item).calories)"></p>
                                             <p class="text-xs text-base-content/40">{{ __('frontend.nutrition_calories') }}</p>
                                         </div>
                                         <div class="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-1.5">
-                                            <p class="text-xs text-emerald-600 font-bold" x-text="((item.proteins||0)+(item.sauce_proteins||0)).toFixed(1)+'{{ __('frontend.grams') }}'"></p>
+                                            <p class="text-xs text-emerald-600 font-bold" x-text="$store.cart.itemNutrition(item).proteins.toFixed(1)+'{{ __('frontend.grams') }}'"></p>
                                             <p class="text-xs text-base-content/40">Б</p>
                                         </div>
                                         <div class="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-1.5">
-                                            <p class="text-xs text-orange-500 font-bold" x-text="((item.fats||0)+(item.sauce_fats||0)).toFixed(1)+'{{ __('frontend.grams') }}'"></p>
+                                            <p class="text-xs text-orange-500 font-bold" x-text="$store.cart.itemNutrition(item).fats.toFixed(1)+'{{ __('frontend.grams') }}'"></p>
                                             <p class="text-xs text-base-content/40">Ж</p>
                                         </div>
                                         <div class="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-1.5">
-                                            <p class="text-xs text-blue-500 font-bold" x-text="((item.carbs||0)+(item.sauce_carbs||0)).toFixed(1)+'{{ __('frontend.grams') }}'"></p>
+                                            <p class="text-xs text-blue-500 font-bold" x-text="$store.cart.itemNutrition(item).carbs.toFixed(1)+'{{ __('frontend.grams') }}'"></p>
                                             <p class="text-xs text-base-content/40">У</p>
                                         </div>
                                     </div>

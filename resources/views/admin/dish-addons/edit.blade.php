@@ -60,6 +60,65 @@
                     </div>
 
                     <div>
+                        <label class="label-text" for="calories">Калории (ккал)</label>
+                        <input type="number"
+                               name="calories"
+                               class="input @error('calories') input-error @enderror"
+                               id="calories"
+                               value="{{ old('calories', $addon->calories) }}"
+                               placeholder="0"
+                               min="0" />
+                        @error('calories')
+                            <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <label class="label-text" for="proteins">Белки (г)</label>
+                            <input type="number"
+                                   name="proteins"
+                                   class="input @error('proteins') input-error @enderror"
+                                   id="proteins"
+                                   value="{{ old('proteins', $addon->proteins) }}"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0" />
+                            @error('proteins')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="label-text" for="fats">Жиры (г)</label>
+                            <input type="number"
+                                   name="fats"
+                                   class="input @error('fats') input-error @enderror"
+                                   id="fats"
+                                   value="{{ old('fats', $addon->fats) }}"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0" />
+                            @error('fats')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="label-text" for="carbohydrates">Углеводы (г)</label>
+                            <input type="number"
+                                   name="carbohydrates"
+                                   class="input @error('carbohydrates') input-error @enderror"
+                                   id="carbohydrates"
+                                   value="{{ old('carbohydrates', $addon->carbohydrates) }}"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0" />
+                            @error('carbohydrates')
+                                <span class="text-error text-sm mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div>
                         <label class="label-text" for="sort_order">Сортировка</label>
                         <input type="number"
                                name="sort_order"

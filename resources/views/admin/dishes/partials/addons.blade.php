@@ -30,7 +30,9 @@
                                class="checkbox"
                                @checked($isChecked) />
                         <span class="label-text font-medium">{{ $addon->name }}</span>
-                        <span class="text-base-content/50 text-sm">({{ number_format($addon->price, 2) }} ₾)</span>
+                        <span class="text-base-content/50 text-sm">
+                            ({{ number_format($addon->price, 2) }} ₾@if($addon->calories) · {{ $addon->calories }} ккал@endif)
+                        </span>
                     </label>
                     <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                         <div>
