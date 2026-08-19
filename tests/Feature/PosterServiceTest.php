@@ -1452,3 +1452,48 @@ it('передаёт fiscal_method в Poster по способу оплаты', 
     'наличными' => [PaymentMethod::Cash, 'cash'],
     'перевод на карту' => [PaymentMethod::BankTransfer, 'card'],
 ]);
+
+it('передаёт service_mode в заведении в Poster без delivery_price', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '99'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_type' => DeliveryType::DineIn,
+        'delivery_address' => null,
+        'subtotal' => 40.00,
+        'delivery_fee' => 0,
+        'total' => 40.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->load('items.dish'));
+
+    Http::assertSent(function ($request) {
+        $body = $request->data();
+        $comment = $body['comment'] ?? '';
+
+        return (int) $body['service_mode'] === 1
+            && ! array_key_exists('delivery_price', $body)
+            && str_contains($comment, 'Способ: в заведении')
+            && str_contains($comment, 'Доставка: —');
+    });
+});

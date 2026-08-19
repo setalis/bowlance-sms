@@ -210,7 +210,11 @@ class PosterService
 
     protected function posterServiceMode(Order $order): int
     {
-        return $this->isPosterDelivery($order) ? 3 : 2;
+        return match ($order->delivery_type) {
+            DeliveryType::DineIn => 1,
+            DeliveryType::Pickup => 2,
+            default => $this->isPosterDelivery($order) ? 3 : 2,
+        };
     }
 
     protected function posterFiscalMethod(Order $order): string
@@ -295,7 +299,7 @@ class PosterService
             $lines[] = 'Скидка: −'.$this->formatMoney($pricing['discount_amount']).' ₾ ('.$this->formatDiscountScopeLabel($pricing['discount']).')';
         }
 
-        if ($deliveryType === DeliveryType::Pickup) {
+        if ($deliveryType->skipsDelivery()) {
             $lines[] = 'Доставка: —';
         } elseif ($deliveryFee > 0) {
             $lines[] = 'Доставка: '.$this->formatMoney($deliveryFee).' ₾';
@@ -304,7 +308,11 @@ class PosterService
         }
 
         $lines[] = 'Итого к оплате: '.$this->formatMoney((float) $order->total).' ₾';
-        $lines[] = 'Способ: '.($deliveryType === DeliveryType::Pickup ? 'самовывоз' : 'доставка');
+        $lines[] = 'Способ: '.match ($deliveryType) {
+            DeliveryType::Pickup => 'самовывоз',
+            DeliveryType::DineIn => 'в заведении',
+            default => 'доставка',
+        };
 
         return $lines;
     }

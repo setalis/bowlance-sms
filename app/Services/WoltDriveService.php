@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DeliveryType;
 use App\Models\Order;
 use App\Models\Setting;
 use Illuminate\Http\Client\PendingRequest;
@@ -31,7 +32,7 @@ class WoltDriveService
 
     public function createDeliveryForOrder(Order $order): ?array
     {
-        if (! $this->isEnabled() || $order->delivery_type->value !== 'delivery') {
+        if (! $this->isEnabled() || $order->delivery_type !== DeliveryType::Delivery) {
             return null;
         }
 

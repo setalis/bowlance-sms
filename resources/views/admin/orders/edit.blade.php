@@ -81,6 +81,15 @@
                                                {{ old('delivery_type', $order->delivery_type?->value ?? 'delivery') === 'pickup' ? 'checked' : '' }}>
                                         <span>Самовывоз</span>
                                     </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio"
+                                               name="delivery_type"
+                                               value="dine_in"
+                                               x-model="deliveryType"
+                                               class="radio radio-primary"
+                                               {{ old('delivery_type', $order->delivery_type?->value ?? 'delivery') === 'dine_in' ? 'checked' : '' }}>
+                                        <span>В заведении</span>
+                                    </label>
                                 </div>
                                 @error('delivery_type')
                                     <label class="label"><span class="label-text-alt text-error">{{ $message }}</span></label>

@@ -94,6 +94,8 @@ return [
     'pickup_from_store' => 'Из заведения',
     'delivery_method_title' => 'Доставка',
     'pickup_method_title' => 'Самовывоз',
+    'dine_in_method_title' => 'В заведении',
+    'dine_in_from_venue' => 'На месте',
     'summary_no_discount' => '—',
     'promotions_section' => 'Акции и доставка',
     'checkout' => 'Оформить заказ',

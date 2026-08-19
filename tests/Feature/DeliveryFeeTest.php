@@ -26,6 +26,12 @@ it('does not charge delivery fee for pickup', function () {
     expect($fee)->toBe(0.0);
 });
 
+it('does not charge delivery fee for dine-in', function () {
+    $fee = app(DeliveryFeeService::class)->calculate(DeliveryType::DineIn, 20);
+
+    expect($fee)->toBe(0.0);
+});
+
 it('includes delivery fee in order total calculation', function () {
     $result = app(DiscountService::class)->calculateTotal(40, DeliveryType::Delivery);
 

@@ -8,6 +8,7 @@ import {
     buildPickupBadge,
     buildPickupHint,
     buildPickupMethodSummary,
+    buildDineInMethodSummary,
     buildSummaryChips,
     calculateDeliveryFee,
     calculateSubtotalFromItems,
@@ -338,6 +339,10 @@ export function initCart() {
             return buildPickupMethodSummary(this.subtotal, getDiscountLabels());
         },
 
+        get dineInMethodSummary() {
+            return buildDineInMethodSummary(this.subtotal, getDiscountLabels());
+        },
+
         // Получить общую пищевую ценность
         get totalNutrition() {
             return {
@@ -418,12 +423,12 @@ export function initCart() {
 
             // Верификация не нужна для самовывоза и метода "звонок менеджера"
             const deliveryType = customerData.deliveryType ?? customerData.delivery_type ?? 'delivery';
-            const isPickup = deliveryType === 'pickup';
+            const isOnPremise = deliveryType === 'pickup' || deliveryType === 'dine_in';
             const phoneVerificationEnabled = window.phoneVerificationEnabled !== false;
-            const verificationMethod = isPickup
+            const verificationMethod = isOnPremise
                 ? null
                 : (customerData.verification_method || (phoneVerificationEnabled ? 'sms' : 'callback'));
-            const skipsPhoneVerification = isPickup || verificationMethod === 'callback';
+            const skipsPhoneVerification = isOnPremise || verificationMethod === 'callback';
 
             if (!skipsPhoneVerification && !customerData.verification_request_id) {
                 this.showNotification('Необходимо верифицировать номер телефона', 'error');

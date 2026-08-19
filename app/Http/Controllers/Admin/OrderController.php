@@ -15,6 +15,7 @@ use App\Support\PhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class OrderController extends Controller
@@ -100,7 +101,7 @@ class OrderController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_phone' => ['required', 'string', 'max:20', new ValidPhoneNumber],
             'customer_email' => 'nullable|email|max:255',
-            'delivery_type' => 'required|in:delivery,pickup',
+            'delivery_type' => ['required', Rule::enum(DeliveryType::class)],
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string|max:1000',
             'comment' => 'nullable|string|max:1000',
             'promo_code' => 'nullable|string|max:100',
@@ -221,7 +222,7 @@ class OrderController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_phone' => ['required', 'string', 'max:20', new ValidPhoneNumber],
             'customer_email' => 'nullable|email|max:255',
-            'delivery_type' => 'required|in:delivery,pickup',
+            'delivery_type' => ['required', Rule::enum(DeliveryType::class)],
             'delivery_address' => 'required_if:delivery_type,delivery|nullable|string|max:1000',
             'comment' => 'nullable|string|max:1000',
             'promo_code' => 'nullable|string|max:100',

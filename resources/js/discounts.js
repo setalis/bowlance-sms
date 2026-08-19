@@ -32,8 +32,12 @@ export function calculateSubtotalFromItems(items = []) {
     );
 }
 
+export function isOnPremise(deliveryType) {
+    return deliveryType === 'pickup' || deliveryType === 'dine_in';
+}
+
 export function resolveDiscountForType(deliveryType, subtotal, pickupDiscount, cartTotalDiscounts = []) {
-    if (deliveryType === 'pickup') {
+    if (isOnPremise(deliveryType)) {
         return pickupDiscount ?? null;
     }
 
@@ -283,38 +287,57 @@ export function buildSummaryChips(subtotal, labels = {}, scope = 'all') {
     return chips;
 }
 
+function emptyMethodFigures(labels = {}) {
+    return [{ text: labels.summaryNoDiscount ?? '—', tone: 'muted' }];
+}
+
+function buildOnPremiseMethodSummary(labels = {}, caption = '') {
+    const { pickup } = getDiscountConfig();
+    const pickupBadge = buildPickupBadge(pickup, labels);
+
+    return {
+        figures: pickupBadge
+            ? [{ text: pickupBadge.text, tone: pickupBadge.tone }]
+            : emptyMethodFigures(labels),
+        caption,
+    };
+}
+
 export function buildDeliveryMethodSummary(subtotal, labels = {}) {
     const { cartTotal } = getDiscountConfig();
-    const parts = [];
+    const figures = [];
     const feeBadge = buildDeliveryFeeBadge(subtotal, labels);
 
     if (feeBadge) {
-        parts.push(feeBadge.text);
+        figures.push({ text: feeBadge.text, tone: feeBadge.tone });
     }
-
-    parts.push(labels.deliveryProviderWolt ?? 'Wolt Drive');
 
     const deliveryBadge = buildDeliveryBadge(subtotal, cartTotal, labels);
 
     if (deliveryBadge) {
-        parts.push(deliveryBadge.text);
+        const applicable = resolveDiscountForType('delivery', subtotal, null, cartTotal);
+        const tier = applicable ?? getNextDeliveryTier(subtotal, cartTotal);
+
+        if (tier) {
+            figures.push({
+                text: formatDiscountLabel(tier),
+                tone: deliveryBadge.tone,
+            });
+        }
     }
 
-    return parts.join(', ');
+    return {
+        figures: figures.length > 0 ? figures : emptyMethodFigures(labels),
+        caption: labels.deliveryProviderWolt ?? 'Wolt Drive',
+    };
 }
 
 export function buildPickupMethodSummary(subtotal, labels = {}) {
-    const { pickup } = getDiscountConfig();
-    const parts = [];
-    const pickupBadge = buildPickupBadge(pickup, labels);
+    return buildOnPremiseMethodSummary(labels, labels.pickupFromStore ?? 'Из заведения');
+}
 
-    if (pickupBadge) {
-        parts.push(pickupBadge.text);
-    }
-
-    parts.push(labels.pickupFromStore ?? 'Из заведения');
-
-    return parts.join(', ');
+export function buildDineInMethodSummary(subtotal, labels = {}) {
+    return buildOnPremiseMethodSummary(labels, labels.dineInFromVenue ?? 'На месте');
 }
 
 export function getDiscountAmountForType(deliveryType, subtotal) {

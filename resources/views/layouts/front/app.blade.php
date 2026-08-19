@@ -42,6 +42,7 @@
             'badgeDeliveryFreeShort' => __('frontend.badge_delivery_free'),
             'deliveryProviderWolt' => __('frontend.delivery_provider_wolt'),
             'pickupFromStore' => __('frontend.pickup_from_store'),
+            'dineInFromVenue' => __('frontend.dine_in_from_venue'),
             'summaryNoDiscount' => __('frontend.summary_no_discount'),
             'promotionsSection' => __('frontend.promotions_section'),
         ];
@@ -508,7 +509,7 @@
             },
 
             goToStep3() {
-                if (this.formData.deliveryType === 'pickup') {
+                if (this.isOnPremise()) {
                     this.submitOrder();
                     return;
                 }
@@ -524,7 +525,7 @@
             },
 
             goToStep4() {
-                if (this.formData.deliveryType === 'pickup') {
+                if (this.isOnPremise()) {
                     this.submitOrder();
                     return;
                 }
@@ -650,11 +651,15 @@
             },
             
             orderError: '',
+
+            isOnPremise() {
+                return this.formData.deliveryType === 'pickup' || this.formData.deliveryType === 'dine_in';
+            },
             
             async submitOrder() {
-                const isPickup = this.formData.deliveryType === 'pickup';
+                const isOnPremise = this.isOnPremise();
                 const isCallback = this.verificationMethod === 'callback';
-                const skipsPhoneVerification = isPickup || isCallback;
+                const skipsPhoneVerification = isOnPremise || isCallback;
 
                 if (!skipsPhoneVerification && !this.phoneVerified) {
                     this.$store.cart.showNotification('Необходимо верифицировать номер телефона', 'error');
@@ -666,7 +671,7 @@
                     return;
                 }
 
-                if (!isPickup && !this.formData.deliveryHouse?.trim()) {
+                if (!isOnPremise && !this.formData.deliveryHouse?.trim()) {
                     this.$store.cart.showNotification('Укажите номер дома', 'error');
                     return;
                 }
@@ -679,7 +684,7 @@
                     const orderData = {
                         ...this.formData,
                         phone: this.formData.phone,
-                        verification_method: isPickup ? null : this.verificationMethod,
+                        verification_method: isOnPremise ? null : this.verificationMethod,
                         verification_request_id: skipsPhoneVerification ? null : this.verificationRequestId,
                         confirm_switch_user: this.formData.confirm_switch_user || false,
                         paymentMethod: this.formData.paymentMethod || 'cash',
@@ -848,7 +853,7 @@
                     return this.$store.cart.summaryChips;
                 }
 
-                const scope = this.formData.deliveryType === 'pickup' ? 'pickup' : 'delivery';
+                const scope = this.isOnPremise() ? 'pickup' : 'delivery';
 
                 return window.buildSummaryChips(this.subtotal, window.discountLabels ?? {}, scope);
             },
@@ -887,6 +892,19 @@
 
             get pickupMethodSummary() {
                 return this.$store.cart.pickupMethodSummary;
+            },
+
+            get dineInMethodSummary() {
+                return this.$store.cart.dineInMethodSummary;
+            },
+
+            methodFigureClass(tone) {
+                return {
+                    'text-sky-600 dark:text-sky-400': tone === 'sky',
+                    'text-emerald-600 dark:text-emerald-400': tone === 'emerald',
+                    'text-amber-600 dark:text-amber-400': tone === 'amber',
+                    'text-base-content/35': tone === 'muted',
+                };
             },
 
             get footerTotalIsFrom() {
@@ -936,7 +954,7 @@
                 const labels = window.discountLabels ?? {};
                 const discountLabel = window.formatDiscountLabel(discount);
 
-                if (this.formData.deliveryType === 'pickup') {
+                if (this.isOnPremise()) {
                     return (labels.discountApplied ?? 'Скидка :discount применена').replace(':discount', discountLabel);
                 }
 

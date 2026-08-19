@@ -76,6 +76,14 @@ it('renders delivery and pickup method summaries in checkout', function () {
     $response->assertSuccessful();
     $response->assertSee(__('frontend.delivery_method_title'), false);
     $response->assertSee(__('frontend.pickup_method_title'), false);
-    $response->assertSee('deliveryMethodSummary', false);
-    $response->assertSee('pickupMethodSummary', false);
+    $response->assertSee(__('frontend.dine_in_method_title'), false);
+    $response->assertSee('deliveryMethodSummary.figures', false);
+    $response->assertSee('deliveryMethodSummary.caption', false);
+    $response->assertSee('pickupMethodSummary.figures', false);
+    $response->assertSee('pickupMethodSummary.caption', false);
+    $response->assertSee('dineInMethodSummary.figures', false);
+    $response->assertSee('dineInMethodSummary.caption', false);
+    $response->assertSee('methodFigureClass(figure.tone)', false);
+    $response->assertSee('grid grid-cols-1 sm:grid-cols-3 gap-2', false);
+    $response->assertSee('sm:flex-col sm:items-center sm:text-center', false);
 });

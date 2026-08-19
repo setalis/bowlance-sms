@@ -87,6 +87,8 @@ return [
     'pickup_from_store' => 'From store',
     'delivery_method_title' => 'Delivery',
     'pickup_method_title' => 'Pickup',
+    'dine_in_method_title' => 'Dine in',
+    'dine_in_from_venue' => 'At the venue',
     'summary_no_discount' => '—',
     'promotions_section' => 'Promotions & delivery',
     'checkout' => 'Checkout',

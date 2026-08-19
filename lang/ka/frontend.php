@@ -94,6 +94,8 @@ return [
     'pickup_from_store' => 'შენობიდან',
     'delivery_method_title' => 'მიწოდება',
     'pickup_method_title' => 'თვითმიღება',
+    'dine_in_method_title' => 'დაწესებულებაში',
+    'dine_in_from_venue' => 'ადგილზე',
     'summary_no_discount' => '—',
     'promotions_section' => 'აქციები და მიწოდება',
     'checkout' => 'შეკვეთის გაფორმება',

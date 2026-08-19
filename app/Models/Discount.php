@@ -51,7 +51,7 @@ class Discount extends Model
     public function appliesTo(DeliveryType $deliveryType, float $subtotal): bool
     {
         return match ($this->scope) {
-            DiscountScope::Pickup => $deliveryType === DeliveryType::Pickup,
+            DiscountScope::Pickup => $deliveryType->skipsDelivery(),
             DiscountScope::CartTotal => $deliveryType === DeliveryType::Delivery
                 && $this->min_cart_total !== null
                 && $subtotal >= (float) $this->min_cart_total,
@@ -61,7 +61,7 @@ class Discount extends Model
     public static function resolveForOrder(DeliveryType $deliveryType, float $subtotal): ?self
     {
         return match ($deliveryType) {
-            DeliveryType::Pickup => self::forPickup()->first(),
+            DeliveryType::Pickup, DeliveryType::DineIn => self::forPickup()->first(),
             DeliveryType::Delivery => self::forCartTotal()
                 ->get()
                 ->first(fn (self $discount) => $discount->appliesTo($deliveryType, $subtotal)),

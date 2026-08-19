@@ -9,6 +9,7 @@ import {
     buildDeliveryMethodSummary,
     buildPickupHint,
     buildPickupMethodSummary,
+    buildDineInMethodSummary,
     buildSummaryChips,
     calculateDiscountAmount,
     calculateDeliveryFee,
@@ -45,6 +46,7 @@ window.buildDeliveryFeeHint = buildDeliveryFeeHint;
 window.buildSummaryChips = buildSummaryChips;
 window.buildDeliveryMethodSummary = buildDeliveryMethodSummary;
 window.buildPickupMethodSummary = buildPickupMethodSummary;
+window.buildDineInMethodSummary = buildDineInMethodSummary;
 window.getFooterTotalBeforeSelection = getFooterTotalBeforeSelection;
 window.calculateDeliveryFee = calculateDeliveryFee;
 window.calculateSubtotalFromItems = calculateSubtotalFromItems;

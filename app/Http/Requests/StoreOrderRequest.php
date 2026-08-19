@@ -138,13 +138,18 @@ class StoreOrderRequest extends FormRequest
         });
     }
 
+    public function deliveryType(): ?DeliveryType
+    {
+        return DeliveryType::tryFrom((string) $this->delivery_type);
+    }
+
     public function skipsPhoneVerification(): bool
     {
         if ($this->verification_method === 'callback') {
             return true;
         }
 
-        return $this->delivery_type === DeliveryType::Pickup->value
+        return $this->deliveryType()?->skipsDelivery() === true
             && blank($this->verification_request_id);
     }
 

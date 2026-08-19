@@ -870,6 +870,35 @@ it('позволяет создать заказ на самовывоз без 
         ->and($order->needs_callback)->toBeFalse();
 });
 
+it('позволяет создать заказ в заведении без верификации телефона', function () {
+    $orderData = [
+        'customer_name' => 'Клиент В заведении',
+        'customer_phone' => '+995599000333',
+        'delivery_type' => \App\Enums\DeliveryType::DineIn->value,
+        'payment_method' => \App\Enums\PaymentMethod::Cash->value,
+        'items' => [
+            [
+                'type' => 'bowl',
+                'id' => 1,
+                'name' => 'Тестовый боул',
+                'price' => 18.00,
+                'quantity' => 1,
+            ],
+        ],
+    ];
+
+    $this->postJson('/orders', $orderData)->assertCreated();
+
+    $order = \App\Models\Order::where('customer_phone', '+995599000333')->first();
+
+    expect($order)->not->toBeNull()
+        ->and($order->delivery_type)->toBe(\App\Enums\DeliveryType::DineIn)
+        ->and((float) $order->delivery_fee)->toBe(0.0)
+        ->and($order->phone_verified)->toBeFalse()
+        ->and($order->phone_verified_at)->toBeNull()
+        ->and($order->needs_callback)->toBeFalse();
+});
+
 it('по-прежнему требует верификацию телефона для доставки', function () {
     $orderData = [
         'customer_name' => 'Клиент Доставка',

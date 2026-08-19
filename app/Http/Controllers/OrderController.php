@@ -42,7 +42,6 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $isCallback = $request->verification_method === 'callback';
-            $isPickup = $request->delivery_type === DeliveryType::Pickup->value;
             $skipsPhoneVerification = $request->skipsPhoneVerification();
 
             $customerPhone = PhoneNumber::toE164($request->customer_phone);
