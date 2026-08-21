@@ -297,6 +297,15 @@
                                                     </div>
                                                     <button type="button"
                                                             class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-0 gap-2 {{ !$siteOrdersEnabled ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                            data-addons="{{ json_encode($dish->addons->map(fn ($addon) => [
+                                                                'id' => $addon->id,
+                                                                'name' => $addon->name,
+                                                                'price' => (float) ($addon->pivot->price ?? $addon->price),
+                                                                'calories' => (int) ($addon->calories ?? 0),
+                                                                'proteins' => (float) ($addon->proteins ?? 0),
+                                                                'fats' => (float) ($addon->fats ?? 0),
+                                                                'carbs' => (float) ($addon->carbohydrates ?? 0),
+                                                            ])->values(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) }}"
                                                             @click="
                                                                 const dishPayload = {
                                                                     id: {{ $dish->id }},
@@ -324,15 +333,7 @@
                                                                     sauce_fats: 0,
                                                                     sauce_carbs: 0,
                                                                     @endif
-                                                                    availableAddons: @js($dish->addons->map(fn ($addon) => [
-                                                                        'id' => $addon->id,
-                                                                        'name' => $addon->name,
-                                                                        'price' => (float) ($addon->pivot->price ?? $addon->price),
-                                                                        'calories' => (int) ($addon->calories ?? 0),
-                                                                        'proteins' => (float) ($addon->proteins ?? 0),
-                                                                        'fats' => (float) ($addon->fats ?? 0),
-                                                                        'carbs' => (float) ($addon->carbohydrates ?? 0),
-                                                                    ])->values())
+                                                                    availableAddons: JSON.parse($el.dataset.addons || '[]')
                                                                 };
                                                                 if (dishPayload.availableAddons.length) {
                                                                     $dispatch('open-dish-addons', dishPayload);
@@ -496,29 +497,44 @@
 
             <div class="overflow-y-auto p-6 flex-1 space-y-3">
                 <template x-for="addon in selectedAddons" :key="addon.id">
-                    <div class="flex items-center justify-between gap-3 rounded-lg bg-base-200/60 p-3">
-                        <label class="inline-flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                            <input type="checkbox"
-                                   class="checkbox"
-                                   :checked="addon.quantity > 0"
-                                   @change="toggleAddon(addon.id, $event.target.checked)">
-                            <span class="min-w-0">
-                                <span class="font-medium truncate block" x-text="addon.name"></span>
-                                <span class="text-xs text-base-content/50"
-                                      x-show="addon.calories > 0"
-                                      x-text="addon.calories + ' {{ __('frontend.calories') }}'"></span>
-                            </span>
-                        </label>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-sm font-semibold text-primary" x-text="parseFloat(addon.price).toFixed(2) + ' ₾'"></span>
-                            <div class="flex items-center gap-1" x-show="addon.quantity > 0">
-                                <button type="button" class="btn btn-circle btn-xs" @click="changeQty(addon.id, -1)">
-                                    <span class="icon-[tabler--minus] size-3"></span>
-                                </button>
-                                <span class="min-w-5 text-center text-sm font-bold" x-text="addon.quantity"></span>
-                                <button type="button" class="btn btn-circle btn-xs" @click="changeQty(addon.id, 1)">
-                                    <span class="icon-[tabler--plus] size-3"></span>
-                                </button>
+                    <div class="rounded-lg bg-base-200/60 p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-3">
+                            <label class="inline-flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                                <input type="checkbox"
+                                       class="checkbox"
+                                       :checked="addon.quantity > 0"
+                                       @change="toggleAddon(addon.id, $event.target.checked)">
+                                <span class="font-medium truncate" x-text="addon.name"></span>
+                            </label>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-sm font-semibold text-primary" x-text="parseFloat(addon.price).toFixed(2) + ' ₾'"></span>
+                                <div class="flex items-center gap-1" x-show="addon.quantity > 0">
+                                    <button type="button" class="btn btn-circle btn-xs" @click="changeQty(addon.id, -1)">
+                                        <span class="icon-[tabler--minus] size-3"></span>
+                                    </button>
+                                    <span class="min-w-5 text-center text-sm font-bold" x-text="addon.quantity"></span>
+                                    <button type="button" class="btn btn-circle btn-xs" @click="changeQty(addon.id, 1)">
+                                        <span class="icon-[tabler--plus] size-3"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-1">
+                            <div class="rounded-md bg-amber-50 p-1.5 text-center dark:bg-amber-950/20">
+                                <p class="text-xs font-bold text-amber-600" x-text="Math.round(addon.calories || 0)"></p>
+                                <p class="text-[10px] text-base-content/40">{{ __('frontend.nutrition_calories') }}</p>
+                            </div>
+                            <div class="rounded-md bg-emerald-50 p-1.5 text-center dark:bg-emerald-950/20">
+                                <p class="text-xs font-bold text-emerald-600" x-text="Number(addon.proteins || 0).toFixed(1) + '{{ __('frontend.grams') }}'"></p>
+                                <p class="text-[10px] text-base-content/40">{{ __('frontend.proteins') }}</p>
+                            </div>
+                            <div class="rounded-md bg-orange-50 p-1.5 text-center dark:bg-orange-950/20">
+                                <p class="text-xs font-bold text-orange-500" x-text="Number(addon.fats || 0).toFixed(1) + '{{ __('frontend.grams') }}'"></p>
+                                <p class="text-[10px] text-base-content/40">{{ __('frontend.fats') }}</p>
+                            </div>
+                            <div class="rounded-md bg-blue-50 p-1.5 text-center dark:bg-blue-950/20">
+                                <p class="text-xs font-bold text-blue-500" x-text="Number(addon.carbs || 0).toFixed(1) + '{{ __('frontend.grams') }}'"></p>
+                                <p class="text-[10px] text-base-content/40">{{ __('frontend.carbs') }}</p>
                             </div>
                         </div>
                     </div>
@@ -529,6 +545,16 @@
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-base-content/60">{{ __('frontend.total') }}</span>
                     <span class="text-lg font-bold text-primary" x-text="totalPrice.toFixed(2) + ' ₾'"></span>
+                </div>
+                <div x-show="selectedAddons.some(addon => addon.quantity > 0)" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/50">
+                    <div class="inline-flex items-center gap-1">
+                        <span class="icon-[tabler--flame] size-3 text-amber-500"></span>
+                        <span x-text="Math.round(selectedAddonsNutrition.calories)"></span>
+                        <span>{{ __('frontend.nutrition_calories') }}</span>
+                    </div>
+                    <div>{{ __('frontend.proteins') }} <span class="font-medium text-emerald-600" x-text="selectedAddonsNutrition.proteins.toFixed(1)"></span></div>
+                    <div>{{ __('frontend.fats') }} <span class="font-medium text-orange-500" x-text="selectedAddonsNutrition.fats.toFixed(1)"></span></div>
+                    <div>{{ __('frontend.carbs') }} <span class="font-medium text-blue-500" x-text="selectedAddonsNutrition.carbs.toFixed(1)"></span></div>
                 </div>
                 <div class="flex flex-col gap-2 sm:flex-row">
                     <button type="button" class="btn btn-outline flex-1" @click="addWithoutAddons()">
@@ -580,6 +606,19 @@ function dishAddonsModal() {
                 return;
             }
             addon.quantity = Math.max(0, addon.quantity + delta);
+        },
+
+        get selectedAddonsNutrition() {
+            return this.selectedAddons.reduce((totals, addon) => {
+                const quantity = addon.quantity || 0;
+
+                totals.calories += (Number(addon.calories) || 0) * quantity;
+                totals.proteins += (Number(addon.proteins) || 0) * quantity;
+                totals.fats += (Number(addon.fats) || 0) * quantity;
+                totals.carbs += (Number(addon.carbs) || 0) * quantity;
+
+                return totals;
+            }, { calories: 0, proteins: 0, fats: 0, carbs: 0 });
         },
 
         get totalPrice() {

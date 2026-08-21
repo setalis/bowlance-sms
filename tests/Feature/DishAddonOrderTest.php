@@ -111,7 +111,38 @@ it('includes addon nutrition in the homepage dish payload', function () {
         ->toContain('187')
         ->toContain('12.5')
         ->toContain('3.1')
-        ->toContain('1.4');
+        ->toContain('1.4')
+        ->toContain('data-addons')
+        ->toContain('addon.calories || 0')
+        ->toContain('addon.proteins || 0')
+        ->toContain('addon.fats || 0')
+        ->toContain('addon.carbs || 0')
+        ->toContain('selectedAddonsNutrition');
+});
+
+it('renders addon nutrition grid in the modal even when values are empty', function () {
+    $category = DishCategory::factory()->active()->create();
+    $dish = Dish::factory()->create([
+        'dish_category_id' => $category->id,
+    ]);
+    $addon = DishAddon::factory()->create([
+        'name_ru' => 'Укроп',
+        'calories' => null,
+        'proteins' => null,
+        'fats' => null,
+        'carbohydrates' => null,
+        'is_active' => true,
+    ]);
+    $dish->addons()->attach($addon->id, [
+        'poster_modification_id' => 1,
+        'price' => null,
+        'sort_order' => 0,
+    ]);
+
+    $this->get('/')
+        ->assertSuccessful()
+        ->assertSee('addon.calories || 0', false)
+        ->assertSee('data-addons', false);
 });
 
 it('sends dish modifications to Poster for selected addons', function () {
