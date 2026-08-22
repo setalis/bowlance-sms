@@ -9,22 +9,42 @@ use App\Models\Dish;
 use App\Models\DishAddon;
 use App\Models\DishCategory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DishController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $dishes = Dish::query()
             ->with('category')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->trim()->value();
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('name_ru', 'like', "%{$search}%")
+                        ->orWhere('name_ka', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->filled('category_id'), function ($query) use ($request) {
+                $query->where('dish_category_id', $request->integer('category_id'));
+            })
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
+
+        $categories = DishCategory::query()
+            ->orderBy('sort')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.dishes.index', [
             'title' => 'Блюда',
             'dishes' => $dishes,
+            'categories' => $categories,
         ]);
     }
 

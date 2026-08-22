@@ -19,6 +19,40 @@
             </x-ui.alert>
         @endsession
 
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" action="{{ route('admin.dishes.index') }}" class="flex flex-wrap gap-4">
+                    <div class="flex-1 min-w-[200px]">
+                        <input type="text"
+                               name="search"
+                               value="{{ request('search') }}"
+                               placeholder="Поиск по названию..."
+                               class="input input-bordered w-full">
+                    </div>
+                    <div class="min-w-[220px]">
+                        <select name="category_id" class="select select-bordered w-full">
+                            <option value="">Все категории</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="icon-[tabler--search] size-5"></span>
+                        Поиск
+                    </button>
+                    @if(request()->filled('search') || request()->filled('category_id'))
+                        <a href="{{ route('admin.dishes.index') }}" class="btn btn-ghost">
+                            <span class="icon-[tabler--x] size-5"></span>
+                            Сбросить
+                        </a>
+                    @endif
+                </form>
+            </div>
+        </div>
+
         <div class="rounded-box shadow-base-300/10 bg-base-100 w-full pb-2 shadow-md">
             <div class="overflow-x-auto">
                 <table class="table">
@@ -111,13 +145,25 @@
                                     <div class="flex flex-col items-center gap-4">
                                         <span class="icon-[tabler--tools-kitchen-2] size-12 text-base-content/30"></span>
                                         <div>
-                                            <p class="text-base-content/70 text-lg font-medium">Блюд пока нет</p>
-                                            <p class="text-base-content/50 text-sm">Создайте первое блюдо для начала работы</p>
+                                            @if(request()->filled('search') || request()->filled('category_id'))
+                                                <p class="text-base-content/70 text-lg font-medium">Ничего не найдено</p>
+                                                <p class="text-base-content/50 text-sm">Измените параметры поиска или сбросьте фильтры</p>
+                                            @else
+                                                <p class="text-base-content/70 text-lg font-medium">Блюд пока нет</p>
+                                                <p class="text-base-content/50 text-sm">Создайте первое блюдо для начала работы</p>
+                                            @endif
                                         </div>
-                                        <a href="{{ route('admin.dishes.create') }}" class="btn btn-primary btn-sm">
-                                            <span class="icon-[tabler--plus] size-4"></span>
-                                            Создать блюдо
-                                        </a>
+                                        @if(request()->filled('search') || request()->filled('category_id'))
+                                            <a href="{{ route('admin.dishes.index') }}" class="btn btn-ghost btn-sm">
+                                                <span class="icon-[tabler--x] size-4"></span>
+                                                Сбросить фильтры
+                                            </a>
+                                        @else
+                                            <a href="{{ route('admin.dishes.create') }}" class="btn btn-primary btn-sm">
+                                                <span class="icon-[tabler--plus] size-4"></span>
+                                                Создать блюдо
+                                            </a>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

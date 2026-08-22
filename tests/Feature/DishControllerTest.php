@@ -22,6 +22,7 @@ it('displays dishes index page', function () {
     $response->assertSuccessful();
     $response->assertViewIs('admin.dishes.index');
     $response->assertViewHas('dishes');
+    $response->assertViewHas('categories');
 });
 
 it('displays create dish form', function () {
@@ -262,4 +263,109 @@ it('loads category relationship on index page', function () {
     $response->assertSuccessful();
     $dishes = $response->viewData('dishes');
     expect($dishes->first()->relationLoaded('category'))->toBeTrue();
+});
+
+it('filters dishes by search term in admin', function () {
+    Dish::factory()->create([
+        'name' => 'Борщ украинский',
+        'name_ru' => 'Борщ украинский',
+        'dish_category_id' => $this->category->id,
+    ]);
+    Dish::factory()->create([
+        'name' => 'Салат Цезарь',
+        'name_ru' => 'Салат Цезарь',
+        'dish_category_id' => $this->category->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('admin.dishes.index', [
+        'search' => 'Борщ',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertSee('Борщ украинский');
+    $response->assertDontSee('Салат Цезарь');
+});
+
+it('filters dishes by category in admin', function () {
+    $soups = DishCategory::factory()->create(['name_ru' => 'Супы']);
+    $salads = DishCategory::factory()->create(['name_ru' => 'Салаты']);
+
+    Dish::factory()->create([
+        'name' => 'Борщ',
+        'name_ru' => 'Борщ',
+        'dish_category_id' => $soups->id,
+    ]);
+    Dish::factory()->create([
+        'name' => 'Цезарь',
+        'name_ru' => 'Цезарь',
+        'dish_category_id' => $salads->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('admin.dishes.index', [
+        'category_id' => $soups->id,
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertSee('Борщ');
+    $response->assertDontSee('Цезарь');
+});
+
+it('filters dishes by search and category together', function () {
+    $soups = DishCategory::factory()->create();
+    $salads = DishCategory::factory()->create();
+
+    Dish::factory()->create([
+        'name' => 'Борщ украинский',
+        'name_ru' => 'Борщ украинский',
+        'dish_category_id' => $soups->id,
+    ]);
+    Dish::factory()->create([
+        'name' => 'Борщ зелёный',
+        'name_ru' => 'Борщ зелёный',
+        'dish_category_id' => $salads->id,
+    ]);
+    Dish::factory()->create([
+        'name' => 'Солянка',
+        'name_ru' => 'Солянка',
+        'dish_category_id' => $soups->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('admin.dishes.index', [
+        'search' => 'Борщ',
+        'category_id' => $soups->id,
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertSee('Борщ украинский');
+    $response->assertDontSee('Борщ зелёный');
+    $response->assertDontSee('Солянка');
+});
+
+it('shows empty state when dish filters match nothing', function () {
+    Dish::factory()->create([
+        'name' => 'Борщ',
+        'name_ru' => 'Борщ',
+        'dish_category_id' => $this->category->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('admin.dishes.index', [
+        'search' => 'несуществующее-блюдо',
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertSee('Ничего не найдено');
+    $response->assertDontSee('Борщ');
+});
+
+it('shows search form and category select on dishes index', function () {
+    $this->category->update(['name_ru' => 'Супы']);
+
+    $response = $this->actingAs($this->user)->get(route('admin.dishes.index'));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('categories');
+    $response->assertSee('name="search"', false);
+    $response->assertSee('name="category_id"', false);
+    $response->assertSee('Все категории');
+    $response->assertSee('Супы');
 });
