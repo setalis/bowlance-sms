@@ -39,12 +39,14 @@ class Dish extends Model
         'sauce_carbohydrates',
         'sauce_fiber',
         'sort_order',
+        'is_active',
         'poster_product_id',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_active' => 'boolean',
             'price' => 'decimal:2',
             'discount_price' => 'decimal:2',
             'proteins' => 'decimal:2',

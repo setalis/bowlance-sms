@@ -37,6 +37,7 @@ it('displays create dish form', function () {
 it('can create a new dish', function () {
     $data = [
         'name' => 'Борщ украинский',
+        'name_ru' => 'Борщ украинский',
         'description' => 'Традиционный украинский суп',
         'price' => 350.00,
         'dish_category_id' => $this->category->id,
@@ -69,6 +70,7 @@ it('can upload image when creating dish', function () {
 
     $data = [
         'name' => 'Салат Цезарь',
+        'name_ru' => 'Салат Цезарь',
         'price' => 250.00,
         'dish_category_id' => $this->category->id,
         'image' => $image,
@@ -87,7 +89,7 @@ it('can upload image when creating dish', function () {
 it('validates required fields when creating dish', function () {
     $response = $this->actingAs($this->user)->post(route('admin.dishes.store'), []);
 
-    $response->assertSessionHasErrors(['name', 'price', 'dish_category_id']);
+    $response->assertSessionHasErrors(['name_ru', 'price', 'dish_category_id']);
 });
 
 it('validates price is numeric when creating dish', function () {
@@ -166,6 +168,7 @@ it('can update dish', function () {
 
     $data = [
         'name' => 'Новое название',
+        'name_ru' => 'Новое название',
         'description' => 'Новое описание',
         'price' => 200.00,
         'dish_category_id' => $newCategory->id,
@@ -200,6 +203,7 @@ it('can update dish image', function () {
 
     $data = [
         'name' => $dish->name,
+        'name_ru' => $dish->name_ru ?? $dish->getRawOriginal('name'),
         'price' => $dish->price,
         'dish_category_id' => $this->category->id,
         'image' => $newImage,
@@ -368,4 +372,119 @@ it('shows search form and category select on dishes index', function () {
     $response->assertSee('name="category_id"', false);
     $response->assertSee('Все категории');
     $response->assertSee('Супы');
+});
+
+it('creates a dish as active by default', function () {
+    $response = $this->actingAs($this->user)->post(route('admin.dishes.store'), [
+        'name_ru' => 'Борщ украинский',
+        'price' => 350.00,
+        'dish_category_id' => $this->category->id,
+        'sort_order' => 0,
+        'is_active' => 1,
+    ]);
+
+    $response->assertRedirect(route('admin.dishes.index'));
+
+    $this->assertDatabaseHas('dishes', [
+        'name_ru' => 'Борщ украинский',
+        'is_active' => true,
+    ]);
+});
+
+it('can create an inactive dish', function () {
+    $response = $this->actingAs($this->user)->post(route('admin.dishes.store'), [
+        'name_ru' => 'Солянка',
+        'price' => 400.00,
+        'dish_category_id' => $this->category->id,
+        'sort_order' => 0,
+        'is_active' => 0,
+    ]);
+
+    $response->assertRedirect(route('admin.dishes.index'));
+
+    $this->assertDatabaseHas('dishes', [
+        'name_ru' => 'Солянка',
+        'is_active' => false,
+    ]);
+});
+
+it('can deactivate a dish', function () {
+    $dish = Dish::factory()->create([
+        'dish_category_id' => $this->category->id,
+        'name_ru' => 'Борщ',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->user)->put(route('admin.dishes.update', $dish), [
+        'name_ru' => 'Борщ',
+        'price' => $dish->price,
+        'dish_category_id' => $this->category->id,
+        'sort_order' => 0,
+        'is_active' => 0,
+    ]);
+
+    $response->assertRedirect(route('admin.dishes.index'));
+
+    expect($dish->fresh()->is_active)->toBeFalse();
+});
+
+it('shows dish activity status on the admin index', function () {
+    Dish::factory()->create([
+        'dish_category_id' => $this->category->id,
+        'name_ru' => 'Активное блюдо',
+        'is_active' => true,
+    ]);
+    Dish::factory()->inactive()->create([
+        'dish_category_id' => $this->category->id,
+        'name_ru' => 'Неактивное блюдо',
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('admin.dishes.index'));
+
+    $response->assertSuccessful();
+    $response->assertSee('Активное блюдо');
+    $response->assertSee('Неактивное блюдо');
+    $response->assertSee('Активна');
+    $response->assertSee('Неактивна');
+});
+
+it('shows the active checkbox on create and edit dish forms', function () {
+    $dish = Dish::factory()->create(['dish_category_id' => $this->category->id]);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.dishes.create'))
+        ->assertSuccessful()
+        ->assertSee('name="is_active"', false)
+        ->assertSee('Активна');
+
+    $this->actingAs($this->user)
+        ->get(route('admin.dishes.edit', $dish))
+        ->assertSuccessful()
+        ->assertSee('name="is_active"', false)
+        ->assertSee('Активна');
+});
+
+it('does not show inactive dishes on the home page', function () {
+    $this->category->update([
+        'is_active' => true,
+        'name_ru' => 'Супы',
+    ]);
+
+    Dish::factory()->create([
+        'dish_category_id' => $this->category->id,
+        'name' => 'Борщ',
+        'name_ru' => 'Борщ',
+        'is_active' => true,
+    ]);
+    Dish::factory()->inactive()->create([
+        'dish_category_id' => $this->category->id,
+        'name' => 'Солянка',
+        'name_ru' => 'Солянка',
+    ]);
+
+    $response = $this->get(route('home'));
+
+    $response->assertSuccessful();
+    $response->assertSee('Борщ');
+    $response->assertDontSee('Солянка');
 });

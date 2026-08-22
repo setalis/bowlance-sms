@@ -37,7 +37,13 @@ class DishFactory extends Factory
             'carbohydrates' => fake()->randomFloat(2, 1, 100),
             'fiber' => fake()->randomFloat(2, 0, 10),
             'sort_order' => fake()->numberBetween(0, 100),
+            'is_active' => true,
         ];
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn () => ['is_active' => false]);
     }
 
     /**

@@ -66,6 +66,7 @@
                             <th>Вес/Объем</th>
                             <th>Калории</th>
                             <th>Сортировка</th>
+                            <th>Статус</th>
                             <th>Создано</th>
                             <th>Действия</th>
                         </tr>
@@ -117,6 +118,13 @@
                                 <td>{{ $dish->weight_volume ?? '—' }}</td>
                                 <td>{{ $dish->calories ? $dish->calories . ' ккал' : '—' }}</td>
                                 <td>{{ $dish->sort_order }}</td>
+                                <td>
+                                    @if($dish->is_active)
+                                        <span class="badge badge-success badge-soft">Активна</span>
+                                    @else
+                                        <span class="badge badge-ghost">Неактивна</span>
+                                    @endif
+                                </td>
                                 <td>{{ $dish->created_at->format('d.m.Y') }}</td>
                                 <td>
                                     <div class="flex gap-2">
@@ -141,7 +149,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center py-8">
+                                <td colspan="11" class="text-center py-8">
                                     <div class="flex flex-col items-center gap-4">
                                         <span class="icon-[tabler--tools-kitchen-2] size-12 text-base-content/30"></span>
                                         <div>
