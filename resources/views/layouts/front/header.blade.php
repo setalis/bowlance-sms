@@ -948,7 +948,7 @@
                                     bank="Bank of Georgia"
                                     iban="GE05BG0000000539887879"
                                     iban-formatted="GE05 BG00 0000 0539 8878 79"
-                                    holder="VLADISLAV KRAVCHENKO"
+                                    holder="VASILY CHENKOV"
                                     scheme="mastercard"
                                     gradient="linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #4c1d95 100%)" />
 
@@ -956,7 +956,7 @@
                                     bank="TBC Bank"
                                     iban="GE26TB7836436010100048"
                                     iban-formatted="GE26 TB78 3643 6010 1000 48"
-                                    holder="VLADISLAV KRAVCHENKO"
+                                    holder="VASILY CHENKOV"
                                     scheme="visa"
                                     gradient="linear-gradient(135deg, #0c4a6e 0%, #0284c7 45%, #075985 100%)" />
                             </div>
