@@ -299,35 +299,28 @@ function buildOnPremiseMethodSummary(labels = {}, caption = '') {
         figures: pickupBadge
             ? [{ text: pickupBadge.text, tone: pickupBadge.tone }]
             : emptyMethodFigures(labels),
+        details: [],
         caption,
     };
 }
 
 export function buildDeliveryMethodSummary(subtotal, labels = {}) {
-    const { cartTotal } = getDiscountConfig();
-    const figures = [];
-    const feeBadge = buildDeliveryFeeBadge(subtotal, labels);
+    const { fee } = getDeliveryConfig();
+    const details = [buildFooterDeliveryRule(labels)];
+    const discountRule = buildFooterDiscountRule(labels);
 
-    if (feeBadge) {
-        figures.push({ text: feeBadge.text, tone: feeBadge.tone });
-    }
-
-    const deliveryBadge = buildDeliveryBadge(subtotal, cartTotal, labels);
-
-    if (deliveryBadge) {
-        const applicable = resolveDiscountForType('delivery', subtotal, null, cartTotal);
-        const tier = applicable ?? getNextDeliveryTier(subtotal, cartTotal);
-
-        if (tier) {
-            figures.push({
-                text: formatDiscountLabel(tier),
-                tone: deliveryBadge.tone,
-            });
-        }
+    if (discountRule) {
+        details.push(`${labels.discountLine ?? 'Скидка'}: ${discountRule}`);
     }
 
     return {
-        figures: figures.length > 0 ? figures : emptyMethodFigures(labels),
+        figures: [
+            {
+                text: `${formatLariAmount(fee)} ₾`,
+                tone: 'sky',
+            },
+        ],
+        details,
         caption: labels.deliveryProviderWolt ?? 'Wolt Drive',
     };
 }
@@ -357,6 +350,59 @@ export function getFooterDiscountAmountBeforeSelection() {
 
 export function getFooterTotalBeforeSelection(subtotal) {
     return roundMoney(subtotal + calculateDeliveryFee(subtotal, 'delivery'));
+}
+
+export function formatLariAmount(value) {
+    const amount = roundMoney(value);
+
+    if (Math.round(amount * 100) % 100 === 0) {
+        return String(Math.round(amount));
+    }
+
+    return amount.toFixed(2);
+}
+
+export function formatFooterDeliveryFeeLabel(fee, labels = {}) {
+    if (fee <= 0) {
+        return labels.deliveryFeeFree ?? 'Бесплатно';
+    }
+
+    return `${formatLariAmount(fee)} ₾`;
+}
+
+export function buildFooterDeliveryRule(labels = {}) {
+    const { freeFrom } = getDeliveryConfig();
+
+    return fillTemplate(labels.cartDeliveryFreeFrom ?? 'от :freeFrom ₾ — бесплатно', {
+        freeFrom: formatLariAmount(freeFrom),
+    });
+}
+
+export function formatDiscountSize(discount) {
+    if (!discount) {
+        return '';
+    }
+
+    if (discount.type === 'percent') {
+        return `${parseFloat(discount.size)}%`;
+    }
+
+    return `${formatLariAmount(parseFloat(discount.size))} ₾`;
+}
+
+export function buildFooterDiscountRule(labels = {}) {
+    const { cartTotal } = getDiscountConfig();
+
+    if (!cartTotal?.length) {
+        return '';
+    }
+
+    const tier = [...cartTotal].sort((a, b) => a.min_cart_total - b.min_cart_total)[0];
+
+    return fillTemplate(labels.cartDiscountFrom ?? 'от :threshold ₾ — :discount', {
+        threshold: formatLariAmount(parseFloat(tier.min_cart_total)),
+        discount: formatDiscountSize(tier),
+    });
 }
 
 export function getDiscountConfig() {

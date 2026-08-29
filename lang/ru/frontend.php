@@ -83,6 +83,8 @@ return [
     'delivery_fee_hint' => 'Доставка :fee ₾, бесплатно от :freeFrom ₾',
     'delivery_fee_free' => 'Бесплатно',
     'delivery_fee_add_more' => 'Бесплатная доставка от :freeFrom ₾. Добавьте ещё :remaining ₾',
+    'cart_delivery_free_from' => 'от :freeFrom ₾ — бесплатно',
+    'cart_discount_from' => 'от :threshold ₾ — :discount',
     'cart_from_total_prefix' => 'от',
     'order_details' => 'Детали заказа',
     'order_details_hide' => 'Скрыть детали',

@@ -45,6 +45,8 @@
             'dineInFromVenue' => __('frontend.dine_in_from_venue'),
             'summaryNoDiscount' => __('frontend.summary_no_discount'),
             'promotionsSection' => __('frontend.promotions_section'),
+            'cartDeliveryFreeFrom' => __('frontend.cart_delivery_free_from'),
+            'cartDiscountFrom' => __('frontend.cart_discount_from'),
         ];
     @endphp
     <script>
@@ -89,7 +91,7 @@
                 <button type="button" class="flex items-center justify-center gap-3 w-full" aria-label="{{ __('frontend.location') }}">
                     <span class="icon-[tabler--live-view] bg-amber-700 size-10 mr-3"></span>
                     <div class="flex flex-col items-start">
-                        <span class="text-xs text-base-content/50 text-start">Пн-Вс 10:00-22:00</span>
+                        <span class="text-xs text-base-content/50 text-start">Пн-Вс 10:00-21:00</span>
                         <span class="text-md font-bold text-start">{{ __('frontend.location') }}</span>
                     </div>
                 </button>

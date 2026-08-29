@@ -13,7 +13,7 @@
         <div class="navbar-center hidden md:flex gap-2 md:gap-6 items-center">
 
             <!-- Телефон -->
-            <a href="tel:+995555123456" class="flex items-center justify-center gap-3" aria-label="{{ __('frontend.phone') }}">
+            <a href="tel:+995500700877" class="flex items-center justify-center gap-3" aria-label="{{ __('frontend.phone') }}">
                 <span class="icon-[tabler--phone] size-10 text-emerald-600 mr-3"></span>
                 <div class="flex flex-col">                    
                     <span class="text-xs text-base-content/50">Заказать по телефону:</span>
@@ -25,7 +25,7 @@
             <button type="button" class="flex items-center justify-center gap-3" aria-label="{{ __('frontend.location') }}">
                 <span class="icon-[tabler--live-view] bg-amber-700 size-10"></span>
                 <div class="flex flex-col items-start">                    
-                    <span class="text-xs text-base-content/50">Пн-Вс 10:00-22:00</span>
+                    <span class="text-xs text-base-content/50">Пн-Вс 10:00-21:00</span>
                     <span class="text-base font-bold">{{ __('frontend.location') }}</span>
                 </div>
             </button>
@@ -828,8 +828,8 @@
                             <div>
                                 <p class="font-semibold text-sm text-emerald-800 dark:text-emerald-200">Самовывоз из заведения</p>
                                 <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Заказ забрать по адресу: 174, Мепе Парнаваз Мепе, Батуми 6000, Грузия</p>
-                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Время работы: 10:00 - 20:00</p>
-                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Телефон: +995 555 123 456</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Время работы: 10:00 - 21:00</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Телефон: +995 500 700 877</p>
                                 <a href="https://maps.app.goo.gl/MBzMJjTLa977ah886?g_st=ic" target="_blank" class="text-base text-emerald-700 dark:text-emerald-300/70 mt-0.5">Посмотреть на карте</a>                               
                             </div>
                         </div>
@@ -843,8 +843,8 @@
                             <div>
                                 <p class="font-semibold text-sm text-emerald-800 dark:text-emerald-200">{{ __('frontend.dine_in_method_title') }}</p>
                                 <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Заказ в заведении: 174, Мепе Парнаваз Мепе, Батуми 6000, Грузия</p>
-                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Время работы: 10:00 - 20:00</p>
-                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Телефон: +995 555 123 456</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Время работы: 10:00 - 21:00</p>
+                                <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Телефон: +995 500 700 877</p>
                             </div>
                         </div>
 
@@ -948,7 +948,7 @@
                                     bank="Bank of Georgia"
                                     iban="GE05BG0000000539887879"
                                     iban-formatted="GE05 BG00 0000 0539 8878 79"
-                                    holder="VASILY CHENKOV"
+                                    holder="VLADYSLAV KRAVCHENKO"
                                     scheme="mastercard"
                                     gradient="linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #4c1d95 100%)" />
 
@@ -956,7 +956,7 @@
                                     bank="TBC Bank"
                                     iban="GE26TB7836436010100048"
                                     iban-formatted="GE26 TB78 3643 6010 1000 48"
-                                    holder="VASILY CHENKOV"
+                                    holder="VASYL CHENKOV"
                                     scheme="visa"
                                     gradient="linear-gradient(135deg, #0c4a6e 0%, #0284c7 45%, #075985 100%)" />
                             </div>

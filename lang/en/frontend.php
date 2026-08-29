@@ -76,6 +76,8 @@ return [
     'delivery_fee_hint' => 'Delivery :fee ₾, free from :freeFrom ₾',
     'delivery_fee_free' => 'Free',
     'delivery_fee_add_more' => 'Free delivery from :freeFrom ₾. Add :remaining ₾ more',
+    'cart_delivery_free_from' => 'from :freeFrom ₾ — free',
+    'cart_discount_from' => 'from :threshold ₾ — :discount',
     'cart_from_total_prefix' => 'from',
     'order_details' => 'Order details',
     'order_details_hide' => 'Hide details',

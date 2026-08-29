@@ -83,6 +83,8 @@ return [
     'delivery_fee_hint' => 'მიწოდება :fee ₾, უფასო :freeFrom ₾-დან',
     'delivery_fee_free' => 'უფასო',
     'delivery_fee_add_more' => 'უფასო მიწოდება :freeFrom ₾-დან. დაამატეთ კიდევ :remaining ₾',
+    'cart_delivery_free_from' => ':freeFrom ₾-დან — უფასო',
+    'cart_discount_from' => ':threshold ₾-დან — :discount',
     'cart_from_total_prefix' => 'დან',
     'order_details' => 'შეკვეთის დეტალები',
     'order_details_hide' => 'დამალვა',

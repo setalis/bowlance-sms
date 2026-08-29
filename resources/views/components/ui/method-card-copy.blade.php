@@ -11,6 +11,11 @@
                   x-text="figure.text"></span>
         </template>
     </p>
+    <template x-for="line in ({{ $summary }}.details || [])" :key="line">
+        <p class="text-[11px] text-base-content/50 leading-snug mt-0.5" x-text="line"></p>
+    </template>
     <p class="text-[11px] text-base-content/50 leading-snug mt-0.5"
+       x-show="{{ $summary }}.caption"
+       x-cloak
        x-text="{{ $summary }}.caption"></p>
 </div>

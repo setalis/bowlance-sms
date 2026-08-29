@@ -21,6 +21,9 @@ import {
     getDiscountLabels,
     resolveDiscountForType,
     roundMoney,
+    formatFooterDeliveryFeeLabel,
+    buildFooterDeliveryRule,
+    buildFooterDiscountRule,
 } from './discounts';
 import {
     composePhone,
@@ -48,6 +51,9 @@ window.buildDeliveryMethodSummary = buildDeliveryMethodSummary;
 window.buildPickupMethodSummary = buildPickupMethodSummary;
 window.buildDineInMethodSummary = buildDineInMethodSummary;
 window.getFooterTotalBeforeSelection = getFooterTotalBeforeSelection;
+window.formatFooterDeliveryFeeLabel = formatFooterDeliveryFeeLabel;
+window.buildFooterDeliveryRule = buildFooterDeliveryRule;
+window.buildFooterDiscountRule = buildFooterDiscountRule;
 window.calculateDeliveryFee = calculateDeliveryFee;
 window.calculateSubtotalFromItems = calculateSubtotalFromItems;
 window.buildDeliveryHint = buildDeliveryHint;
