@@ -17,7 +17,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+    @stack('head')
 </head>
 
 <body class="overflow-x-clip overscroll-x-none max-w-full" x-data data-orders-enabled="{{ $siteOrdersEnabled ? '1' : '0' }}">

@@ -1,22 +1,32 @@
 @extends('layouts.front.app')
 
+@push('head')
+    <link rel="preload" as="image" type="image/webp" href="{{ asset('storage/images/slider/slider-m-1.webp') }}" media="(max-width: 767px)">
+    <link rel="preload" as="image" type="image/webp" href="{{ asset('storage/images/slider/slider-d-1.webp') }}" media="(min-width: 768px)">
+@endpush
+
 @section('content')
     <!-- Слайдер -->
     <div data-carousel='{
-        "loadingClasses": "opacity-0",
         "dotsItemClasses": "carousel-box carousel-active:bg-primary",
         "isAutoPlay": false, "speed": 7000
     }' class="relative w-full rounded-xl overflow-hidden shadow-lg">
         <div class="carousel h-1/2 md:h-96">
-            <div class="carousel-body h-full opacity-0">
+            <div class="carousel-body h-full">
                 <div class="carousel-slide active">
                     <div class="relative h-full w-full">
-                        <img src="{{ asset('storage/images/slider/slider-m-1.jpg') }}" 
-                             alt="Доставка по Батуми - бесплатно!" 
-                             class="h-full w-full object-cover md:hidden">
-                        <img src="{{ asset('storage/images/slider/slider-d-1.jpg') }}" 
-                             alt="Доставка по Батуми - бесплатно!" 
-                             class="h-full w-full object-cover hidden md:block">
+                        <picture>
+                            <source media="(min-width: 768px)" type="image/webp" srcset="{{ asset('storage/images/slider/slider-d-1.webp') }}">
+                            <source media="(min-width: 768px)" srcset="{{ asset('storage/images/slider/slider-d-1.jpg') }}">
+                            <source type="image/webp" srcset="{{ asset('storage/images/slider/slider-m-1.webp') }}">
+                            <img src="{{ asset('storage/images/slider/slider-m-1.jpg') }}"
+                                 alt="Доставка по Батуми - бесплатно!"
+                                 width="721"
+                                 height="1279"
+                                 fetchpriority="high"
+                                 decoding="async"
+                                 class="h-full w-full object-cover">
+                        </picture>
                         <!-- Градиентная подложка -->
                         <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60"></div> -->
                         <!-- Текстовый блок без размытия -->
@@ -41,12 +51,19 @@
                 </div>
                 <div class="carousel-slide">
                     <div class="relative h-full w-full">
-                        <img src="{{ asset('storage/images/slider/slider-m-2.jpg') }}" 
-                             alt="Скидка 10% от 100 лари" 
-                             class="h-full w-full object-cover md:hidden">
-                        <img src="{{ asset('storage/images/slider/slider-d-2.jpg') }}" 
-                             alt="Скидка 10% от 100 лари" 
-                             class="h-full w-full object-cover hidden md:block">
+                        <picture>
+                            <source media="(min-width: 768px)" type="image/webp" srcset="{{ asset('storage/images/slider/slider-d-2.webp') }}">
+                            <source media="(min-width: 768px)" srcset="{{ asset('storage/images/slider/slider-d-2.jpg') }}">
+                            <source type="image/webp" srcset="{{ asset('storage/images/slider/slider-m-2.webp') }}">
+                            <img src="{{ asset('storage/images/slider/slider-m-2.jpg') }}"
+                                 alt="Скидка 10% от 100 лари"
+                                 width="717"
+                                 height="1280"
+                                 loading="lazy"
+                                 fetchpriority="low"
+                                 decoding="async"
+                                 class="h-full w-full object-cover">
+                        </picture>
 
                         <!-- <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
                             <h2 class="mb-4 text-4xl font-black sm:text-5xl">{{ __('frontend.slider_2_title') }}</h2>
@@ -64,12 +81,19 @@
                 </div>
                 <div class="carousel-slide">
                     <div class="relative h-full w-full">
-                        <img src="{{ asset('storage/images/slider/slider-m-3.jpg') }}" 
-                             alt="Скидка 15% на самовывоз" 
-                             class="h-full w-full object-cover md:hidden">
-                        <img src="{{ asset('storage/images/slider/slider-d-3.jpg') }}" 
-                             alt="Скидка 15% на самовывоз" 
-                             class="h-full w-full object-cover hidden md:block">
+                        <picture>
+                            <source media="(min-width: 768px)" type="image/webp" srcset="{{ asset('storage/images/slider/slider-d-3.webp') }}">
+                            <source media="(min-width: 768px)" srcset="{{ asset('storage/images/slider/slider-d-3.jpg') }}">
+                            <source type="image/webp" srcset="{{ asset('storage/images/slider/slider-m-3.webp') }}">
+                            <img src="{{ asset('storage/images/slider/slider-m-3.jpg') }}"
+                                 alt="Скидка 15% на самовывоз"
+                                 width="715"
+                                 height="1280"
+                                 loading="lazy"
+                                 fetchpriority="low"
+                                 decoding="async"
+                                 class="h-full w-full object-cover">
+                        </picture>
 
                          <!-- <div class="absolute inset-0 flex flex-col items-start justify-start pt-10 px-6 md:px-20">                        
                             <h2 class="mb-4 text-4xl font-black sm:text-5xl">{{ __('frontend.slider_3_title') }}</h2>
