@@ -22,8 +22,8 @@
                     <h4 class="text-base-content text-lg font-semibold">Основная информация</h4>
                     
                     <div>
-                        <span class="label-text">Категории*</span>
-                        <p class="text-base-content/60 text-xs mt-1 mb-3">Можно выбрать несколько категорий — в том числе из обоих конструкторов</p>
+                        <span class="label-text">Категории</span>
+                        <p class="text-base-content/60 text-xs mt-1 mb-3">Можно выбрать несколько категорий — в том числе из обоих конструкторов. Если снять все галочки, продукт не будет отображаться в конструкторах (например, если его нет в наличии).</p>
                         <div class="space-y-4">
                             @foreach(\App\Enums\ConstructorType::cases() as $constructorType)
                                 @php

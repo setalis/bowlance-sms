@@ -25,7 +25,7 @@ class UpdateConstructorProductRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'description_ru' => ['nullable', 'string'],
             'description_ka' => ['nullable', 'string'],
-            'category_ids' => ['required', 'array', 'min:1'],
+            'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:constructor_categories,id'],
             'image' => ['nullable', 'image', 'max:2048'],
             'sort_order' => ['integer', 'min:0'],
@@ -58,8 +58,6 @@ class UpdateConstructorProductRequest extends FormRequest
             'name_ru.required' => 'Название продукта на русском языке обязательно для заполнения.',
             'name_ru.max' => 'Название не должно превышать 255 символов.',
             'name_ka.max' => 'Название на грузинском языке не должно превышать 255 символов.',
-            'category_ids.required' => 'Выберите хотя бы одну категорию.',
-            'category_ids.min' => 'Выберите хотя бы одну категорию.',
             'category_ids.*.exists' => 'Выбранная категория не существует.',
             'image.image' => 'Файл должен быть изображением.',
             'image.max' => 'Размер изображения не должен превышать 2 МБ.',
@@ -78,6 +76,13 @@ class UpdateConstructorProductRequest extends FormRequest
         }
 
         return $messages;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'category_ids' => $this->input('category_ids', []),
+        ]);
     }
 
     /**

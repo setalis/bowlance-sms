@@ -75,7 +75,7 @@ class ConstructorProductController extends Controller
         }
 
         $product = ConstructorProduct::create($data);
-        $product->categories()->sync($request->validated('category_ids'));
+        $product->categories()->sync($request->validated('category_ids') ?? []);
         $this->syncVariants($product, $request->selectedConstructorTypes(), $request->validated('variants', []));
 
         return redirect()
@@ -112,7 +112,7 @@ class ConstructorProductController extends Controller
         }
 
         $constructorProduct->update($data);
-        $constructorProduct->categories()->sync($request->validated('category_ids'));
+        $constructorProduct->categories()->sync($request->validated('category_ids') ?? []);
         $this->syncVariants($constructorProduct, $request->selectedConstructorTypes(), $request->validated('variants', []));
 
         return redirect()
@@ -139,6 +139,10 @@ class ConstructorProductController extends Controller
      */
     protected function syncVariants(ConstructorProduct $product, array $types, array $variants): void
     {
+        if ($types === []) {
+            return;
+        }
+
         $typeValues = collect($types)->map(fn (ConstructorType $type) => $type->value)->all();
 
         $product->variants()->whereNotIn('type', $typeValues)->delete();
