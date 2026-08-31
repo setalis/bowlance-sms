@@ -1166,7 +1166,7 @@
                                     <div>
                                         <p class="font-semibold text-amber-800 dark:text-amber-200 text-sm">Менеджер перезвонит вам</p>
                                         <p class="text-xs text-amber-700/80 dark:text-amber-300/80 mt-0.5">
-                                            Заказ будет создан, и наш менеджер позвонит на номер
+                                        Спасибо за заказ! Мы уже начали готовить ❤️ Менеджер перезвонит вам на номер 
                                             <strong x-text="formData.phone || ('+' + selectedPhoneCountry().dial + ' ' + formData.phoneLocal)"></strong> для подтверждения.
                                         </p>
                                     </div>
