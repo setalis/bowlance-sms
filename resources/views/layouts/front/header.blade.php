@@ -848,6 +848,14 @@
                             </div>
                         </div>
 
+                        <div x-show="isOnPremise()" x-cloak>
+                            <label class="text-xs font-medium text-base-content/60 mb-1 block">{{ __('frontend.order_comment') }}</label>
+                            <textarea x-model="formData.comment"
+                                      class="textarea textarea-bordered w-full rounded-xl text-sm focus:border-emerald-400"
+                                      rows="2"
+                                      placeholder="{{ __('frontend.comment_placeholder') }}"></textarea>
+                        </div>
+
                         <div>
                             <label class="text-xs font-medium text-base-content/60 mb-1 block">{{ __('frontend.promo_code') }}</label>
                             <input type="text"
