@@ -962,7 +962,7 @@
 
                                 <x-ui.bank-card
                                     bank="TBC Bank"
-                                    iban="GE26TB7836436010100048"
+                                    iban="GE23TB7836445064400008"
                                     iban-formatted="GE26 TB78 3643 6010 1000 48"
                                     holder="VASYL CHENKOV"
                                     scheme="visa"
