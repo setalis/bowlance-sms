@@ -53,6 +53,7 @@ it('stores delivery fee when creating delivery order below threshold', function 
 
     $response = $this->postJson('/orders', [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_address' => 'Batumi, ул. Тестовая, 123',

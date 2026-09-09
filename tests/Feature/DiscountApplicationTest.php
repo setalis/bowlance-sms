@@ -102,6 +102,7 @@ it('applies pickup discount when creating dine-in order', function () {
 
     $response = $this->postJson('/orders', [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => DeliveryType::DineIn->value,
         'items' => [
@@ -137,6 +138,7 @@ it('applies cart total discount when creating delivery order', function () {
 
     $response = $this->postJson('/orders', [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_address' => 'Batumi, ул. Тестовая, 123',
@@ -175,6 +177,7 @@ it('does not apply cart total discount below threshold when creating delivery or
 
     $response = $this->postJson('/orders', [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_address' => 'Batumi, ул. Тестовая, 123',

@@ -16,6 +16,7 @@ function deliveryOrderPayload(array $overrides = []): array
 {
     return array_merge([
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
         'delivery_type' => 'delivery',

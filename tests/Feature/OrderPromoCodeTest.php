@@ -27,6 +27,7 @@ it('сохраняет промокод при создании заказа', f
 
     $response = $this->postJson('/orders', [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
         'delivery_type' => 'delivery',
@@ -66,6 +67,7 @@ it('письмо администратору содержит промокод'
 
     $this->postJson('/orders', [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555100300',
         'delivery_type' => 'delivery',
         'delivery_city' => 'Batumi',

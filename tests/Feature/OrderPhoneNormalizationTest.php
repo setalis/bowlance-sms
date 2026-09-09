@@ -36,6 +36,7 @@ function postBreakfastOrder(array $payload = []): Illuminate\Testing\TestRespons
 
     return test()->postJson('/orders', array_merge([
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_email' => 'test@example.com',
         'delivery_type' => 'pickup',
         'payment_method' => 'cash',

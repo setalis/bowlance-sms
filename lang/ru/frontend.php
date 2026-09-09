@@ -121,6 +121,10 @@ return [
     'submit' => 'Оформить',
     'submitting' => 'Отправка...',
     'required' => '*',
+    'personal_data_consent_page' => 'Согласие на обработку персональных данных',
+    'personal_data_consent_prefix' => 'Я согласен(на) на',
+    'personal_data_consent_link' => 'обработку персональных данных',
+    'personal_data_consent_required' => 'Необходимо согласие на обработку персональных данных',
 
     // Order
     'back_to_order' => 'Назад к заказу',

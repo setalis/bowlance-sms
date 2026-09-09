@@ -296,6 +296,7 @@ it('сохраняет drink_id при создании заказа с напи
 
     $this->postJson('/orders', [
         'customer_name' => 'Тест',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'items' => [

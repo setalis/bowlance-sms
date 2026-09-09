@@ -14,6 +14,7 @@ beforeEach(function () {
 it('требует верификацию телефона при создании заказа', function () {
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
         'delivery_type' => 'delivery',
@@ -42,6 +43,7 @@ it('не позволяет создать заказ без верифицир�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
         'delivery_type' => 'delivery',
@@ -69,6 +71,7 @@ it('позволяет создать заказ с верифицированн
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
         'delivery_type' => 'delivery',
@@ -119,6 +122,7 @@ it('не позволяет создать заказ с истекшей вер
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -146,6 +150,7 @@ it('не позволяет использовать чужую верифика
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -173,6 +178,7 @@ it('сохраняет данные о верификации телефона �
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -208,6 +214,7 @@ it('требует указания типа доставки при созда�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'verification_request_id' => $verification->request_id,
         'items' => [
@@ -234,6 +241,7 @@ it('требует адрес доставки при выборе достав�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'verification_request_id' => $verification->request_id,
@@ -261,6 +269,7 @@ it('не требует адрес доставки при выборе само
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -293,6 +302,7 @@ it('создает нового пользователя и авторизует
 
     $orderData = [
         'customer_name' => 'Новый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'new@example.com',
         'delivery_type' => 'pickup',
@@ -343,6 +353,7 @@ it('авторизует существующего пользователя п�
 
     $orderData = [
         'customer_name' => 'Другое Имя',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -380,6 +391,7 @@ it('генерирует email-заглушку если email не указан
 
     $orderData = [
         'customer_name' => 'Клиент без email',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -424,6 +436,7 @@ it('требует подтверждения при попытке перекл
 
     $orderData = [
         'customer_name' => 'Тест',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555222222',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -477,6 +490,7 @@ it('переключает пользователя после подтверж�
 
     $orderData = [
         'customer_name' => 'Тест',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555222222',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -518,6 +532,7 @@ it('не требует подтверждения если телефон пр�
 
     $orderData = [
         'customer_name' => 'Тест',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -558,6 +573,7 @@ it('применяет скидку за самовывоз при создан�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -589,6 +605,7 @@ it('корректно рассчитывает сумму боула с про�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -634,6 +651,7 @@ it('сохраняет delivery_city, delivery_street, delivery_house в адр�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_address' => 'Batumi, Agmashenebeli 50',
@@ -711,6 +729,7 @@ it('создаёт доставку в Wolt Drive для заказа с дос�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
         'delivery_type' => 'delivery',
@@ -755,6 +774,7 @@ it('создаёт доставку в Wolt Drive для заказа с дос�
 it('позволяет создать заказ с методом callback без верификации телефона', function () {
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => 'test@example.com',
         'delivery_type' => 'delivery',
@@ -793,6 +813,7 @@ it('позволяет создать заказ с методом callback бе
 it('не позволяет создать заказ без verification_request_id для метода sms', function () {
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_city' => 'Batumi',
@@ -818,6 +839,7 @@ it('не позволяет создать заказ без verification_reques
 it('заказ с callback имеет корректные флаги phone_verified и needs_callback', function () {
     $orderData = [
         'customer_name' => 'Клиент Callback',
+        'personal_data_consent' => true,
         'customer_phone' => '+995599000111',
         'delivery_type' => 'pickup',
         'verification_method' => 'callback',
@@ -844,6 +866,7 @@ it('заказ с callback имеет корректные флаги phone_veri
 it('позволяет создать заказ на самовывоз без верификации телефона', function () {
     $orderData = [
         'customer_name' => 'Клиент Самовывоз',
+        'personal_data_consent' => true,
         'customer_phone' => '+995599000222',
         'delivery_type' => \App\Enums\DeliveryType::Pickup->value,
         'payment_method' => \App\Enums\PaymentMethod::Cash->value,
@@ -873,6 +896,7 @@ it('позволяет создать заказ на самовывоз без 
 it('позволяет создать заказ в заведении без верификации телефона', function () {
     $orderData = [
         'customer_name' => 'Клиент В заведении',
+        'personal_data_consent' => true,
         'customer_phone' => '+995599000333',
         'delivery_type' => \App\Enums\DeliveryType::DineIn->value,
         'payment_method' => \App\Enums\PaymentMethod::Cash->value,
@@ -902,6 +926,7 @@ it('позволяет создать заказ в заведении без в
 it('по-прежнему требует верификацию телефона для доставки', function () {
     $orderData = [
         'customer_name' => 'Клиент Доставка',
+        'personal_data_consent' => true,
         'customer_phone' => '+995599000333',
         'delivery_type' => \App\Enums\DeliveryType::Delivery->value,
         'delivery_city' => 'Batumi',
@@ -930,6 +955,7 @@ it('сохраняет способ оплаты наличными по умо�
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,
@@ -957,6 +983,7 @@ it('сохраняет способ оплаты банковским перев
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'payment_method' => 'bank_transfer',
@@ -985,6 +1012,7 @@ it('отклоняет некорректный способ оплаты', func
 
     $orderData = [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'payment_method' => 'bitcoin',

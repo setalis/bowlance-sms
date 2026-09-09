@@ -60,6 +60,11 @@
 
         <div class="mt-8 border-t border-base-content/10 pt-6 text-center text-sm text-base-content/60">
             <p>&copy; {{ date('Y') }} Bowlance. Все права защищены.</p>
+            <p class="mt-2">
+                <a href="{{ route('legal.personal-data-consent') }}" class="hover:text-primary">
+                    {{ __('frontend.personal_data_consent_page') }}
+                </a>
+            </p>
         </div>
     </div>
 </footer>

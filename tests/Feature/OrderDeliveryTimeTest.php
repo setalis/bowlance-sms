@@ -12,6 +12,7 @@ function baseOrderData(array $overrides = []): array
 {
     return array_merge([
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_city' => 'Batumi',

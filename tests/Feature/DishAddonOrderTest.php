@@ -47,6 +47,7 @@ it('saves dish addons and recalculates price on checkout', function () {
 
     $response = $this->postJson('/orders', [
         'customer_name' => 'Тест',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'pickup',
         'verification_request_id' => $verification->request_id,

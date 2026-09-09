@@ -17,6 +17,7 @@ beforeEach(function () {
 it('сохраняет комментарий для заказа на вынос и в заведении', function (DeliveryType $deliveryType) {
     $response = $this->postJson('/orders', [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => $deliveryType->value,
         'comment' => 'Без лука',

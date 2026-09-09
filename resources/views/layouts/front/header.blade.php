@@ -881,10 +881,11 @@
                         </button>
 
                         <!-- Самовывоз и в заведении: сразу оформить заказ (без оплаты и подтверждения телефона) -->
+                        <x-ui.personal-data-consent id="personal-data-consent-pickup" x-show="isOnPremise()" x-cloak />
                         <button type="submit"
                                 x-show="isOnPremise()"
                                 class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
-                                :disabled="loading">
+                                :disabled="loading || !formData.personalDataConsent">
                             <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
                             <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                             <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
@@ -1154,9 +1155,10 @@
                                 <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
                             </div>
 
+                            <x-ui.personal-data-consent id="personal-data-consent-verified" />
                             <button type="submit"
                                     class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
-                                    :disabled="loading">
+                                    :disabled="loading || !formData.personalDataConsent">
                                 <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
                                 <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                                 <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
@@ -1190,9 +1192,10 @@
                                 <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
                             </div>
 
+                            <x-ui.personal-data-consent id="personal-data-consent-callback" />
                             <button type="submit"
                                     class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
-                                    :disabled="loading">
+                                    :disabled="loading || !formData.personalDataConsent">
                                 <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
                                 <span x-show="loading" class="loading loading-spinner loading-sm"></span>
                                 <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>

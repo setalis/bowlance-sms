@@ -121,6 +121,10 @@ return [
     'submit' => 'გაფორმება',
     'submitting' => 'გაგზავნა...',
     'required' => '*',
+    'personal_data_consent_page' => 'პერსონალური მონაცემების დამუშავებაზე თანხმობა',
+    'personal_data_consent_prefix' => 'ვეთანხმები',
+    'personal_data_consent_link' => 'პერსონალური მონაცემების დამუშავებას',
+    'personal_data_consent_required' => 'საჭიროა თანხმობა პერსონალური მონაცემების დამუშავებაზე',
 
     // Order
     'back_to_order' => 'უკან შეკვეთაზე',

@@ -19,6 +19,7 @@ it('returns 503 and message when orders are disabled', function () {
 
     $payload = [
         'customer_name' => 'Test User',
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'customer_email' => null,
         'delivery_type' => 'pickup',

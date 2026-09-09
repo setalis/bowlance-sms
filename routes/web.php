@@ -27,6 +27,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::view('/personal-data-consent', 'frontend.personal-data-consent', [
+    'title' => 'Согласие на обработку персональных данных',
+])->name('legal.personal-data-consent');
+
 // Переключение языка
 Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
 

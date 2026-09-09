@@ -483,6 +483,7 @@ export function initCart() {
                     verification_method: verificationMethod,
                     verification_request_id: skipsPhoneVerification ? null : customerData.verification_request_id,
                     confirm_switch_user: customerData.confirm_switch_user || false,
+                    personal_data_consent: customerData.personalDataConsent || customerData.personal_data_consent || false,
                     items: this.items.map(item => ({
                         type: item.type,
                         id: item.id,

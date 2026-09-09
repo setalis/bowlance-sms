@@ -149,6 +149,7 @@ it('адрес автоматически сохраняется при созд
 
     $orderData = [
         'customer_name' => $user->name,
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_address' => 'Batumi, ул. Новая, 789',
@@ -198,6 +199,7 @@ it('не создаются дубликаты адресов при заказ�
 
     $orderData = [
         'customer_name' => $user->name,
+        'personal_data_consent' => true,
         'customer_phone' => '+995555123456',
         'delivery_type' => 'delivery',
         'delivery_address' => 'ул. Существующая, 123',

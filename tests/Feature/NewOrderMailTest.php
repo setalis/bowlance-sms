@@ -16,6 +16,7 @@ function validOrderPayload(string $phone, string $requestId): array
 {
     return [
         'customer_name' => 'Тестовый Клиент',
+        'personal_data_consent' => true,
         'customer_phone' => $phone,
         'customer_email' => 'client@example.com',
         'delivery_type' => 'delivery',

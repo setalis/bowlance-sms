@@ -53,6 +53,7 @@
         window.siteOrdersEnabled = @json($siteOrdersEnabled);
         window.phoneVerificationEnabled = @json($phoneVerificationEnabled ?? true);
         window.ordersUnavailableMessage = @json(__('frontend.orders_unavailable'));
+        window.personalDataConsentRequiredMessage = @json(__('frontend.personal_data_consent_required'));
         window.discountConfig = {
             pickup: @json($pickupDiscount ? ['size' => (float) $pickupDiscount->size, 'type' => $pickupDiscount->type->value] : null),
             cartTotal: @json($cartTotalDiscounts ?? []),
@@ -293,7 +294,8 @@
                 leaveAtDoor: false,
                 comment: '',
                 promoCode: '',
-                paymentMethod: 'cash'
+                paymentMethod: 'cash',
+                personalDataConsent: false
             },
             
             phoneVerification: null,
@@ -677,6 +679,14 @@
                     this.$store.cart.showNotification('Укажите номер дома', 'error');
                     return;
                 }
+
+                if (!this.formData.personalDataConsent) {
+                    this.$store.cart.showNotification(
+                        window.personalDataConsentRequiredMessage || 'Необходимо согласие на обработку персональных данных',
+                        'error'
+                    );
+                    return;
+                }
                 
                 this.loading = true;
                 this.orderError = '';
@@ -766,7 +776,8 @@
                     leaveAtDoor: false,
                     comment: '',
                     promoCode: '',
-                    paymentMethod: 'cash'
+                    paymentMethod: 'cash',
+                    personalDataConsent: false
                 };
                 this.step = 1;
                 this.verificationMethod = this.phoneVerificationEnabled

@@ -41,6 +41,7 @@ class StoreOrderRequest extends FormRequest
                 'string',
             ],
             'confirm_switch_user' => 'nullable|boolean',
+            'personal_data_consent' => 'accepted',
             'items' => 'required|array|min:1',
             'items.*.type' => 'required|in:dish,bowl,drink,breakfast',
             'items.*.id' => 'required|integer',
@@ -75,6 +76,7 @@ class StoreOrderRequest extends FormRequest
             'delivery_house.required_if' => 'Укажите номер дома',
             'verification_request_id.required_unless' => 'Требуется верификация номера телефона',
             'verification_method.in' => 'Выбранный способ подтверждения недоступен',
+            'personal_data_consent.accepted' => 'Необходимо согласие на обработку персональных данных',
             'items.required' => 'Корзина не может быть пустой',
             'items.min' => 'Необходимо добавить хотя бы один товар',
         ];

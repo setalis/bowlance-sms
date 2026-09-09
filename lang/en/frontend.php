@@ -113,6 +113,10 @@ return [
     'submit' => 'Submit',
     'submitting' => 'Sending...',
     'required' => '*',
+    'personal_data_consent_page' => 'Consent to personal data processing',
+    'personal_data_consent_prefix' => 'I agree to',
+    'personal_data_consent_link' => 'the processing of personal data',
+    'personal_data_consent_required' => 'Consent to personal data processing is required',
 
     // Order
     'back_to_order' => 'Back to order',
