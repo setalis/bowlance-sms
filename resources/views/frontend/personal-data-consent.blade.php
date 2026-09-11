@@ -11,10 +11,9 @@
                 Оформляя заказ на сайте
                 <a href="https://www.bowlance.ge/" class="font-semibold text-emerald-600 hover:underline" target="_blank" rel="noopener noreferrer">https://www.bowlance.ge/</a>
                 (далее — «Сайт»), я свободно, конкретно, информированно и однозначно даю своё согласие оператору/контролёру персональных данных
-                <strong class="text-base-content">Bowlance</strong>
-                <span class="text-base-content/50">([указать полное юридическое название владельца сервиса])</span>,
+                <strong class="text-base-content">I/E Vladyslav Kravchenko</strong>,
                 идентификационный номер
-                <span class="text-base-content/50">[указать идентификационный номер]</span>,
+                <strong class="text-base-content">543811345</strong>,
                 адрес: <strong class="text-base-content">Батуми, ул. Парнаваз Мепе 162/174</strong>
                 (далее — «Оператор»), на обработку моих персональных данных в соответствии с применимым законодательством Грузии о защите персональных данных.
             </p>
@@ -108,11 +107,11 @@
                 <dl class="space-y-2">
                     <div>
                         <dt class="text-xs font-semibold uppercase tracking-wider text-base-content/40">Наименование</dt>
-                        <dd>Bowlance <span class="text-base-content/50">([указать полное юридическое название])</span></dd>
+                        <dd>I/E Vladyslav Kravchenko</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase tracking-wider text-base-content/40">Идентификационный номер</dt>
-                        <dd class="text-base-content/50">[указать идентификационный номер]</dd>
+                        <dd>543811345</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase tracking-wider text-base-content/40">Адрес</dt>
@@ -121,7 +120,7 @@
                     <div>
                         <dt class="text-xs font-semibold uppercase tracking-wider text-base-content/40">E-mail</dt>
                         <dd>
-                            <a href="mailto:info@bowlance.ge" class="text-emerald-600 hover:underline">info@bowlance.ge</a>
+                            <a href="mailto:bowlance.ge@gmail.com" class="text-emerald-600 hover:underline">bowlance.ge@gmail.com</a>
                         </dd>
                     </div>
                     <div>
@@ -133,7 +132,7 @@
                 </dl>
             </section>
 
-            <p class="text-sm text-base-content/50">Дата последнего обновления: 9 сентября 2026</p>
+            <p class="text-sm text-base-content/50">Дата последнего обновления: 11 сентября 2026</p>
         </div>
     </article>
 @endsection

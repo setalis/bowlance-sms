@@ -6,8 +6,13 @@ it('renders the personal data consent page', function () {
     $response->assertSuccessful();
     $response->assertSee('Согласие на обработку персональных данных', false);
     $response->assertSee('https://www.bowlance.ge/', false);
-    $response->assertSee('info@bowlance.ge', false);
+    $response->assertSee('I/E Vladyslav Kravchenko', false);
+    $response->assertSee('543811345', false);
+    $response->assertSee('Батуми, ул. Парнаваз Мепе 162/174', false);
+    $response->assertSee('bowlance.ge@gmail.com', false);
+    $response->assertSee('mailto:bowlance.ge@gmail.com', false);
     $response->assertSee('+995 500 700 877', false);
+    $response->assertDontSee('[указать', false);
 });
 
 it('links to the consent page from the footer and checkout form', function () {
