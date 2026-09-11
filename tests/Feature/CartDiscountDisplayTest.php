@@ -90,3 +90,11 @@ it('renders delivery and pickup method summaries in checkout', function () {
     $response->assertSee('cartDeliveryFreeFrom', false);
     $response->assertSee('cartDiscountFrom', false);
 });
+
+it('renders cart toast above the checkout button on mobile with a short success timeout', function () {
+    $this->get('/')
+        ->assertSuccessful()
+        ->assertSee('top-24', false)
+        ->assertSee('md:bottom-6', false)
+        ->assertSee("this.type === 'error' ? 4000 : 2000", false);
+});

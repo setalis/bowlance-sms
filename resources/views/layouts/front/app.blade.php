@@ -130,19 +130,19 @@
                 this.type = e.detail.type || 'success';
                 this.show = true;
                 clearTimeout(this.timer);
-                this.timer = setTimeout(() => { this.show = false; }, 4000);
+                this.timer = setTimeout(() => { this.show = false; }, this.type === 'error' ? 4000 : 2000);
             });
         }
     }"
          x-show="show"
          x-cloak
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-3"
+         x-transition:enter-start="opacity-0 -translate-y-3 md:translate-y-3"
          x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 translate-y-3"
-         class="fixed bottom-6 left-6 z-[110] max-w-sm w-auto">
+         x-transition:leave-end="opacity-0 -translate-y-3 md:translate-y-3"
+         class="fixed top-24 inset-x-4 z-[110] max-w-sm w-auto mx-auto md:top-auto md:inset-x-auto md:bottom-6 md:left-6 md:mx-0">
         <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-xl border"
              :class="{
                  'bg-emerald-600 border-emerald-700 text-white': type === 'success',
