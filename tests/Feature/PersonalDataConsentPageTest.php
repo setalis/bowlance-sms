@@ -17,7 +17,22 @@ it('links to the consent page from the footer and checkout form', function () {
     $response->assertSee(route('legal.personal-data-consent'), false);
     $response->assertSee(__('frontend.personal_data_consent_prefix'), false);
     $response->assertSee(__('frontend.personal_data_consent_link'), false);
-    $response->assertSee('personal-data-consent-pickup', false);
-    $response->assertSee('personal-data-consent-verified', false);
-    $response->assertSee('personal-data-consent-callback', false);
+    $response->assertSee('personal-data-consent-checkout', false);
+    $response->assertDontSee('personal-data-consent-pickup', false);
+    $response->assertDontSee('personal-data-consent-verified', false);
+    $response->assertDontSee('personal-data-consent-callback', false);
+});
+
+it('renders a three-step delivery checkout with a thank-you phone link', function () {
+    $response = $this->get(route('home'));
+
+    $response->assertSuccessful();
+    $response->assertSee('Шаг 1 из 3 — контакты и время', false);
+    $response->assertSee('Шаг 2 из 3 — адрес доставки', false);
+    $response->assertSee('Шаг 3 из 3 — как вы оплатите', false);
+    $response->assertDontSee('Шаг 1 из 4', false);
+    $response->assertDontSee('goToStep4()', false);
+    $response->assertSee(__('frontend.order_thanks'), false);
+    $response->assertSee('tel:+995500700877', false);
+    $response->assertSee('verification_method: isOnPremise ? null : \'callback\'', false);
 });

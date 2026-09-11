@@ -117,6 +117,9 @@ return [
     'personal_data_consent_prefix' => 'I agree to',
     'personal_data_consent_link' => 'the processing of personal data',
     'personal_data_consent_required' => 'Consent to personal data processing is required',
+    'order_thanks_title' => 'Order placed',
+    'order_thanks' => 'Thank you for your order, we have already started cooking. Contact phone —',
+    'order_thanks_done' => 'Done',
 
     // Order
     'back_to_order' => 'Back to order',

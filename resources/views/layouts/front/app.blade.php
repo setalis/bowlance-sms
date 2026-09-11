@@ -273,6 +273,7 @@
             open: false,
             loading: false,
             step: 1,
+            orderSuccess: false,
             formData: {
                 name: '',
                 phone: '',
@@ -300,7 +301,7 @@
             
             phoneVerification: null,
             phoneVerificationEnabled: @json($phoneVerificationEnabled ?? true),
-            verificationMethod: '{{ ($phoneVerificationEnabled ?? true) ? (config('vonage.sms_enabled', true) ? 'sms' : 'telegram') : 'callback' }}',
+            verificationMethod: 'callback',
             codeSent: false,
             sendingCode: false,
             verificationCode: '',
@@ -326,13 +327,7 @@
             async init() {
                 this.phoneVerification = new PhoneVerification();
 
-                // Восстановить состояние Telegram-верификации после возврата из Telegram
-                // (Safari на iOS перезагружает вкладку при возврате из другого приложения)
-                const saved = this.restoreTelegramSession();
-                if (saved) {
-                    this.open = true;
-                    this.step = 4;
-                }
+                this.clearTelegramSession();
                 
                 // Загрузить адреса
                 if (this.isAuthenticated) {
@@ -517,6 +512,13 @@
                     this.submitOrder();
                     return;
                 }
+                if (!this.formData.personalDataConsent) {
+                    this.$store.cart.showNotification(
+                        window.personalDataConsentRequiredMessage || 'Необходимо согласие на обработку персональных данных',
+                        'error'
+                    );
+                    return;
+                }
                 if (!this.formData.deliveryCity?.trim() || !this.formData.deliveryStreet?.trim()) {
                     this.$store.cart.showNotification('Укажите город и улицу', 'error');
                     return;
@@ -526,14 +528,6 @@
                     return;
                 }
                 this.step = 3;
-            },
-
-            goToStep4() {
-                if (this.isOnPremise()) {
-                    this.submitOrder();
-                    return;
-                }
-                this.step = 4;
             },
             
             async sendVerificationCode() {
@@ -662,18 +656,6 @@
             
             async submitOrder() {
                 const isOnPremise = this.isOnPremise();
-                const isCallback = this.verificationMethod === 'callback';
-                const skipsPhoneVerification = isOnPremise || isCallback;
-
-                if (!skipsPhoneVerification && !this.phoneVerified) {
-                    this.$store.cart.showNotification('Необходимо верифицировать номер телефона', 'error');
-                    return;
-                }
-                
-                if (!skipsPhoneVerification && !this.verificationRequestId) {
-                    this.$store.cart.showNotification('Ошибка верификации. Попробуйте снова', 'error');
-                    return;
-                }
 
                 if (!isOnPremise && !this.formData.deliveryHouse?.trim()) {
                     this.$store.cart.showNotification('Укажите номер дома', 'error');
@@ -696,11 +678,10 @@
                     const orderData = {
                         ...this.formData,
                         phone: this.formData.phone,
-                        verification_method: isOnPremise ? null : this.verificationMethod,
-                        verification_request_id: skipsPhoneVerification ? null : this.verificationRequestId,
+                        verification_method: isOnPremise ? null : 'callback',
+                        verification_request_id: null,
                         confirm_switch_user: this.formData.confirm_switch_user || false,
                         paymentMethod: this.formData.paymentMethod || 'cash',
-                        // Явно передаём адрес доставки при отправке (поля могут не попадать в spread при скрытом шаге 1)
                         deliveryCity: (this.formData.deliveryCity || '').trim(),
                         deliveryStreet: (this.formData.deliveryStreet || '').trim(),
                         deliveryHouse: (this.formData.deliveryHouse || '').trim(),
@@ -712,25 +693,10 @@
                     const order = await this.$store.cart.checkout(orderData);
                     
                     if (order) {
-                        const msg = order.needs_callback
-                            ? `Заказ ${order.order_number} оформлен. Менеджер перезвонит вам для подтверждения.`
-                            : (order.wolt_tracking_url
-                                ? `Заказ ${order.order_number} оформлен. Отслеживание доставки открыто во вкладке.`
-                                : (order.delivery_type === 'delivery'
-                                    ? `Заказ ${order.order_number} оформлен. Доставка будет уточнена — с вами могут связаться.`
-                                    : `Заказ ${order.order_number} успешно оформлен!`));
-                        this.$store.cart.showNotification(msg, 'success');
+                        this.orderSuccess = true;
                         if (order.wolt_tracking_url) {
                             window.open(order.wolt_tracking_url, '_blank', 'noopener');
                         }
-                        
-                        this.resetForm();
-                        this.open = false;
-                        
-                        // Обновить страницу через 2 секунды, чтобы пользователь увидел авторизацию
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
                     }
                 } catch (error) {
                     // Check if it requires user confirmation for switching accounts
@@ -780,9 +746,8 @@
                     personalDataConsent: false
                 };
                 this.step = 1;
-                this.verificationMethod = this.phoneVerificationEnabled
-                    ? '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}'
-                    : 'callback';
+                this.orderSuccess = false;
+                this.verificationMethod = 'callback';
                 this.codeSent = false;
                 this.verificationCode = '';
                 this.phoneVerified = false;
@@ -802,8 +767,16 @@
                 if (this.loading) {
                     return;
                 }
+                if (this.orderSuccess) {
+                    this.finishSuccessfulOrder();
+                    return;
+                }
                 this.open = false;
                 this.resetForm();
+            },
+
+            finishSuccessfulOrder() {
+                window.location.reload();
             },
             
             handleEsc() {

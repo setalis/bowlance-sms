@@ -125,6 +125,9 @@ return [
     'personal_data_consent_prefix' => 'Я согласен(на) на',
     'personal_data_consent_link' => 'обработку персональных данных',
     'personal_data_consent_required' => 'Необходимо согласие на обработку персональных данных',
+    'order_thanks_title' => 'Заказ оформлен',
+    'order_thanks' => 'Спасибо за заказ, мы уже начали готовить. Телефон для связи —',
+    'order_thanks_done' => 'Готово',
 
     // Order
     'back_to_order' => 'Назад к заказу',

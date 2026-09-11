@@ -125,6 +125,9 @@ return [
     'personal_data_consent_prefix' => 'ვეთანხმები',
     'personal_data_consent_link' => 'პერსონალური მონაცემების დამუშავებას',
     'personal_data_consent_required' => 'საჭიროა თანხმობა პერსონალური მონაცემების დამუშავებაზე',
+    'order_thanks_title' => 'შეკვეთა გაფორმებულია',
+    'order_thanks' => 'გმადლობთ შეკვეთისთვის, უკვე დავიწყეთ მომზადება. საკონტაქტო ტელეფონი —',
+    'order_thanks_done' => 'მზადაა',
 
     // Order
     'back_to_order' => 'უკან შეკვეთაზე',

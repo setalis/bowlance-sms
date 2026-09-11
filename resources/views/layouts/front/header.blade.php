@@ -453,8 +453,8 @@
         >
             <!-- Sticky Header с прогресс-индикатором -->
             <div class="flex-none px-6 pt-5 pb-4 border-b border-base-200">
-                <!-- Прогресс-индикатор: 2 шага для самовывоза, 4 для доставки -->
-                <div class="flex items-center gap-1.5 mb-4" x-show="isOnPremise()">
+                <!-- Прогресс-индикатор: 2 шага для самовывоза, 3 для доставки -->
+                <div class="flex items-center gap-1.5 mb-4" x-show="!orderSuccess && isOnPremise()">
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">1</div>
                     <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
@@ -464,7 +464,7 @@
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 2 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">2</div>
                 </div>
-                <div class="flex items-center gap-1.5 mb-4" x-show="!isOnPremise()">
+                <div class="flex items-center gap-1.5 mb-4" x-show="!orderSuccess && !isOnPremise()">
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">1</div>
                     <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
@@ -479,29 +479,26 @@
                     </div>
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 3 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">3</div>
-                    <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
-                        <div class="h-full bg-emerald-600 transition-all duration-500 rounded-full"
-                             :style="step >= 4 ? 'width: 100%' : 'width: 0%'"></div>
-                    </div>
-                    <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
-                         :class="step >= 4 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">4</div>
                 </div>
                 <!-- Заголовок + кнопка назад + закрыть -->
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                         <button type="button"
                                 @click="step = step - 1"
-                                x-show="step > 1"
+                                x-show="!orderSuccess && step > 1"
                                 class="btn btn-circle btn-sm text-base-content/50 bg-white hover:text-base-content -ml-1">
                             <span class="icon-[tabler--arrow-left] size-4"></span>
                         </button>
                         <div>
                             <h3 class="text-lg font-bold leading-tight"
-                                x-text="step === 1 ? '{{ __('frontend.checkout_title') }}' : (step === 2 ? (formData.deliveryType === 'pickup' ? '{{ __('frontend.pickup_method_title') }}' : (formData.deliveryType === 'dine_in' ? '{{ __('frontend.dine_in_method_title') }}' : 'Адрес доставки')) : (step === 3 ? 'Способ оплаты' : 'Подтверждение'))"></h3>
+                                x-text="orderSuccess
+                                    ? '{{ __('frontend.order_thanks_title') }}'
+                                    : (step === 1 ? '{{ __('frontend.checkout_title') }}' : (step === 2 ? (formData.deliveryType === 'pickup' ? '{{ __('frontend.pickup_method_title') }}' : (formData.deliveryType === 'dine_in' ? '{{ __('frontend.dine_in_method_title') }}' : 'Адрес доставки')) : 'Способ оплаты'))"></h3>
                             <p class="text-xs text-base-content/40 leading-tight"
+                               x-show="!orderSuccess"
                                x-text="isOnPremise()
                                    ? (step === 1 ? 'Шаг 1 из 2 — контакты и время' : (formData.deliveryType === 'dine_in' ? 'Шаг 2 из 2 — в заведении' : 'Шаг 2 из 2 — самовывоз'))
-                                   : (step === 1 ? 'Шаг 1 из 4 — контакты и время' : (step === 2 ? 'Шаг 2 из 4 — адрес доставки' : (step === 3 ? 'Шаг 3 из 4 — как вы оплатите' : 'Шаг 4 из 4 — подтверждение номера')))"></p>
+                                   : (step === 1 ? 'Шаг 1 из 3 — контакты и время' : (step === 2 ? 'Шаг 2 из 3 — адрес доставки' : 'Шаг 3 из 3 — как вы оплатите'))"></p>
                         </div>
                     </div>
                     <button @click="closeModal()" class="btn btn-circle btn-sm text-base-content/40 shrink-0 bg-white hover:bg-error/10">
@@ -512,7 +509,7 @@
 
             <!-- Scrollable body -->
             <div class="overflow-y-auto grow">
-                <form @submit.prevent="submitOrder">
+                <form @submit.prevent="submitOrder" x-show="!orderSuccess">
 
                     <!-- ====== ШАГ 1: Контакты + Время доставки ====== -->
                     <div x-show="step === 1" class="p-6 space-y-5">
@@ -877,16 +874,17 @@
                         </div>
 
                         <!-- Доставка: далее к оплате -->
+                        <x-ui.personal-data-consent id="personal-data-consent-checkout" />
                         <button type="button"
                                 x-show="formData.deliveryType === 'delivery'"
                                 @click="goToStep3()"
-                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20">
+                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                                :disabled="!formData.personalDataConsent">
                             Далее
                             <span class="icon-[tabler--arrow-right] size-5"></span>
                         </button>
 
                         <!-- Самовывоз и в заведении: сразу оформить заказ (без оплаты и подтверждения телефона) -->
-                        <x-ui.personal-data-consent id="personal-data-consent-pickup" x-show="isOnPremise()" x-cloak />
                         <button type="submit"
                                 x-show="isOnPremise()"
                                 class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
@@ -980,247 +978,41 @@
                             </p>
                         </div>
 
-                        <!-- Кнопка далее -->
-                        <button type="button"
-                                @click="goToStep4()"
-                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20">
-                            Далее
-                            <span class="icon-[tabler--arrow-right] size-5"></span>
+                        <div x-show="orderError"
+                             class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
+                            <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
+                            <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
+                        </div>
+
+                        <button type="submit"
+                                class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
+                                :disabled="loading || !formData.personalDataConsent">
+                            <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
+                            <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                            <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
                         </button>
                     </div>
-
-                    <!-- ====== ШАГ 4: Подтверждение номера ====== -->
-                    <div x-show="step === 4 && formData.deliveryType === 'delivery'" class="p-6 space-y-4">
-
-                        <!-- Номер телефона (не для callback) -->
-                        <div x-show="verificationMethod !== 'callback'"
-                             class="flex items-center gap-3 bg-base-200/50 rounded-2xl px-4 py-3">
-                            <span class="icon-[tabler--phone] size-4 text-base-content/40 shrink-0"></span>
-                            <p class="text-sm text-base-content/60">
-                                Подтвердите номер <strong class="text-base-content font-semibold" x-text="formData.phone || ('+' + selectedPhoneCountry().dial + ' ' + formData.phoneLocal)"></strong>
-                            </p>
-                        </div>
-
-                        <!-- Карточки выбора метода -->
-                        <div x-show="!codeSent && verificationMethod !== 'callback'" class="space-y-2">
-                            @if($phoneVerificationEnabled ?? true)
-                            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">Способ подтверждения</p>
-
-                            @if(config('vonage.sms_enabled', true))
-                            {{-- SMS верификация через Vonage (включается через VONAGE_SMS_ENABLED=true) --}}
-                            <button type="button"
-                                    @click="verificationMethod = 'sms'"
-                                    class="flex items-center gap-4 p-4 rounded-2xl border-2 w-full text-left transition-all"
-                                    :class="verificationMethod === 'sms' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
-                                <div class="size-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
-                                     :class="verificationMethod === 'sms' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
-                                    <span class="icon-[tabler--message] size-5"
-                                          :class="verificationMethod === 'sms' ? 'text-emerald-600' : 'text-base-content/40'"></span>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">SMS</p>
-                                    <p class="text-xs text-base-content/50">Код придёт на ваш номер</p>
-                                </div>
-                                <span x-show="verificationMethod === 'sms'" class="icon-[tabler--circle-check-filled] size-5 text-emerald-500 shrink-0"></span>
-                            </button>
-                            @endif
-
-                            <button type="button"
-                                    @click="verificationMethod = 'telegram'"
-                                    class="flex items-center gap-4 p-4 rounded-2xl border-2 w-full text-left transition-all"
-                                    :class="verificationMethod === 'telegram' ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/20' : 'border-base-200 hover:border-base-300'">
-                                <div class="size-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
-                                     :class="verificationMethod === 'telegram' ? 'bg-sky-100 dark:bg-sky-900/40' : 'bg-base-200'">
-                                    <span class="icon-[tabler--brand-telegram] size-5"
-                                          :class="verificationMethod === 'telegram' ? 'text-sky-500' : 'text-base-content/40'"></span>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">Telegram</p>
-                                    <p class="text-xs text-base-content/50">Получите код в боте</p>
-                                </div>
-                                <span x-show="verificationMethod === 'telegram'" class="icon-[tabler--circle-check-filled] size-5 text-sky-500 shrink-0"></span>
-                            </button>
-                            @endif
-
-                            <button type="button"
-                                    @click="verificationMethod = 'callback'"
-                                    class="flex items-center gap-4 p-4 rounded-2xl border-2 w-full text-left transition-all"
-                                    :class="verificationMethod === 'callback' ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/20' : 'border-base-200 hover:border-base-300'">
-                                <div class="size-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
-                                     :class="verificationMethod === 'callback' ? 'bg-amber-100 dark:bg-amber-900/40' : 'bg-base-200'">
-                                    <span class="icon-[tabler--phone-call] size-5"
-                                          :class="verificationMethod === 'callback' ? 'text-amber-600' : 'text-base-content/40'"></span>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">Звонок менеджера</p>
-                                    <p class="text-xs text-base-content/50">Мы перезвоним для подтверждения</p>
-                                </div>
-                                <span x-show="verificationMethod === 'callback'" class="icon-[tabler--circle-check-filled] size-5 text-amber-500 shrink-0"></span>
-                            </button>
-                        </div>
-
-                        @if($phoneVerificationEnabled ?? true)
-                        @if(config('vonage.sms_enabled', true))
-                        <!-- Кнопка отправки SMS -->
-                        <div x-show="!codeSent && verificationMethod === 'sms'">
-                            <button type="button"
-                                    @click="sendVerificationCode()"
-                                    class="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-                                    :disabled="sendingCode">
-                                <span x-show="!sendingCode" class="icon-[tabler--send] size-5"></span>
-                                <span x-show="sendingCode" class="loading loading-spinner loading-sm"></span>
-                                <span x-text="sendingCode ? 'Отправка...' : 'Отправить SMS-код'"></span>
-                            </button>
-                        </div>
-                        @endif
-
-                        <!-- Telegram: кнопка открыть -->
-                        <div x-show="!codeSent && verificationMethod === 'telegram'">
-                            <button type="button"
-                                    @click="startTelegramVerification()"
-                                    class="w-full h-12 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-                                    :disabled="sendingCode">
-                                <span x-show="!sendingCode" class="icon-[tabler--brand-telegram] size-5"></span>
-                                <span x-show="sendingCode" class="loading loading-spinner loading-sm"></span>
-                                <span x-text="sendingCode ? 'Открытие...' : 'Открыть Telegram'"></span>
-                            </button>
-                        </div>
-
-                        <!-- Telegram: повторно открыть после отправки -->
-                        <div x-show="codeSent && !phoneVerified && verificationMethod === 'telegram' && telegramLink"
-                             class="rounded-2xl bg-sky-50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-800 p-4">
-                            <p class="text-sm text-sky-800 dark:text-sky-200 mb-3">
-                                Получите код в Telegram-боте и введите его ниже.
-                            </p>
-                            <a :href="telegramLink"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="flex items-center justify-center gap-2 w-full h-9 rounded-xl border border-sky-300 dark:border-sky-700 text-sky-600 dark:text-sky-300 text-sm font-medium hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors">
-                                <span class="icon-[tabler--brand-telegram] size-4"></span>
-                                Открыть Telegram снова
-                            </a>
-                        </div>
-
-                        <!-- Поле ввода кода -->
-                        <div x-show="codeSent && !phoneVerified && verificationMethod !== 'callback'" class="space-y-3">
-                            <label class="text-sm font-medium text-base-content/70 block">
-                                Введите 6-значный код <span class="text-error">*</span>
-                            </label>
-                            <input type="text"
-                                   x-model="verificationCode"
-                                   maxlength="6"
-                                   class="input w-full text-center text-4xl tracking-[0.4em] font-black h-16 rounded-2xl border-2 border-base-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/15 bg-base-100 font-mono"
-                                   placeholder="——————"
-                                   @input="verificationCode = verificationCode.replace(/[^0-9]/g, '')"
-                                   autofocus>
-
-                            <div x-show="verificationError"
-                                 x-transition:enter="transition ease-out duration-150"
-                                 x-transition:enter-start="opacity-0 -translate-y-1"
-                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
-                                <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
-                                <span class="text-sm text-red-700 dark:text-red-300" x-text="verificationError"></span>
-                            </div>
-
-                            <button type="button"
-                                    @click="verifyCode()"
-                                    class="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-40"
-                                    :disabled="verificationCode.length !== 6 || verifyingCode">
-                                <span x-show="!verifyingCode" class="icon-[tabler--check] size-5"></span>
-                                <span x-show="verifyingCode" class="loading loading-spinner loading-sm"></span>
-                                <span x-text="verifyingCode ? 'Проверка...' : 'Подтвердить код'"></span>
-                            </button>
-
-                            <button type="button"
-                                    @click="resendCode()"
-                                    class="flex items-center justify-center gap-1.5 w-full py-2 text-sm text-base-content/50 hover:text-base-content/70 transition-colors">
-                                <span class="icon-[tabler--refresh] size-3.5"></span>
-                                <span x-text="verificationMethod === 'telegram' ? 'Запросить новый код' : 'Отправить код повторно'"></span>
-                            </button>
-                        </div>
-
-                        <!-- Успешная верификация -->
-                        <div x-show="phoneVerified && verificationMethod !== 'callback'"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             class="space-y-4">
-                            <div class="flex flex-col items-center text-center py-4">
-                                <div class="size-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-3">
-                                    <span class="icon-[tabler--circle-check-filled] size-9 text-emerald-500"></span>
-                                </div>
-                                <h4 class="font-bold text-lg">Номер подтверждён!</h4>
-                                <p class="text-sm text-base-content/50 mt-1">Вы можете оформить заказ</p>
-                            </div>
-
-                            <div x-show="orderError"
-                                 class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
-                                <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
-                                <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
-                            </div>
-
-                            <x-ui.personal-data-consent id="personal-data-consent-verified" />
-                            <button type="submit"
-                                    class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
-                                    :disabled="loading || !formData.personalDataConsent">
-                                <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                                <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
-                            </button>
-                        </div>
-                        @endif
-
-                        <!-- Callback: карточка + кнопка -->
-                        <div x-show="verificationMethod === 'callback'" class="space-y-4">
-                            <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4">
-                                <div class="flex items-start gap-3 mb-3">
-                                    <div class="size-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span class="icon-[tabler--phone-call] size-5 text-amber-600"></span>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-amber-800 dark:text-amber-200 text-sm">Менеджер перезвонит вам</p>
-                                        <p class="text-xs text-amber-700/80 dark:text-amber-300/80 mt-0.5">
-                                        Спасибо за заказ! Мы уже начали готовить ❤️ Менеджер перезвонит вам на номер 
-                                            <strong x-text="formData.phone || ('+' + selectedPhoneCountry().dial + ' ' + formData.phoneLocal)"></strong> для подтверждения.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div x-show="orderError"
-                                 x-transition:enter="transition ease-out duration-150"
-                                 x-transition:enter-start="opacity-0"
-                                 x-transition:enter-end="opacity-100"
-                                 class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
-                                <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
-                                <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
-                            </div>
-
-                            <x-ui.personal-data-consent id="personal-data-consent-callback" />
-                            <button type="submit"
-                                    class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
-                                    :disabled="loading || !formData.personalDataConsent">
-                                <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
-                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
-                                <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
-                            </button>
-
-                            @if($phoneVerificationEnabled ?? true)
-                            <button type="button"
-                                    @click="verificationMethod = '{{ config('vonage.sms_enabled', true) ? 'sms' : 'telegram' }}'"
-                                    class="flex items-center justify-center gap-1.5 w-full py-2 text-sm text-base-content/50 hover:text-base-content/70 transition-colors">
-                                <span class="icon-[tabler--arrow-left] size-3.5"></span>
-                                Выбрать другой способ
-                            </button>
-                            @endif
-                        </div>
-
-                    </div>
                 </form>
+
+                <div x-show="orderSuccess" x-cloak class="p-6 space-y-5">
+                    <div class="flex flex-col items-center text-center py-2">
+                        <div class="size-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mb-3">
+                            <span class="icon-[tabler--circle-check-filled] size-9 text-emerald-500"></span>
+                        </div>
+                        <p class="text-sm leading-relaxed text-base-content/80">
+                            {{ __('frontend.order_thanks') }}
+                            <a href="tel:+995500700877" class="font-semibold text-emerald-600 hover:underline whitespace-nowrap">+995 500 700 877</a>
+                        </p>
+                    </div>
+                    <button type="button"
+                            @click="finishSuccessfulOrder()"
+                            class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20">
+                        {{ __('frontend.order_thanks_done') }}
+                    </button>
+                </div>
             </div>
 
-            <x-ui.cart-footer context="checkout" class="flex-none" />
+            <x-ui.cart-footer context="checkout" class="flex-none" x-show="!orderSuccess" />
         </div>
     </div>
 </div>
