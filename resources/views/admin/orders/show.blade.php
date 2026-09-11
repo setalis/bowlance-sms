@@ -42,14 +42,7 @@
                                         <div>
                                             <h3 class="font-medium">{{ $item->name }}</h3>
                                             @if(in_array($item->item_type, ['bowl', 'breakfast'], true) && $item->bowl_products)
-                                                <div class="mt-2">
-                                                    <p class="text-xs text-base-content/60 mb-1">{{ $item->item_type === 'breakfast' ? 'Состав завтрака:' : 'Состав боула:' }}</p>
-                                                    <div class="flex flex-wrap gap-1">
-                                                        @foreach($item->bowl_products as $product)
-                                                            <span class="badge badge-sm badge-outline">{{ $product['name'] }}</span>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
+                                                <x-ui.constructor-composition :item="$item" />
                                             @endif
                                         </div>
                                         <span class="badge badge-primary">{{ match($item->item_type) { 'dish' => 'Блюдо', 'breakfast' => 'Завтрак', default => 'Боул' } }}</span>

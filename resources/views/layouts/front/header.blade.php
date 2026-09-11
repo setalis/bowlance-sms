@@ -347,8 +347,13 @@
                                         <ul class="mt-2 space-y-1">
                                             <template x-for="product in item.products" :key="product.id">
                                                 <li class="flex items-center justify-between text-xs">
-                                                    <span x-text="product.name" class="text-base-content/60"></span>
-                                                    <span x-text="product.price.toFixed(2) + ' ₾'" class="text-base-content/40 tabular-nums"></span>
+                                                    <span class="text-base-content/60">
+                                                        <span x-text="product.name"></span>
+                                                        <span x-show="$store.cart.productQuantity(item, product) > 1"
+                                                              x-text="' ×' + $store.cart.productQuantity(item, product)"></span>
+                                                    </span>
+                                                    <span x-text="$store.cart.productLinePrice(item, product).toFixed(2) + ' ₾'"
+                                                          class="text-base-content/40 tabular-nums"></span>
                                                 </li>
                                             </template>
                                         </ul>

@@ -401,6 +401,7 @@ class OrderController extends Controller
                 'id' => $product->id,
                 'name' => $product->name,
                 'price' => $this->constructorProductPrice($product, $type),
+                'quantity' => 1,
             ];
         })->filter()->values()->toArray();
 

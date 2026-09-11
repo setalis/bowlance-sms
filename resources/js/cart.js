@@ -115,6 +115,14 @@ export function initCart() {
                 .join('|');
         },
 
+        productQuantity(item, product) {
+            return Math.max(1, parseInt(product.quantity, 10) || 1) * item.quantity;
+        },
+
+        productLinePrice(item, product) {
+            return parseFloat(product.price) * this.productQuantity(item, product);
+        },
+
         addonsNutrition(addons = []) {
             return addons.reduce((totals, addon) => {
                 const quantity = addon.quantity || 1;

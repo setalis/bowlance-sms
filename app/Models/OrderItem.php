@@ -54,4 +54,14 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Drink::class);
     }
+
+    public function constructorProductQuantity(array $product): int
+    {
+        return max(1, (int) ($product['quantity'] ?? 1)) * $this->quantity;
+    }
+
+    public function constructorProductLinePrice(array $product): float
+    {
+        return (float) ($product['price'] ?? 0) * $this->constructorProductQuantity($product);
+    }
 }

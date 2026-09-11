@@ -23,14 +23,7 @@
                                         <span class="badge badge-primary">{{ match($item->item_type) { 'dish' => 'Блюдо', 'breakfast' => 'Завтрак', default => 'Боул' } }}</span>
                                     </div>
                                     @if(in_array($item->item_type, ['bowl', 'breakfast'], true) && $item->bowl_products)
-                                        <div class="mt-2">
-                                            <p class="mb-1 text-xs text-base-content/60">{{ $item->item_type === 'breakfast' ? 'Состав завтрака:' : 'Состав боула:' }}</p>
-                                            <div class="flex flex-wrap gap-1">
-                                                @foreach($item->bowl_products as $product)
-                                                    <span class="badge badge-outline badge-sm">{{ $product['name'] }}</span>
-                                                @endforeach
-                                            </div>
-                                        </div>
+                                        <x-ui.constructor-composition :item="$item" />
                                     @endif
                                     @if($item->calories || $item->proteins || $item->fats || $item->carbohydrates)
                                         <div class="mt-2 flex flex-wrap gap-2 text-xs">
