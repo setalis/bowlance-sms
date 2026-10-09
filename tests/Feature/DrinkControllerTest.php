@@ -227,6 +227,108 @@ it('requires authentication to access drinks', function () {
     $response->assertRedirect(route('login'));
 });
 
+it('creates a drink as active by default', function () {
+    $response = $this->actingAs($this->user)->post(route('admin.drinks.store'), [
+        'name_ru' => 'Кока-Кола',
+        'price' => 150.00,
+        'sort_order' => 0,
+        'is_active' => 1,
+    ]);
+
+    $response->assertRedirect(route('admin.drinks.index'));
+
+    $this->assertDatabaseHas('drinks', [
+        'name_ru' => 'Кока-Кола',
+        'is_active' => true,
+    ]);
+});
+
+it('can create an inactive drink', function () {
+    $response = $this->actingAs($this->user)->post(route('admin.drinks.store'), [
+        'name_ru' => 'Пепси',
+        'price' => 140.00,
+        'sort_order' => 0,
+        'is_active' => 0,
+    ]);
+
+    $response->assertRedirect(route('admin.drinks.index'));
+
+    $this->assertDatabaseHas('drinks', [
+        'name_ru' => 'Пепси',
+        'is_active' => false,
+    ]);
+});
+
+it('can deactivate a drink', function () {
+    $drink = Drink::factory()->create([
+        'name_ru' => 'Боржоми',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->user)->put(route('admin.drinks.update', $drink), [
+        'name_ru' => 'Боржоми',
+        'price' => $drink->price,
+        'sort_order' => 0,
+        'is_active' => 0,
+    ]);
+
+    $response->assertRedirect(route('admin.drinks.index'));
+
+    expect($drink->fresh()->is_active)->toBeFalse();
+});
+
+it('shows drink activity status on the admin index', function () {
+    Drink::factory()->create([
+        'name_ru' => 'Активный напиток',
+        'is_active' => true,
+    ]);
+    Drink::factory()->inactive()->create([
+        'name_ru' => 'Неактивный напиток',
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('admin.drinks.index'));
+
+    $response->assertSuccessful();
+    $response->assertSee('Активный напиток');
+    $response->assertSee('Неактивный напиток');
+    $response->assertSee('Активна');
+    $response->assertSee('Неактивна');
+});
+
+it('shows the active checkbox on create and edit drink forms', function () {
+    $drink = Drink::factory()->create();
+
+    $this->actingAs($this->user)
+        ->get(route('admin.drinks.create'))
+        ->assertSuccessful()
+        ->assertSee('name="is_active"', false)
+        ->assertSee('Активна');
+
+    $this->actingAs($this->user)
+        ->get(route('admin.drinks.edit', $drink))
+        ->assertSuccessful()
+        ->assertSee('name="is_active"', false)
+        ->assertSee('Активна');
+});
+
+it('does not show inactive drinks on the home page', function () {
+    Drink::factory()->create([
+        'name' => 'Боржоми',
+        'name_ru' => 'Боржоми',
+        'is_active' => true,
+    ]);
+    Drink::factory()->inactive()->create([
+        'name' => 'Мтис',
+        'name_ru' => 'Мтис',
+    ]);
+
+    $response = $this->get(route('home'));
+
+    $response->assertSuccessful();
+    $response->assertSee('Боржоми');
+    $response->assertDontSee('Мтис');
+});
+
 it('paginates drinks on index page', function () {
     Drink::factory()->count(20)->create();
 

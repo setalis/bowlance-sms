@@ -31,6 +31,7 @@
                             <th>Объем</th>
                             <th>Калории</th>
                             <th>Сортировка</th>
+                            <th>Статус</th>
                             <th>Создано</th>
                             <th>Действия</th>
                         </tr>
@@ -75,6 +76,13 @@
                                 <td>{{ $drink->volume ?? '—' }}</td>
                                 <td>{{ $drink->calories ? $drink->calories . ' ккал' : '—' }}</td>
                                 <td>{{ $drink->sort_order }}</td>
+                                <td>
+                                    @if($drink->is_active)
+                                        <span class="badge badge-success badge-soft">Активна</span>
+                                    @else
+                                        <span class="badge badge-ghost">Неактивна</span>
+                                    @endif
+                                </td>
                                 <td>{{ $drink->created_at->format('d.m.Y') }}</td>
                                 <td>
                                     <div class="flex gap-2">
@@ -99,7 +107,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center py-8">
+                                <td colspan="10" class="text-center py-8">
                                     <div class="flex flex-col items-center gap-4">
                                         <span class="icon-[tabler--cup] size-12 text-base-content/30"></span>
                                         <div>

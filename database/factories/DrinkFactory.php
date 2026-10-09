@@ -39,8 +39,14 @@ class DrinkFactory extends Factory
             'carbohydrates' => fake()->randomFloat(2, 0, 50),
             'fiber' => fake()->randomFloat(2, 0, 2),
             'sort_order' => fake()->numberBetween(0, 100),
+            'is_active' => true,
             'poster_product_id' => null,
         ];
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn () => ['is_active' => false]);
     }
 
     /**

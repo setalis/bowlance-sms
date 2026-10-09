@@ -273,6 +273,16 @@
                             <span class="text-error text-sm mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
+
+                    <label class="label cursor-pointer justify-start gap-3">
+                        <input type="hidden" name="is_active" value="0">
+                        <input type="checkbox"
+                               name="is_active"
+                               value="1"
+                               class="checkbox"
+                               @checked(old('is_active', true)) />
+                        <span class="label-text">Активна</span>
+                    </label>
                 </div>
 
                 <div class="flex items-center gap-3 pt-2">
