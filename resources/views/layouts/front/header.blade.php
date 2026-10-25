@@ -486,18 +486,8 @@
         >
             <!-- Sticky Header с прогресс-индикатором -->
             <div class="flex-none px-6 pt-5 pb-4 border-b border-base-200">
-                <!-- Прогресс-индикатор: 2 шага для самовывоза, 3 для доставки -->
-                <div class="flex items-center gap-1.5 mb-4" x-show="!orderSuccess && isOnPremise()">
-                    <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
-                         :class="step >= 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">1</div>
-                    <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
-                        <div class="h-full bg-emerald-600 transition-all duration-500 rounded-full"
-                             :style="step >= 2 ? 'width: 100%' : 'width: 0%'"></div>
-                    </div>
-                    <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
-                         :class="step >= 2 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">2</div>
-                </div>
-                <div class="flex items-center gap-1.5 mb-4" x-show="!orderSuccess && !isOnPremise()">
+                @if($orderMode !== \App\Enums\OrderMode::Onsite)
+                <div class="flex items-center gap-1.5 mb-4" x-show="!orderSuccess">
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">1</div>
                     <div class="flex-1 h-1 rounded-full overflow-hidden bg-base-200">
@@ -513,6 +503,7 @@
                     <div class="size-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all"
                          :class="step >= 3 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-base-200 text-base-content/40'">3</div>
                 </div>
+                @endif
                 <!-- Заголовок + кнопка назад + закрыть -->
                 <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
@@ -527,11 +518,11 @@
                                 x-text="orderSuccess
                                     ? '{{ __('frontend.order_thanks_title') }}'
                                     : (step === 1 ? '{{ __('frontend.checkout_title') }}' : (step === 2 ? (formData.deliveryType === 'pickup' ? '{{ __('frontend.pickup_method_title') }}' : (formData.deliveryType === 'dine_in' ? '{{ __('frontend.dine_in_method_title') }}' : 'Адрес доставки')) : 'Способ оплаты'))"></h3>
+                            @if($orderMode !== \App\Enums\OrderMode::Onsite)
                             <p class="text-xs text-base-content/40 leading-tight"
                                x-show="!orderSuccess"
-                               x-text="isOnPremise()
-                                   ? (step === 1 ? 'Шаг 1 из 2 — контакты и время' : (formData.deliveryType === 'dine_in' ? 'Шаг 2 из 2 — в заведении' : 'Шаг 2 из 2 — самовывоз'))
-                                   : (step === 1 ? 'Шаг 1 из 3 — контакты и время' : (step === 2 ? 'Шаг 2 из 3 — адрес доставки' : 'Шаг 3 из 3 — как вы оплатите'))"></p>
+                               x-text="step === 1 ? 'Шаг 1 из 3 — контакты и время' : (step === 2 ? 'Шаг 2 из 3 — адрес доставки' : 'Шаг 3 из 3 — как вы оплатите')"></p>
+                            @endif
                         </div>
                     </div>
                     <button @click="closeModal()" class="btn btn-circle btn-sm text-base-content/40 shrink-0 bg-white hover:bg-error/10">
@@ -653,7 +644,107 @@
                             </div>
                         </div>
 
-                        <!-- Кнопка далее -->
+                        @if($orderMode === \App\Enums\OrderMode::Onsite)
+                            <div class="space-y-3">
+                                <p class="text-xs font-semibold uppercase tracking-wider text-base-content/40">
+                                    <span class="icon-[tabler--map-pin] size-3.5 mr-1 inline-block"></span>
+                                    Способ получения <span class="text-error">*</span>
+                                </p>
+                                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    <label class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
+                                           :class="formData.deliveryType === 'pickup' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
+                                        <input type="radio"
+                                               x-model="formData.deliveryType"
+                                               value="pickup"
+                                               name="delivery_type"
+                                               class="hidden">
+                                        <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                             :class="formData.deliveryType === 'pickup' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
+                                            <span class="icon-[tabler--walk] size-5"
+                                                  :class="formData.deliveryType === 'pickup' ? 'text-emerald-600' : 'text-base-content/40'"></span>
+                                        </div>
+                                        <x-ui.method-card-copy summary="pickupMethodSummary">
+                                            {{ __('frontend.pickup_method_title') }}
+                                        </x-ui.method-card-copy>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
+                                           :class="formData.deliveryType === 'dine_in' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
+                                        <input type="radio"
+                                               x-model="formData.deliveryType"
+                                               value="dine_in"
+                                               name="delivery_type"
+                                               class="hidden">
+                                        <div class="size-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                                             :class="formData.deliveryType === 'dine_in' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-base-200'">
+                                            <span class="icon-[tabler--tools-kitchen-2] size-5"
+                                                  :class="formData.deliveryType === 'dine_in' ? 'text-emerald-600' : 'text-base-content/40'"></span>
+                                        </div>
+                                        <x-ui.method-card-copy summary="dineInMethodSummary">
+                                            {{ __('frontend.dine_in_method_title') }}
+                                        </x-ui.method-card-copy>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div x-show="formData.deliveryType === 'pickup'" x-cloak
+                                 class="rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 p-4 flex items-start gap-3">
+                                <div class="size-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                                    <span class="icon-[tabler--walk] size-5 text-emerald-600"></span>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-sm text-emerald-800 dark:text-emerald-200">Самовывоз из заведения</p>
+                                    <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Заказ забрать по адресу: 174, Мепе Парнаваз Мепе, Батуми 6000, Грузия</p>
+                                    <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Время работы: 10:00 - 21:00</p>
+                                    <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Телефон: +995 500 700 877</p>
+                                    <a href="https://maps.app.goo.gl/MBzMJjTLa977ah886?g_st=ic" target="_blank" class="text-base text-emerald-700 dark:text-emerald-300/70 mt-0.5">Посмотреть на карте</a>
+                                </div>
+                            </div>
+
+                            <div x-show="formData.deliveryType === 'dine_in'" x-cloak
+                                 class="rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 p-4 flex items-start gap-3">
+                                <div class="size-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                                    <span class="icon-[tabler--tools-kitchen-2] size-5 text-emerald-600"></span>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-sm text-emerald-800 dark:text-emerald-200">{{ __('frontend.dine_in_method_title') }}</p>
+                                    <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Заказ в заведении: 174, Мепе Парнаваз Мепе, Батуми 6000, Грузия</p>
+                                    <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Время работы: 10:00 - 21:00</p>
+                                    <p class="text-xs text-emerald-700/70 dark:text-emerald-300/70 mt-0.5">Телефон: +995 500 700 877</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-base-content/60 mb-1 block">{{ __('frontend.order_comment') }}</label>
+                                <textarea x-model="formData.comment"
+                                          class="textarea textarea-bordered w-full rounded-xl text-sm focus:border-emerald-400"
+                                          rows="2"
+                                          placeholder="{{ __('frontend.comment_placeholder') }}"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-base-content/60 mb-1 block">{{ __('frontend.promo_code') }}</label>
+                                <input type="text"
+                                       x-model="formData.promoCode"
+                                       maxlength="100"
+                                       class="input input-bordered input-sm w-full rounded-xl focus:border-emerald-400"
+                                       placeholder="{{ __('frontend.promo_code_placeholder') }}">
+                            </div>
+
+                            <div x-show="orderError"
+                                 class="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
+                                <span class="icon-[tabler--alert-circle] size-4 text-red-500 shrink-0"></span>
+                                <span class="text-sm text-red-700 dark:text-red-300" x-text="orderError"></span>
+                            </div>
+
+                            <x-ui.personal-data-consent id="personal-data-consent-checkout" />
+                            <button type="submit"
+                                    class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40"
+                                    :disabled="loading || !formData.name || !isPhoneComplete() || !formData.personalDataConsent">
+                                <span x-show="!loading" class="icon-[tabler--check] size-5"></span>
+                                <span x-show="loading" class="loading loading-spinner loading-sm"></span>
+                                <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
+                            </button>
+                        @else
                         <button type="button"
                                 @click="goToStep2()"
                                 class="w-full h-13 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -661,8 +752,10 @@
                             Далее
                             <span class="icon-[tabler--arrow-right] size-5"></span>
                         </button>
+                        @endif
                     </div>
 
+                    @if($orderMode !== \App\Enums\OrderMode::Onsite)
                     <!-- ====== ШАГ 2: Способ получения + Адрес ====== -->
                     <div x-show="step === 2" class="p-6 space-y-5">
 
@@ -1025,6 +1118,7 @@
                             <span x-text="loading ? 'Оформление...' : 'Оформить заказ'"></span>
                         </button>
                     </div>
+                    @endif
                 </form>
 
                 <div x-show="orderSuccess" x-cloak class="p-6 space-y-5">

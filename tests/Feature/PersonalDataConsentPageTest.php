@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\OrderMode;
+
 it('renders the personal data consent page', function () {
     $response = $this->get(route('legal.personal-data-consent'));
 
@@ -40,4 +42,23 @@ it('renders a three-step delivery checkout with a thank-you phone link', functio
     $response->assertSee(__('frontend.order_thanks'), false);
     $response->assertSee('tel:+995500700877', false);
     $response->assertSee('verification_method: isOnPremise ? null : \'callback\'', false);
+});
+
+it('renders a single-step onsite checkout', function () {
+    $this->withSession([OrderMode::SESSION_KEY => OrderMode::Onsite->value]);
+
+    $response = $this->get(route('home'));
+
+    $response->assertSuccessful();
+    $response->assertSee(__('frontend.pickup_method_title'), false);
+    $response->assertSee(__('frontend.dine_in_method_title'), false);
+    $response->assertSee(__('frontend.order_comment'), false);
+    $response->assertSee(__('frontend.promo_code'), false);
+    $response->assertSee('personal-data-consent-checkout', false);
+    $response->assertSee('Оформить заказ', false);
+    $response->assertSee("window.orderMode === 'onsite' || this.step >= 2", false);
+    $response->assertDontSee('Шаг 1 из 2', false);
+    $response->assertDontSee('Шаг 2 из 2', false);
+    $response->assertDontSee('Шаг 1 из 3', false);
+    $response->assertDontSee('Далее', false);
 });

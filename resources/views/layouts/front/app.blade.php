@@ -907,7 +907,7 @@
             },
 
             get showFinalTotal() {
-                return this.step >= 2;
+                return window.orderMode === 'onsite' || this.step >= 2;
             },
 
             get discountAmount() {
