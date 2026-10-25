@@ -19,7 +19,10 @@ it('shows the order mode selection screen to a new visitor', function () {
         ->assertSuccessful()
         ->assertViewIs('frontend.order-mode')
         ->assertSee(__('frontend.order_mode_onsite'), false)
-        ->assertSee(__('frontend.order_mode_delivery'), false);
+        ->assertSee(__('frontend.order_mode_delivery'), false)
+        ->assertSee('storage/images/slider/slider-d-3.webp', false)
+        ->assertSee('backdrop-blur-md', false)
+        ->assertDontSee('<h1', false);
 });
 
 it('saves onsite mode and opens the catalog', function () {

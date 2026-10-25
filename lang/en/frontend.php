@@ -8,7 +8,7 @@ return [
     'menu' => 'Menu',
     'close' => 'Close',
     'order_mode_title' => 'How would you like to get your order?',
-    'order_mode_onsite' => 'At the establishment & takeaway',
+    'order_mode_onsite' => 'Dine in / Takeaway',
     'order_mode_delivery' => 'Delivery',
     'order_mode_onsite_short' => 'On site',
     'order_mode_delivery_short' => 'Delivery',

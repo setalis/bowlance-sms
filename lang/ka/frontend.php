@@ -8,7 +8,7 @@ return [
     'menu' => 'მენიუ',
     'close' => 'დახურვა',
     'order_mode_title' => 'როგორ გსურთ შეკვეთის მიღება?',
-    'order_mode_onsite' => 'დაწესებულებაში და წასაღებად',
+    'order_mode_onsite' => 'დაწესებულებაში / წასაღებად',
     'order_mode_delivery' => 'მიწოდება',
     'order_mode_onsite_short' => 'დაწესებულებაში',
     'order_mode_delivery_short' => 'მიწოდება',

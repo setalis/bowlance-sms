@@ -8,7 +8,7 @@ return [
     'menu' => 'Меню',
     'close' => 'Закрыть',
     'order_mode_title' => 'Как вы хотите получить заказ?',
-    'order_mode_onsite' => 'В заведении и с собой',
+    'order_mode_onsite' => 'В заведении / С собой',
     'order_mode_delivery' => 'Доставка',
     'order_mode_onsite_short' => 'В заведении',
     'order_mode_delivery_short' => 'Доставка',
