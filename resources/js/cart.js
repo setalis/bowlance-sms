@@ -13,6 +13,7 @@ import {
     calculateDeliveryFee,
     calculateSubtotalFromItems,
     calculateTotalForType,
+    roundMoney,
     getDiscountAmountForType,
     getDiscountConfig,
     getDiscountLabels,
@@ -31,7 +32,7 @@ export function initCart() {
             this.pricingVersion++;
         },
 
-        init() {
+        async init() {
             const savedCart = localStorage.getItem('bowlance_cart');
             if (savedCart) {
                 try {
@@ -39,6 +40,154 @@ export function initCart() {
                 } catch (e) {
                     this.items = [];
                 }
+            }
+
+            if (!window.orderMode || this.items.length === 0) {
+                return;
+            }
+
+            const previousTotal = roundMoney(this.items.reduce(
+                (sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1),
+                0
+            ));
+
+            this.applyModePrices();
+
+            if (this.items.some((item) => this.needsServerPrice(item))) {
+                await this.repriceFromServer();
+            }
+
+            this.saveCart();
+            this.touchPricing();
+
+            const nextTotal = roundMoney(this.items.reduce(
+                (sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1),
+                0
+            ));
+
+            if (previousTotal !== nextTotal) {
+                this.showNotification(window.orderModePricing?.updatedMessage || 'Цены обновлены', 'info');
+            }
+        },
+
+        needsServerPrice(item) {
+            if (item.type === 'bowl' || item.type === 'breakfast') {
+                return (item.products || []).some((product) => product?.id && product.catalogPrice == null);
+            }
+
+            return item.catalogPrice == null;
+        },
+
+        modeUnit(catalogPrice) {
+            const price = parseFloat(catalogPrice) || 0;
+
+            if (window.orderMode === 'onsite' && window.pricesIncludePickupDiscount && window.orderModePricing?.pickupPercent) {
+                return roundMoney(price * (1 - (window.orderModePricing.pickupPercent / 100)));
+            }
+
+            return roundMoney(price);
+        },
+
+        applyModePrices() {
+            this.items.forEach((item) => {
+                if (item.type === 'dish') {
+                    const addons = (item.addons || []).map((addon) => {
+                        const catalogPrice = addon.catalogPrice ?? addon.price;
+
+                        return {
+                            ...addon,
+                            catalogPrice,
+                            price: this.modeUnit(catalogPrice),
+                        };
+                    });
+                    const catalogPrice = item.catalogPrice ?? item.basePrice ?? item.price;
+                    const addonsTotal = addons.reduce((sum, addon) => sum + (addon.price * (addon.quantity || 1)), 0);
+
+                    item.catalogPrice = catalogPrice;
+                    item.addons = addons;
+                    item.basePrice = this.modeUnit(catalogPrice);
+                    item.price = roundMoney(item.basePrice + addonsTotal);
+
+                    return;
+                }
+
+                if (item.type === 'bowl' || item.type === 'breakfast') {
+                    if ((item.products || []).some((product) => product?.catalogPrice != null)) {
+                        item.products = item.products.map((product) => ({
+                            ...product,
+                            price: this.modeUnit(product.catalogPrice ?? product.price),
+                            catalogPrice: product.catalogPrice ?? product.price,
+                        }));
+                        item.price = roundMoney(item.products.reduce(
+                            (sum, product) => sum + (parseFloat(product.price) * (product.quantity || 1)),
+                            0
+                        ));
+                        item.catalogPrice = item.price;
+                    } else if (item.catalogPrice != null) {
+                        item.price = this.modeUnit(item.catalogPrice);
+                    }
+
+                    return;
+                }
+
+                if (item.catalogPrice != null) {
+                    item.price = this.modeUnit(item.catalogPrice);
+                }
+            });
+        },
+
+        async repriceFromServer() {
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+
+            if (!csrfMeta) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/cart/reprice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfMeta.getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        items: this.items.map((item) => ({
+                            type: item.type,
+                            id: item.id,
+                            name: item.name,
+                            price: item.catalogPrice ?? item.price,
+                            quantity: item.quantity,
+                            products: item.products || null,
+                            addons: item.addons || null,
+                        })),
+                    }),
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const result = await response.json();
+
+                this.items = this.items.map((item, index) => {
+                    const priced = result.items?.[index];
+
+                    if (!priced) {
+                        return item;
+                    }
+
+                    return {
+                        ...item,
+                        price: priced.price,
+                        catalogPrice: priced.catalogPrice ?? item.catalogPrice,
+                        name: priced.name || item.name,
+                        products: priced.products || item.products,
+                        addons: priced.addons || item.addons,
+                    };
+                });
+            } catch {
+                return;
             }
         },
 
@@ -55,18 +204,24 @@ export function initCart() {
 
             const addons = (dish.addons || [])
                 .filter(addon => (addon.quantity || 0) > 0)
-                .map(addon => ({
-                    id: addon.id,
-                    name: addon.name,
-                    price: parseFloat(addon.price),
-                    quantity: Math.max(1, parseInt(addon.quantity, 10) || 1),
-                    calories: addon.calories || 0,
-                    proteins: addon.proteins || 0,
-                    fats: addon.fats || 0,
-                    carbs: addon.carbs || 0,
-                }));
+                .map(addon => {
+                    const catalogPrice = parseFloat(addon.catalogPrice ?? addon.price);
 
-            const basePrice = parseFloat(dish.basePrice ?? dish.price);
+                    return {
+                        id: addon.id,
+                        name: addon.name,
+                        catalogPrice,
+                        price: this.modeUnit(catalogPrice),
+                        quantity: Math.max(1, parseInt(addon.quantity, 10) || 1),
+                        calories: addon.calories || 0,
+                        proteins: addon.proteins || 0,
+                        fats: addon.fats || 0,
+                        carbs: addon.carbs || 0,
+                    };
+                });
+
+            const catalogPrice = parseFloat(dish.catalogPrice ?? dish.basePrice ?? dish.price);
+            const basePrice = this.modeUnit(catalogPrice);
             const addonsTotal = addons.reduce((sum, addon) => sum + (addon.price * addon.quantity), 0);
             const unitPrice = basePrice + addonsTotal;
             const addonsKey = this.getAddonsKey(addons);
@@ -84,6 +239,7 @@ export function initCart() {
                     type: 'dish',
                     id: dish.id,
                     name: dish.name,
+                    catalogPrice,
                     basePrice: basePrice,
                     price: unitPrice,
                     image: dish.image,
@@ -162,7 +318,8 @@ export function initCart() {
                     type: 'drink',
                     id: drink.id,
                     name: drink.name,
-                    price: parseFloat(drink.price),
+                    catalogPrice: parseFloat(drink.catalogPrice ?? drink.price),
+                    price: this.modeUnit(drink.catalogPrice ?? drink.price),
                     image: drink.image,
                     quantity: 1,
                     volume: drink.volume || null,
@@ -190,7 +347,16 @@ export function initCart() {
             }
 
             const bowlId = Date.now();
-            const totalPrice = products.reduce((sum, p) => sum + parseFloat(p.price) * (p.quantity || 1), 0);
+            const normalizedProducts = products.map((product) => {
+                const catalogPrice = parseFloat(product.catalogPrice ?? product.price);
+
+                return {
+                    ...product,
+                    catalogPrice,
+                    price: this.modeUnit(catalogPrice),
+                };
+            });
+            const totalPrice = normalizedProducts.reduce((sum, p) => sum + parseFloat(p.price) * (p.quantity || 1), 0);
             const totalCalories = products.reduce((sum, p) => sum + (p.calories || 0) * (p.quantity || 1), 0);
             const totalProteins = products.reduce((sum, p) => sum + (p.proteins || 0) * (p.quantity || 1), 0);
             const totalFats = products.reduce((sum, p) => sum + (p.fats || 0) * (p.quantity || 1), 0);
@@ -201,9 +367,10 @@ export function initCart() {
                 type,
                 id: bowlId,
                 name: isBreakfast ? 'Собранный завтрак' : 'Собранный боул',
+                catalogPrice: totalPrice,
                 price: totalPrice,
                 quantity: 1,
-                products: products,
+                products: normalizedProducts,
                 calories: totalCalories,
                 proteins: totalProteins,
                 fats: totalFats,
@@ -330,7 +497,11 @@ export function initCart() {
         },
 
         get summaryChips() {
-            return buildSummaryChips(this.subtotal, getDiscountLabels(), 'all');
+            const scope = window.orderMode === 'delivery'
+                ? 'delivery'
+                : (window.orderMode === 'onsite' ? 'pickup' : 'all');
+
+            return buildSummaryChips(this.subtotal, getDiscountLabels(), scope);
         },
 
         get hasSummaryDetails() {

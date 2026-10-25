@@ -7,6 +7,14 @@ return [
     'cart' => 'Cart',
     'menu' => 'Menu',
     'close' => 'Close',
+    'order_mode_title' => 'How would you like to get your order?',
+    'order_mode_onsite' => 'At the establishment & takeaway',
+    'order_mode_delivery' => 'Delivery',
+    'order_mode_onsite_short' => 'On site',
+    'order_mode_delivery_short' => 'Delivery',
+    'order_mode_onsite_hint' => 'Prices include the pickup discount',
+    'order_mode_delivery_hint' => 'We will bring it to your address',
+    'order_mode_prices_updated' => 'Prices were updated for the selected order mode.',
 
     // Main page
     'tagline' => 'Healthy food fast and tasty',

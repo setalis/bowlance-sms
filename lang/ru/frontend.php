@@ -7,6 +7,14 @@ return [
     'cart' => 'Корзина',
     'menu' => 'Меню',
     'close' => 'Закрыть',
+    'order_mode_title' => 'Как вы хотите получить заказ?',
+    'order_mode_onsite' => 'В заведении и с собой',
+    'order_mode_delivery' => 'Доставка',
+    'order_mode_onsite_short' => 'В заведении',
+    'order_mode_delivery_short' => 'Доставка',
+    'order_mode_onsite_hint' => 'Цены со скидкой самовывоза',
+    'order_mode_delivery_hint' => 'Привезём по вашему адресу',
+    'order_mode_prices_updated' => 'Цены обновлены под выбранный способ заказа.',
 
     // Main page
     'tagline' => 'Полезная еда быстро и вкусно',

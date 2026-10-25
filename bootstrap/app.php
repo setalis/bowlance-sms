@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
+            'order.mode' => \App\Http\Middleware\EnsureOrderMode::class,
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'auth.cabinet' => \App\Http\Middleware\AuthenticateCabinet::class,
             'cabinet' => \App\Http\Middleware\EnsureCabinetUser::class,

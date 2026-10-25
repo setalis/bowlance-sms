@@ -121,7 +121,7 @@ it('applies pickup discount when creating dine-in order', function () {
     $response->assertJsonPath('order.delivery_type', DeliveryType::DineIn->value);
 
     $order = \App\Models\Order::latest()->first();
-    expect((float) $order->subtotal)->toBe(100.0);
+    expect((float) $order->subtotal)->toBe(85.0);
     expect((float) $order->delivery_fee)->toBe(0.0);
     expect((float) $order->total)->toBe(85.0);
 });

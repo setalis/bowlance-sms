@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Enums\OrderMode;
 use App\Models\Discount;
 use App\Models\Setting;
+use App\Services\ProductPriceService;
 use App\Services\WoltDriveService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -27,10 +29,16 @@ class AppServiceProvider extends ServiceProvider
         // Гарантируем fallback-локаль для переводов (важно на хостинге после config:cache)
         $this->app->setFallbackLocale(config('app.fallback_locale', 'ru'));
 
-        View::composer('layouts.front.app', function ($view): void {
+        View::composer(['layouts.front.app', 'frontend.*'], function ($view): void {
+            $prices = app(ProductPriceService::class);
+            $mode = OrderMode::current();
+
             $view->with([
                 'pickupDiscount' => $this->getPickupDiscount(),
                 'cartTotalDiscounts' => $this->getCartTotalDiscounts(),
+                'orderMode' => $mode,
+                'productPrice' => $prices,
+                'pricesIncludePickupDiscount' => $mode ? $prices->includesPickupPercent($mode) : false,
             ]);
         });
 

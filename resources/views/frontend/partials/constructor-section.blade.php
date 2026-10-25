@@ -150,11 +150,14 @@
                             @foreach($category->products as $product)
                                 @php
                                     $variant = $product->variantFor($category->type);
+                                    $ingredientCatalogPrice = $productPrice->catalogAmount($variant?->price ?? 0);
+                                    $ingredientPrice = $productPrice->forAmount($ingredientCatalogPrice);
                                 @endphp
                                 <div @click="toggleProduct({
                                     id: {{ $product->id }},
                                     name: '{{ addslashes($product->name) }}',
-                                    price: {{ $variant?->price ?? 0 }},
+                                    catalogPrice: {{ $ingredientCatalogPrice }},
+                                    price: {{ $ingredientPrice }},
                                     categoryId: {{ $category->id }},
                                     category: '{{ addslashes($category->name) }}',
                                     image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
@@ -190,7 +193,8 @@
                                                         @click.stop="toggleProduct({
                                                             id: {{ $product->id }},
                                                             name: '{{ addslashes($product->name) }}',
-                                                            price: {{ $variant?->price ?? 0 }},
+                                                            catalogPrice: {{ $ingredientCatalogPrice }},
+                                                            price: {{ $ingredientPrice }},
                                                             categoryId: {{ $category->id }},
                                                             category: '{{ addslashes($category->name) }}',
                                                             image: '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
@@ -221,7 +225,7 @@
                                         @endif
 
                                         <div class="mt-2 flex items-center justify-between">
-                                            <span class="text-base font-bold">{{ number_format($variant?->price ?? 0, 2) }} ₾</span>
+                                            <span class="text-base font-bold">{{ number_format($ingredientPrice, 2) }} ₾</span>
                                             <span x-show="isSelected({{ $product->id }})"
                                                   class="badge badge-primary badge-sm"
                                                   x-text="'×' + getProductQuantity({{ $product->id }})">

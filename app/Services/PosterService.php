@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DeliveryType;
 use App\Enums\DiscountScope;
 use App\Enums\DiscountType;
+use App\Enums\OrderMode;
 use App\Enums\PaymentMethod;
 use App\Models\ConstructorProduct;
 use App\Models\Discount;
@@ -288,8 +289,31 @@ class PosterService
     protected function buildPricingCommentLines(Order $order): array
     {
         $deliveryType = $order->delivery_type ?? DeliveryType::Delivery;
-        $pricing = $this->discountService->calculateTotal((float) $order->subtotal, $deliveryType);
         $deliveryFee = (float) $order->delivery_fee;
+
+        if ($order->order_mode === OrderMode::Onsite) {
+            $discountAmount = max(0, round((float) $order->subtotal + $deliveryFee - (float) $order->total, 2));
+
+            $lines = [
+                'Сумма товаров: '.$this->formatMoney((float) $order->subtotal).' ₾',
+            ];
+
+            if ($discountAmount > 0) {
+                $lines[] = 'Скидка: −'.$this->formatMoney($discountAmount).' ₾ (самовывоз)';
+            }
+
+            $lines[] = 'Доставка: —';
+            $lines[] = 'Итого к оплате: '.$this->formatMoney((float) $order->total).' ₾';
+            $lines[] = 'Способ: '.match ($deliveryType) {
+                DeliveryType::Pickup => 'самовывоз',
+                DeliveryType::DineIn => 'в заведении',
+                default => 'доставка',
+            };
+
+            return $lines;
+        }
+
+        $pricing = $this->discountService->calculateTotal((float) $order->subtotal, $deliveryType);
 
         $lines = [
             'Сумма товаров: '.$this->formatMoney((float) $order->subtotal).' ₾',

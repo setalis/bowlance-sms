@@ -594,7 +594,7 @@ it('применяет скидку за самовывоз при создан�
     $response->assertJsonPath('order.total', '90.00');
 
     $order = \App\Models\Order::latest()->first();
-    expect((float) $order->subtotal)->toBe(100.0);
+    expect((float) $order->subtotal)->toBe(90.0);
     expect((float) $order->total)->toBe(90.0);
 });
 

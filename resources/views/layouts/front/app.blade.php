@@ -54,10 +54,19 @@
         window.phoneVerificationEnabled = @json($phoneVerificationEnabled ?? true);
         window.ordersUnavailableMessage = @json(__('frontend.orders_unavailable'));
         window.personalDataConsentRequiredMessage = @json(__('frontend.personal_data_consent_required'));
+        window.orderMode = @json($orderMode?->value);
+        window.pricesIncludePickupDiscount = @json($pricesIncludePickupDiscount ?? false);
+        window.orderModePricing = {
+            pickupPercent: @json($productPrice->pickupPercent()),
+            updatedMessage: @json(__('frontend.order_mode_prices_updated')),
+        };
         window.discountConfig = {
             pickup: @json($pickupDiscount ? ['size' => (float) $pickupDiscount->size, 'type' => $pickupDiscount->type->value] : null),
             cartTotal: @json($cartTotalDiscounts ?? []),
         };
+        if (window.pricesIncludePickupDiscount) {
+            window.discountConfig.pickup = null;
+        }
         window.deliveryConfig = {
             fee: @json((float) config('delivery.fee', 5)),
             freeFrom: @json((float) config('delivery.free_from', 50)),
@@ -280,7 +289,7 @@
                 phoneCountry: window.defaultPhoneCountry || 'GE',
                 phoneLocal: '',
                 email: '',
-                deliveryType: 'delivery',
+                deliveryType: window.orderMode === 'onsite' ? 'dine_in' : 'delivery',
                 deliveryTimeMode: 'asap',
                 scheduledTime: '10:00',
                 deliveryCity: '',
@@ -727,7 +736,7 @@
                     phoneCountry: window.defaultPhoneCountry || 'GE',
                     phoneLocal: '',
                     email: '',
-                    deliveryType: 'delivery',
+                    deliveryType: window.orderMode === 'onsite' ? 'dine_in' : 'delivery',
                     deliveryTimeMode: 'asap',
                     scheduledTime: '10:00',
                     deliveryCity: '',

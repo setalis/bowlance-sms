@@ -7,6 +7,14 @@ return [
     'cart' => 'კალათა',
     'menu' => 'მენიუ',
     'close' => 'დახურვა',
+    'order_mode_title' => 'როგორ გსურთ შეკვეთის მიღება?',
+    'order_mode_onsite' => 'დაწესებულებაში და წასაღებად',
+    'order_mode_delivery' => 'მიწოდება',
+    'order_mode_onsite_short' => 'დაწესებულებაში',
+    'order_mode_delivery_short' => 'მიწოდება',
+    'order_mode_onsite_hint' => 'ფასები თვითმიღების ფასდაკლებით',
+    'order_mode_delivery_hint' => 'მოგიტანთ მისამართზე',
+    'order_mode_prices_updated' => 'ფასები განახლდა არჩეული შეკვეთის რეჟიმისთვის.',
 
     // Main page
     'tagline' => 'სასარგებლო საკვები სწრაფად და გემრიელად',

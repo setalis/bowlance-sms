@@ -3,17 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Enums\DeliveryType;
+use App\Enums\OrderMode;
 use App\Enums\OrderStatus;
 use App\Http\Requests\StoreOrderRequest;
 use App\Mail\NewOrderMail;
-use App\Models\Dish;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PhoneVerification;
 use App\Models\Setting;
 use App\Services\DiscountService;
+use App\Services\OrderItemPriceResolver;
 use App\Services\PhoneAuthService;
 use App\Services\PosterService;
+use App\Services\ProductPriceService;
 use App\Services\WoltDriveService;
 use App\Support\PhoneNumber;
 use Illuminate\Http\JsonResponse;
@@ -29,8 +31,11 @@ class OrderController extends Controller
         protected DiscountService $discountService
     ) {}
 
-    public function store(StoreOrderRequest $request): JsonResponse
-    {
+    public function store(
+        StoreOrderRequest $request,
+        OrderItemPriceResolver $itemPrices,
+        ProductPriceService $productPrices,
+    ): JsonResponse {
         if (! Setting::get('orders_enabled', true)) {
             return response()->json([
                 'success' => false,
@@ -85,20 +90,21 @@ class OrderController extends Controller
             // Authenticate the user
             $this->phoneAuthService->authenticateUser($user);
 
-            $resolvedItems = collect($request->items)->map(function (array $item) {
-                if ($item['type'] !== 'dish') {
-                    return $item;
-                }
+            $orderMode = OrderMode::current();
+            $resolvedItems = collect($itemPrices->priceItems($request->items, $orderMode));
 
-                return $this->resolveDishOrderItem($item);
-            });
-
-            $subtotal = $resolvedItems->sum(fn ($item) => $item['price'] * $item['quantity']);
+            $subtotal = round($resolvedItems->sum(fn ($item) => $item['price'] * $item['quantity']), 2);
 
             $deliveryType = DeliveryType::from($request->delivery_type ?? DeliveryType::Delivery->value);
-            $pricing = $this->discountService->calculateTotal((float) $subtotal, $deliveryType);
-            $deliveryFee = $pricing['delivery_fee'];
-            $total = $pricing['total'];
+
+            if ($orderMode === OrderMode::Onsite && $productPrices->includesPickupPercent($orderMode)) {
+                $deliveryFee = 0.0;
+                $total = $subtotal;
+            } else {
+                $pricing = $this->discountService->calculateTotal($subtotal, $deliveryType);
+                $deliveryFee = $pricing['delivery_fee'];
+                $total = $pricing['total'];
+            }
 
             $deliveryAddress = $request->delivery_address;
             if ($request->delivery_type === DeliveryType::Delivery->value && $request->filled('delivery_city') && $request->filled('delivery_street')) {
@@ -114,6 +120,7 @@ class OrderController extends Controller
                 'customer_phone' => $customerPhone,
                 'customer_email' => $request->customer_email,
                 'delivery_type' => $request->delivery_type ?? DeliveryType::Delivery->value,
+                'order_mode' => $orderMode,
                 'delivery_time' => $request->delivery_time,
                 'delivery_address' => $deliveryAddress,
                 'delivery_city' => $request->delivery_city,
@@ -213,64 +220,6 @@ class OrderController extends Controller
                 'message' => 'Ошибка при создании заказа: '.$e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * @param  array<string, mixed>  $item
-     * @return array<string, mixed>
-     */
-    protected function resolveDishOrderItem(array $item): array
-    {
-        $dish = Dish::query()->with('addons')->find($item['id']);
-
-        if (! $dish) {
-            return $item;
-        }
-
-        $basePrice = (float) ($dish->discount_price ?? $dish->price);
-        $addonsData = [];
-        $addonsTotal = 0.0;
-        $addonCalories = 0;
-        $addonProteins = 0.0;
-        $addonFats = 0.0;
-        $addonCarbs = 0.0;
-
-        foreach ($item['addons'] ?? [] as $addonInput) {
-            $attached = $dish->addons->firstWhere('id', (int) ($addonInput['id'] ?? 0));
-
-            if (! $attached) {
-                continue;
-            }
-
-            $quantity = max(1, (int) ($addonInput['quantity'] ?? 1));
-            $addonPrice = (float) ($attached->pivot->price ?? $attached->price);
-            $addonsTotal += $addonPrice * $quantity;
-            $addonCalories += (int) ($attached->calories ?? 0) * $quantity;
-            $addonProteins += (float) ($attached->proteins ?? 0) * $quantity;
-            $addonFats += (float) ($attached->fats ?? 0) * $quantity;
-            $addonCarbs += (float) ($attached->carbohydrates ?? 0) * $quantity;
-
-            $addonsData[] = [
-                'id' => $attached->id,
-                'name' => $attached->name,
-                'price' => $addonPrice,
-                'quantity' => $quantity,
-                'calories' => $attached->calories,
-                'proteins' => $attached->proteins,
-                'fats' => $attached->fats,
-                'carbs' => $attached->carbohydrates,
-            ];
-        }
-
-        $item['price'] = round($basePrice + $addonsTotal, 2);
-        $item['addons'] = $addonsData !== [] ? $addonsData : null;
-        $item['name'] = $dish->name;
-        $item['calories'] = (int) ($dish->calories ?? 0) + $addonCalories;
-        $item['proteins'] = (float) ($dish->proteins ?? 0) + $addonProteins;
-        $item['fats'] = (float) ($dish->fats ?? 0) + $addonFats;
-        $item['carbs'] = (float) ($dish->carbohydrates ?? 0) + $addonCarbs;
-
-        return $item;
     }
 
     public function show(Order $order): JsonResponse

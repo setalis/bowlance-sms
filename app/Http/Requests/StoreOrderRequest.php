@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\DeliveryType;
+use App\Enums\OrderMode;
 use App\Models\PhoneVerification;
 use App\Models\Setting;
 use App\Rules\ValidPhoneNumber;
@@ -85,6 +86,22 @@ class StoreOrderRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            $mode = OrderMode::current();
+
+            if ($mode === null) {
+                $validator->errors()->add('order_mode', 'Сначала выберите способ заказа.');
+
+                return;
+            }
+
+            $deliveryType = $this->deliveryType();
+
+            if ($deliveryType !== null && ! $mode->allows($deliveryType)) {
+                $validator->errors()->add('delivery_type', 'Способ получения не соответствует выбранному режиму заказа.');
+
+                return;
+            }
+
             if (! Setting::get('phone_verification_enabled', true)
                 && $this->delivery_type === DeliveryType::Delivery->value
                 && $this->verification_method !== 'callback') {

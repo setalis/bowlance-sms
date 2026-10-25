@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DeliveryType;
+use App\Enums\OrderMode;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,7 @@ class Order extends Model
         'customer_phone',
         'customer_email',
         'delivery_type',
+        'order_mode',
         'delivery_time',
         'delivery_address',
         'delivery_city',
@@ -58,6 +60,7 @@ class Order extends Model
         return [
             'status' => OrderStatus::class,
             'delivery_type' => DeliveryType::class,
+            'order_mode' => OrderMode::class,
             'payment_method' => PaymentMethod::class,
             'subtotal' => 'decimal:2',
             'delivery_fee' => 'decimal:2',

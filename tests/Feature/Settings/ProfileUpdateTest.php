@@ -55,7 +55,7 @@ test('user can delete their account', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
+        ->assertRedirect(route('home'));
 
     $this->assertGuest();
     expect($user->fresh())->toBeNull();

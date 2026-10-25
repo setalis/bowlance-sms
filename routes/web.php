@@ -15,8 +15,10 @@ use App\Http\Controllers\Cabinet\Auth\LoginController as CabinetLoginController;
 use App\Http\Controllers\Cabinet\DashboardController;
 use App\Http\Controllers\Cabinet\OrderController as CabinetOrderController;
 use App\Http\Controllers\Cabinet\ProfileController as CabinetProfileController;
+use App\Http\Controllers\CartPriceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderModeController;
 use App\Http\Controllers\UserAddressController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -25,7 +27,11 @@ use Illuminate\Support\Facades\Route;
 //     return view('frontend.index');
 // })->name('home');
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [OrderModeController::class, 'show'])->name('order-mode');
+Route::post('/order-mode', [OrderModeController::class, 'store'])->name('order-mode.store');
+Route::get('/qr/onsite', [OrderModeController::class, 'qrOnsite'])->name('qr.onsite');
+Route::get('/menu', [HomeController::class, 'index'])->middleware('order.mode')->name('home');
+Route::post('/cart/reprice', CartPriceController::class)->name('cart.reprice');
 
 Route::view('/personal-data-consent', 'frontend.personal-data-consent', [
     'title' => 'Согласие на обработку персональных данных',

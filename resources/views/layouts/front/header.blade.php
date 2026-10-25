@@ -39,6 +39,21 @@
 
 
         <div class="navbar-end flex items-center gap-3">
+            @if($orderMode)
+                <div class="hidden items-center rounded-full border border-emerald-600 p-0.5 md:flex" role="group" aria-label="{{ __('frontend.order_mode_title') }}" data-order-mode-switch="header">
+                    @foreach(\App\Enums\OrderMode::cases() as $modeOption)
+                        <form method="POST" action="{{ route('order-mode.store') }}">
+                            @csrf
+                            <input type="hidden" name="order_mode" value="{{ $modeOption->value }}">
+                            <button type="submit"
+                                    class="rounded-full px-2.5 py-1 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 {{ $orderMode === $modeOption ? 'bg-emerald-600 text-white' : 'text-emerald-700 hover:bg-emerald-50' }}"
+                                    aria-pressed="{{ $orderMode === $modeOption ? 'true' : 'false' }}">
+                                {{ $modeOption->shortLabel() }}
+                            </button>
+                        </form>
+                    @endforeach
+                </div>
+            @endif
             <div class="dropdown relative inline-flex [--placement:bottom-end]">
               <button id="locale-dropdown" 
                       type="button" 
@@ -114,7 +129,25 @@
 </header>
 
 <!-- Отступ для fixed header (учитываем баннер техработ при его показе) -->
-<div class="{{ $siteOrdersEnabled ? 'h-16' : 'h-[8.5rem]' }}"></div>
+<div class="{{ $siteOrdersEnabled ? 'h-20' : 'h-[8.5rem]' }}"></div>
+
+@if($orderMode)
+    <div class="w-full border-b border-base-content/10 bg-base-100 md:hidden" data-order-mode-switch="bar">
+        <div class="grid grid-cols-2" role="group" aria-label="{{ __('frontend.order_mode_title') }}">
+            @foreach(\App\Enums\OrderMode::cases() as $modeOption)
+                <form method="POST" action="{{ route('order-mode.store') }}">
+                    @csrf
+                    <input type="hidden" name="order_mode" value="{{ $modeOption->value }}">
+                    <button type="submit"
+                            class="w-full px-3 py-3 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-emerald-600 {{ $orderMode === $modeOption ? 'bg-emerald-600 text-white' : 'bg-base-100 text-emerald-700' }}"
+                            aria-pressed="{{ $orderMode === $modeOption ? 'true' : 'false' }}">
+                        {{ $modeOption->label() }}
+                    </button>
+                </form>
+            @endforeach
+        </div>
+    </div>
+@endif
 
 
 
@@ -641,7 +674,7 @@
                             </p>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <!-- Доставка -->
-                                <label class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
+                                <label x-show="window.orderMode !== 'onsite'" class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
                                        :class="formData.deliveryType === 'delivery' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
                                     <input type="radio"
                                            x-model="formData.deliveryType"
@@ -659,7 +692,7 @@
                                     </x-ui.method-card-copy>
                                 </label>
                                 <!-- Самовывоз -->
-                                <label class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
+                                <label x-show="window.orderMode !== 'delivery'" class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
                                        :class="formData.deliveryType === 'pickup' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
                                     <input type="radio"
                                            x-model="formData.deliveryType"
@@ -677,7 +710,7 @@
                                     </x-ui.method-card-copy>
                                 </label>
                                 <!-- В заведении -->
-                                <label class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
+                                <label x-show="window.orderMode !== 'delivery'" class="flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all sm:flex-col sm:items-center sm:text-center sm:gap-2"
                                        :class="formData.deliveryType === 'dine_in' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-base-200 hover:border-base-300'">
                                     <input type="radio"
                                            x-model="formData.deliveryType"

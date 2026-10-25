@@ -311,31 +311,41 @@
                                                 @endif
                                                 
                                                 <div class="card-actions mt-4 items-center justify-between">
+                                                    @php
+                                                        $dishCatalogPrice = $productPrice->catalogAmount($dish->price, $dish->discount_price);
+                                                        $dishDisplayPrice = $productPrice->forAmount($dishCatalogPrice);
+                                                    @endphp
                                                     <div class="flex flex-col">
-                                                        @if($dish->discount_price)
+                                                        @if($orderMode === \App\Enums\OrderMode::Delivery && $dish->discount_price)
                                                             <span class="text-xs text-base-content/50 line-through">{{ number_format($dish->price, 2) }} ₾</span>
-                                                            <span class="text-xl font-bold text-primary">{{ number_format($dish->discount_price, 2) }} ₾</span>
+                                                            <span class="text-xl font-bold text-primary">{{ number_format($dishDisplayPrice, 2) }} ₾</span>
                                                         @else
-                                                            <span class="text-xl font-bold">{{ number_format($dish->price, 2) }} ₾</span>
+                                                            <span class="text-xl font-bold">{{ number_format($dishDisplayPrice, 2) }} ₾</span>
                                                         @endif
                                                     </div>
                                                     <button type="button"
                                                             class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white border-0 gap-2 {{ !$siteOrdersEnabled ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                                            data-addons="{{ json_encode($dish->addons->map(fn ($addon) => [
-                                                                'id' => $addon->id,
-                                                                'name' => $addon->name,
-                                                                'price' => (float) ($addon->pivot->price ?? $addon->price),
-                                                                'calories' => (int) ($addon->calories ?? 0),
-                                                                'proteins' => (float) ($addon->proteins ?? 0),
-                                                                'fats' => (float) ($addon->fats ?? 0),
-                                                                'carbs' => (float) ($addon->carbohydrates ?? 0),
-                                                            ])->values(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) }}"
+                                                            data-addons="{{ json_encode($dish->addons->map(function ($addon) use ($productPrice) {
+                                                                $catalogPrice = $productPrice->catalogAmount($addon->pivot->price ?? $addon->price);
+
+                                                                return [
+                                                                    'id' => $addon->id,
+                                                                    'name' => $addon->name,
+                                                                    'catalogPrice' => $catalogPrice,
+                                                                    'price' => $productPrice->forAmount($catalogPrice),
+                                                                    'calories' => (int) ($addon->calories ?? 0),
+                                                                    'proteins' => (float) ($addon->proteins ?? 0),
+                                                                    'fats' => (float) ($addon->fats ?? 0),
+                                                                    'carbs' => (float) ($addon->carbohydrates ?? 0),
+                                                                ];
+                                                            })->values(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) }}"
                                                             @click="
                                                                 const dishPayload = {
                                                                     id: {{ $dish->id }},
                                                                     name: '{{ addslashes($dish->name) }}',
-                                                                    basePrice: {{ $dish->discount_price ?? $dish->price }},
-                                                                    price: {{ $dish->discount_price ?? $dish->price }},
+                                                                    catalogPrice: {{ $dishCatalogPrice }},
+                                                                    basePrice: {{ $dishDisplayPrice }},
+                                                                    price: {{ $dishDisplayPrice }},
                                                                     image: '{{ $dish->image }}',
                                                                     weight: '{{ $dish->weight_volume }}',
                                                                     calories: {{ $dish->calories ?? 0 }},
@@ -436,12 +446,16 @@
                                         @endif
                                         
                                         <div class="card-actions mt-4 items-center justify-between">
+                                            @php
+                                                $drinkCatalogPrice = $productPrice->catalogAmount($drink->price, $drink->discount_price);
+                                                $drinkDisplayPrice = $productPrice->forAmount($drinkCatalogPrice);
+                                            @endphp
                                             <div class="flex flex-col">
-                                                @if($drink->discount_price)
+                                                @if($orderMode === \App\Enums\OrderMode::Delivery && $drink->discount_price)
                                                     <span class="text-xs text-base-content/50 line-through">{{ number_format($drink->price, 2) }} ₾</span>
-                                                    <span class="text-xl font-bold text-primary">{{ number_format($drink->discount_price, 2) }} ₾</span>
+                                                    <span class="text-xl font-bold text-primary">{{ number_format($drinkDisplayPrice, 2) }} ₾</span>
                                                 @else
-                                                    <span class="text-xl font-bold">{{ number_format($drink->price, 2) }} ₾</span>
+                                                    <span class="text-xl font-bold">{{ number_format($drinkDisplayPrice, 2) }} ₾</span>
                                                 @endif
                                             </div>
                                             <button type="button"
@@ -451,7 +465,8 @@
                                                         $store.cart.addDrink({
                                                             id: {{ $drink->id }},
                                                             name: '{{ addslashes($drink->name) }}',
-                                                            price: {{ $drink->discount_price ?? $drink->price }},
+                                                            catalogPrice: {{ $drinkCatalogPrice }},
+                                                            price: {{ $drinkDisplayPrice }},
                                                             image: '{{ $drink->image }}',
                                                             volume: '{{ $drink->volume }}',
                                                             calories: {{ $drink->calories ?? 0 }},

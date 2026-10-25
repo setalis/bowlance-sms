@@ -341,6 +341,10 @@ export function getDiscountAmountForType(deliveryType, subtotal) {
 }
 
 export function getFooterDeliveryFeeBeforeSelection(subtotal) {
+    if (window.orderMode === 'onsite') {
+        return 0;
+    }
+
     return calculateDeliveryFee(subtotal, 'delivery');
 }
 
@@ -349,6 +353,18 @@ export function getFooterDiscountAmountBeforeSelection() {
 }
 
 export function getFooterTotalBeforeSelection(subtotal) {
+    if (window.orderMode === 'onsite') {
+        if (window.pricesIncludePickupDiscount) {
+            return roundMoney(subtotal);
+        }
+
+        return calculateTotalForType('pickup', subtotal, getDiscountConfig().pickup, []);
+    }
+
+    if (window.orderMode === 'delivery') {
+        return calculateTotalForType('delivery', subtotal, null, getDiscountConfig().cartTotal);
+    }
+
     return roundMoney(subtotal + calculateDeliveryFee(subtotal, 'delivery'));
 }
 
