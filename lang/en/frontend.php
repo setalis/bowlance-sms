@@ -12,7 +12,7 @@ return [
     'order_mode_delivery' => 'Delivery',
     'order_mode_onsite_short' => 'On site',
     'order_mode_delivery_short' => 'Delivery',
-    'order_mode_onsite_hint' => 'Prices include the pickup discount',
+    'order_mode_onsite_hint' => 'Цена со скидкой -15%',
     'order_mode_delivery_hint' => 'We will bring it to your address',
     'order_mode_prices_updated' => 'Prices were updated for the selected order mode.',
 

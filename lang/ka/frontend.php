@@ -12,7 +12,7 @@ return [
     'order_mode_delivery' => 'მიწოდება',
     'order_mode_onsite_short' => 'დაწესებულებაში',
     'order_mode_delivery_short' => 'მიწოდება',
-    'order_mode_onsite_hint' => 'ფასები თვითმიღების ფასდაკლებით',
+    'order_mode_onsite_hint' => 'Цена со скидкой -15%',
     'order_mode_delivery_hint' => 'მოგიტანთ მისამართზე',
     'order_mode_prices_updated' => 'ფასები განახლდა არჩეული შეკვეთის რეჟიმისთვის.',
 

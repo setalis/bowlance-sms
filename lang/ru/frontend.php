@@ -12,7 +12,7 @@ return [
     'order_mode_delivery' => 'Доставка',
     'order_mode_onsite_short' => 'В заведении',
     'order_mode_delivery_short' => 'Доставка',
-    'order_mode_onsite_hint' => 'Цены со скидкой самовывоза',
+    'order_mode_onsite_hint' => 'Цена со скидкой -15%',
     'order_mode_delivery_hint' => 'Привезём по вашему адресу',
     'order_mode_prices_updated' => 'Цены обновлены под выбранный способ заказа.',
 
