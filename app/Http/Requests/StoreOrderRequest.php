@@ -7,8 +7,10 @@ use App\Enums\OrderMode;
 use App\Models\PhoneVerification;
 use App\Models\Setting;
 use App\Rules\ValidPhoneNumber;
+use App\Support\OrderWindow;
 use App\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
@@ -25,7 +27,7 @@ class StoreOrderRequest extends FormRequest
             'customer_phone' => ['required', 'string', 'max:20', new ValidPhoneNumber],
             'customer_email' => 'nullable|email|max:255',
             'delivery_type' => ['required', Rule::enum(DeliveryType::class)],
-            'delivery_time' => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/', Rule::in($this->allowedDeliveryTimeSlots())],
+            'delivery_time' => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/', Rule::in($this->orderWindow()->allSlots())],
             'delivery_address' => 'nullable|string|max:1000',
             'delivery_city' => 'required_if:delivery_type,delivery|nullable|string|max:255',
             'delivery_street' => 'required_if:delivery_type,delivery|nullable|string|max:500',
@@ -71,7 +73,7 @@ class StoreOrderRequest extends FormRequest
             'delivery_type.required' => 'Необходимо выбрать способ получения',
             'delivery_type.in' => 'Неверный способ получения',
             'delivery_address.max' => 'Адрес доставки слишком длинный',
-            'delivery_time.in' => 'Выбранное время доставки недоступно. Выберите время с 10:00 до 20:00.',
+            'delivery_time.in' => $this->orderWindow()->closedMessage(),
             'delivery_city.required_if' => 'Укажите город',
             'delivery_street.required_if' => 'Укажите улицу и дом',
             'delivery_house.required_if' => 'Укажите номер дома',
@@ -98,6 +100,14 @@ class StoreOrderRequest extends FormRequest
 
             if ($deliveryType !== null && ! $mode->allows($deliveryType)) {
                 $validator->errors()->add('delivery_type', 'Способ получения не соответствует выбранному режиму заказа.');
+
+                return;
+            }
+
+            $deliveryTime = is_string($this->delivery_time) ? $this->delivery_time : null;
+
+            if (! $this->orderWindow()->accepts($deliveryTime)) {
+                $validator->errors()->add('delivery_time', $this->orderWindow()->closedMessage());
 
                 return;
             }
@@ -172,13 +182,15 @@ class StoreOrderRequest extends FormRequest
             && blank($this->verification_request_id);
     }
 
-    protected function allowedDeliveryTimeSlots(): array
+    public function orderWindow(): OrderWindow
     {
-        $slots = [];
-        for ($minutes = 10 * 60; $minutes <= 20 * 60; $minutes += 30) {
-            $slots[] = sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60);
-        }
+        return app(OrderWindow::class);
+    }
 
-        return $slots;
+    public function fulfillAt(): ?Carbon
+    {
+        $deliveryTime = is_string($this->delivery_time) ? $this->delivery_time : null;
+
+        return $this->orderWindow()->fulfillAt($deliveryTime);
     }
 }

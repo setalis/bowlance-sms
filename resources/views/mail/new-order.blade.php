@@ -63,10 +63,10 @@
             <span class="info-value">{{ $order->delivery_address }}</span>
         </div>
         @endif
-        @if($order->delivery_time)
+        @if($order->scheduledForLabel())
         <div class="info-row">
             <span class="info-label">Время доставки:</span>
-            <span class="info-value">{{ $order->delivery_time }}</span>
+            <span class="info-value">{{ $order->scheduledForLabel() }}</span>
         </div>
         @endif
         @if($order->receiver_phone)

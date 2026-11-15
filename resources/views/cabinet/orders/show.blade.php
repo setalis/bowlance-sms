@@ -151,6 +151,14 @@
                             <p class="mb-1 text-xs text-base-content/60">Способ получения</p>
                             <p>{{ $order->delivery_type?->label() ?? 'Доставка' }}</p>
                         </div>
+                        <div>
+                            <p class="mb-1 text-xs text-base-content/60">Время</p>
+                            @if($order->scheduledForLabel())
+                                <p class="font-medium">{{ $order->scheduledForLabel() }}</p>
+                            @else
+                                <p class="text-base-content/60">Как можно быстрее</p>
+                            @endif
+                        </div>
                         @if($order->delivery_address && $order->delivery_type?->value === 'delivery')
                             <div>
                                 <p class="mb-1 text-xs text-base-content/60">Адрес доставки</p>

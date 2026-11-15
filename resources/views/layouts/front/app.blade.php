@@ -71,6 +71,7 @@
             fee: @json((float) config('delivery.fee', 5)),
             freeFrom: @json((float) config('delivery.free_from', 50)),
         };
+        window.orderWindow = @json(app(\App\Support\OrderWindow::class)->clientPayload());
         window.discountLabels = @json($discountLabels);
     </script>
     @if(!$siteOrdersEnabled)
@@ -291,7 +292,7 @@
                 email: '',
                 deliveryType: window.orderMode === 'onsite' ? 'dine_in' : 'delivery',
                 deliveryTimeMode: 'asap',
-                scheduledTime: '10:00',
+                scheduledTime: '10:30',
                 deliveryCity: '',
                 deliveryStreet: '',
                 deliveryHouse: '',
@@ -335,6 +336,7 @@
             
             async init() {
                 this.phoneVerification = new PhoneVerification();
+                this.syncScheduledTime();
 
                 this.clearTelegramSession();
                 
@@ -491,13 +493,126 @@
             },
             
             deliveryTimeSlots() {
+                const config = this.orderWindowConfig();
+                const firstSlot = this.firstSlotMinutes();
+                const closes = this.parseClock(config.closesAt);
+                const step = Number(config.slotMinutes) || 30;
+                const nowMinutes = this.zonedParts(this.serverNowDate()).minutes;
                 const slots = [];
-                for (let minutes = 10 * 60; minutes <= 20 * 60; minutes += 30) {
-                    const h = String(Math.floor(minutes / 60)).padStart(2, '0');
-                    const m = String(minutes % 60).padStart(2, '0');
-                    slots.push(`${h}:${m}`);
+
+                for (let minutes = firstSlot; minutes <= closes; minutes += step) {
+                    if (this.isOrderingOpen() && minutes < nowMinutes) {
+                        continue;
+                    }
+
+                    const hour = String(Math.floor(minutes / 60)).padStart(2, '0');
+                    const minute = String(minutes % 60).padStart(2, '0');
+                    slots.push(`${hour}:${minute}`);
                 }
+
                 return slots;
+            },
+
+            orderWindowConfig() {
+                return window.orderWindow || {
+                    timezone: 'Asia/Tbilisi',
+                    opensAt: '10:00',
+                    closesAt: '21:00',
+                    firstSlotAt: '10:30',
+                    morningPrepMinutes: 30,
+                    slotMinutes: 30,
+                    serverNow: new Date().toISOString(),
+                };
+            },
+
+            serverNowDate() {
+                const config = this.orderWindowConfig();
+
+                if (!this._orderWindowLoadedAt) {
+                    this._orderWindowLoadedAt = Date.now();
+                    this._orderWindowServerNow = Date.parse(config.serverNow);
+                }
+
+                return new Date(this._orderWindowServerNow + (Date.now() - this._orderWindowLoadedAt));
+            },
+
+            zonedParts(date) {
+                const formatted = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: this.orderWindowConfig().timezone || 'Asia/Tbilisi',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hourCycle: 'h23',
+                }).formatToParts(date);
+                const parts = Object.fromEntries(formatted.map((part) => [part.type, part.value]));
+                const hour = Number(parts.hour === '24' ? '0' : parts.hour);
+
+                return {
+                    minutes: hour * 60 + Number(parts.minute),
+                };
+            },
+
+            parseClock(value) {
+                const [hour, minute] = String(value || '00:00').split(':').map(Number);
+
+                return hour * 60 + minute;
+            },
+
+            firstSlotMinutes() {
+                const config = this.orderWindowConfig();
+
+                if (config.firstSlotAt) {
+                    return this.parseClock(config.firstSlotAt);
+                }
+
+                return this.parseClock(config.opensAt) + (Number(config.morningPrepMinutes) || 0);
+            },
+
+            isOrderingOpen() {
+                const nowMinutes = this.zonedParts(this.serverNowDate()).minutes;
+                const config = this.orderWindowConfig();
+
+                return nowMinutes >= this.firstSlotMinutes() && nowMinutes <= this.parseClock(config.closesAt);
+            },
+
+            bookableDateLabel() {
+                const config = this.orderWindowConfig();
+                const now = this.serverNowDate();
+                const target = this.zonedParts(now).minutes > this.parseClock(config.closesAt)
+                    ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
+                    : now;
+
+                return new Intl.DateTimeFormat('ru', {
+                    timeZone: config.timezone || 'Asia/Tbilisi',
+                    day: 'numeric',
+                    month: 'long',
+                }).format(target);
+            },
+
+            syncScheduledTime() {
+                const slots = this.deliveryTimeSlots();
+                const fallback = slots[0] || this.orderWindowConfig().firstSlotAt || '10:30';
+
+                if (!slots.includes(this.formData.scheduledTime)) {
+                    this.formData.scheduledTime = fallback;
+                }
+
+                if (!slots.includes(this.afterHoursTime)) {
+                    this.afterHoursTime = this.formData.scheduledTime || fallback;
+                }
+            },
+
+            confirmAfterHours() {
+                this.formData.deliveryTimeMode = 'scheduled';
+                this.formData.scheduledTime = this.afterHoursTime;
+                this.afterHoursConfirmed = true;
+                this.afterHoursPrompt = false;
+                this.submitOrder();
+            },
+
+            cancelAfterHours() {
+                this.afterHoursPrompt = false;
+                this.afterHoursConfirmed = false;
+                this.$store.cart.showNotification('Заказ не оформлен', 'info');
             },
 
             goToStep2() {
@@ -658,6 +773,9 @@
             },
             
             orderError: '',
+            afterHoursPrompt: false,
+            afterHoursTime: '10:30',
+            afterHoursConfirmed: false,
 
             isOnPremise() {
                 return this.formData.deliveryType === 'pickup' || this.formData.deliveryType === 'dine_in';
@@ -676,6 +794,27 @@
                         window.personalDataConsentRequiredMessage || 'Необходимо согласие на обработку персональных данных',
                         'error'
                     );
+                    return;
+                }
+
+                if (!this.isOrderingOpen() && !this.afterHoursConfirmed) {
+                    const slots = this.deliveryTimeSlots();
+                    this.afterHoursTime = slots.includes(this.formData.scheduledTime)
+                        ? this.formData.scheduledTime
+                        : (slots[0] || this.orderWindowConfig().firstSlotAt);
+                    this.afterHoursPrompt = true;
+                    this.orderError = '';
+                    return;
+                }
+
+                if (this.formData.deliveryTimeMode === 'scheduled' && !this.deliveryTimeSlots().includes(this.formData.scheduledTime)) {
+                    this.syncScheduledTime();
+                    this.orderError = 'Выбранное время уже недоступно. Выберите другое время с '
+                        + (this.orderWindowConfig().firstSlotAt || this.orderWindowConfig().opensAt)
+                        + ' до '
+                        + this.orderWindowConfig().closesAt
+                        + '.';
+                    this.$store.cart.showNotification(this.orderError, 'error');
                     return;
                 }
                 
@@ -706,6 +845,8 @@
                         if (order.wolt_tracking_url) {
                             window.open(order.wolt_tracking_url, '_blank', 'noopener');
                         }
+                    } else {
+                        this.afterHoursConfirmed = false;
                     }
                 } catch (error) {
                     // Check if it requires user confirmation for switching accounts
@@ -724,6 +865,7 @@
                         this.orderError = error.message || 'Произошла ошибка при оформлении заказа';
                         this.$store.cart.showNotification(this.orderError, 'error');
                     }
+                    this.afterHoursConfirmed = false;
                 } finally {
                     this.loading = false;
                 }
@@ -738,7 +880,7 @@
                     email: '',
                     deliveryType: window.orderMode === 'onsite' ? 'dine_in' : 'delivery',
                     deliveryTimeMode: 'asap',
-                    scheduledTime: '10:00',
+                    scheduledTime: '10:30',
                     deliveryCity: '',
                     deliveryStreet: '',
                     deliveryHouse: '',
@@ -756,6 +898,8 @@
                 };
                 this.step = 1;
                 this.orderSuccess = false;
+                this.afterHoursPrompt = false;
+                this.afterHoursConfirmed = false;
                 this.verificationMethod = 'callback';
                 this.codeSent = false;
                 this.verificationCode = '';

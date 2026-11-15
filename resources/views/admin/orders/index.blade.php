@@ -98,10 +98,10 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if($order->delivery_time)
+                                        @if($order->scheduledForLabel())
                                             <span class="badge badge-outline gap-1">
                                                 <span class="icon-[tabler--clock] size-3"></span>
-                                                {{ $order->delivery_time }}
+                                                {{ $order->scheduledForLabel() }}
                                             </span>
                                         @else
                                             <span class="text-base-content/40 text-xs">ASAP</span>

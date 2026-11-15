@@ -482,7 +482,7 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
             x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-            class="w-full max-w-xl rounded-3xl bg-base-100 shadow-2xl flex flex-col max-h-[92vh]"
+            class="relative w-full max-w-xl rounded-3xl bg-base-100 shadow-2xl flex flex-col max-h-[92vh]"
         >
             <!-- Sticky Header с прогресс-индикатором -->
             <div class="flex-none px-6 pt-5 pb-4 border-b border-base-200">
@@ -1140,6 +1140,43 @@
             </div>
 
             <x-ui.cart-footer context="checkout" class="flex-none" x-show="!orderSuccess" />
+
+            <div x-show="afterHoursPrompt"
+                 x-cloak
+                 class="absolute inset-0 z-30 flex items-end bg-black/50 p-4 sm:items-center">
+                <div class="w-full space-y-4 rounded-2xl bg-base-100 p-4 shadow-xl">
+                    <div class="flex items-start gap-3">
+                        <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
+                            <span class="icon-[tabler--clock] size-5 text-amber-600"></span>
+                        </div>
+                        <p class="text-sm leading-relaxed">
+                            Заказ можно выполнить только в рабочее время с
+                            <span class="font-semibold" x-text="orderWindowConfig().firstSlotAt || orderWindowConfig().opensAt"></span>
+                            до
+                            <span class="font-semibold" x-text="orderWindowConfig().closesAt"></span>.
+                            Выберите время на <span class="font-semibold" x-text="bookableDateLabel()"></span>.
+                        </p>
+                    </div>
+                    <select x-model="afterHoursTime"
+                            class="select select-bordered w-full rounded-xl text-sm focus:border-emerald-400">
+                        <template x-for="slot in deliveryTimeSlots()" :key="'after-hours-' + slot">
+                            <option :value="slot" x-text="slot"></option>
+                        </template>
+                    </select>
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <button type="button"
+                                @click="cancelAfterHours()"
+                                class="h-12 rounded-2xl border border-base-300 bg-base-100 font-semibold text-base-content">
+                            Отменить
+                        </button>
+                        <button type="button"
+                                @click="confirmAfterHours()"
+                                class="h-12 rounded-2xl bg-emerald-600 font-semibold text-white hover:bg-emerald-700">
+                            Оформить на выбранное время
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

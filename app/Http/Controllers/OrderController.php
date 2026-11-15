@@ -122,6 +122,7 @@ class OrderController extends Controller
                 'delivery_type' => $request->delivery_type ?? DeliveryType::Delivery->value,
                 'order_mode' => $orderMode,
                 'delivery_time' => $request->delivery_time,
+                'fulfill_at' => $request->fulfillAt(),
                 'delivery_address' => $deliveryAddress,
                 'delivery_city' => $request->delivery_city,
                 'delivery_street' => $request->delivery_street,

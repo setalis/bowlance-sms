@@ -1238,6 +1238,48 @@ it('передаёт delivery_time в Poster на следующий день е
     });
 });
 
+it('передаёт сохранённый fulfill_at в Poster и не сдвигает его ещё на день', function () {
+    config([
+        'poster.enabled' => true,
+        'poster.token' => 'test-token',
+        'poster.spot_id' => 1,
+    ]);
+
+    $this->travelTo(now()->setTime(16, 0));
+    $fulfillAt = now()->setTime(14, 30);
+
+    Http::fake([
+        'joinposter.com/*' => Http::response([
+            'response' => ['incoming_order_id' => '97'],
+        ]),
+    ]);
+
+    $dish = Dish::factory()->create(['poster_product_id' => 169]);
+    $order = makePosterOrder([
+        'delivery_time' => '14:30',
+        'fulfill_at' => $fulfillAt,
+        'subtotal' => 40.00,
+        'delivery_fee' => 5.00,
+        'total' => 45.00,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'item_type' => 'dish',
+        'dish_id' => $dish->id,
+        'name' => 'Тестовое блюдо',
+        'price' => 40.00,
+        'quantity' => 1,
+        'subtotal' => 40.00,
+    ]);
+
+    posterService()->createIncomingOrder($order->fresh(['items.dish']));
+
+    Http::assertSent(function ($request) use ($fulfillAt) {
+        return $request->data()['delivery_time'] === $fulfillAt->format('Y-m-d H:i:s');
+    });
+});
+
 it('передаёт service_mode самовывоза в Poster без delivery_price', function () {
     config([
         'poster.enabled' => true,

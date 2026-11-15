@@ -24,6 +24,7 @@ class Order extends Model
         'delivery_type',
         'order_mode',
         'delivery_time',
+        'fulfill_at',
         'delivery_address',
         'delivery_city',
         'delivery_street',
@@ -68,6 +69,7 @@ class Order extends Model
             'phone_verified' => 'boolean',
             'needs_callback' => 'boolean',
             'leave_at_door' => 'boolean',
+            'fulfill_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'confirmed_at' => 'datetime',
             'completed_at' => 'datetime',
@@ -112,5 +114,20 @@ class Order extends Model
     public function getTotalCaloriesAttribute(): int
     {
         return $this->items->sum(fn ($item) => ($item->calories ?? 0) * $item->quantity);
+    }
+
+    public function scheduledForLabel(): ?string
+    {
+        if ($this->fulfill_at !== null) {
+            $fulfillAt = $this->fulfill_at->timezone(config('app.timezone'));
+
+            if ($fulfillAt->isSameDay(now())) {
+                return $fulfillAt->format('H:i');
+            }
+
+            return $fulfillAt->format('d.m.Y H:i');
+        }
+
+        return $this->delivery_time;
     }
 }

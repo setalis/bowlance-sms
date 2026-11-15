@@ -241,6 +241,10 @@ class PosterService
 
     protected function posterDeliveryTime(Order $order): ?string
     {
+        if ($order->fulfill_at !== null) {
+            return $order->fulfill_at->timezone(config('app.timezone'))->format('Y-m-d H:i:s');
+        }
+
         if (blank($order->delivery_time)) {
             return null;
         }
@@ -259,8 +263,8 @@ class PosterService
         $parts = $this->buildPricingCommentLines($order);
         $customerParts = [];
 
-        if (filled($order->delivery_time)) {
-            $customerParts[] = 'Ко времени: '.$order->delivery_time;
+        if (filled($order->scheduledForLabel())) {
+            $customerParts[] = 'Ко времени: '.$order->scheduledForLabel();
         }
 
         if (filled($order->promo_code)) {

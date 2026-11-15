@@ -175,10 +175,10 @@
                         </div>
                         <div>
                             <p class="text-xs text-base-content/60 mb-1">Время доставки</p>
-                            @if($order->delivery_time)
+                            @if($order->scheduledForLabel())
                                 <p class="font-medium flex items-center gap-1">
                                     <span class="icon-[tabler--clock] size-4 text-primary"></span>
-                                    {{ $order->delivery_time }}
+                                    {{ $order->scheduledForLabel() }}
                                 </p>
                             @else
                                 <p class="text-base-content/50">Как можно быстрее</p>
