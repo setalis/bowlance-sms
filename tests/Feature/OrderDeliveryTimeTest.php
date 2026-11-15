@@ -176,6 +176,26 @@ it('сохраняет слот на завтра если заказ оформ
         ->and(latestDeliveryTimeOrder()->scheduledForLabel())->toBe(now()->addDay()->format('d.m.Y').' 10:30');
 });
 
+it('открывает сайт со временем по умолчанию если конфиг окна не загружен', function () {
+    config([
+        'ordering.opens_at' => null,
+        'ordering.closes_at' => null,
+        'ordering.slot_minutes' => null,
+        'ordering.morning_prep_minutes' => null,
+    ]);
+
+    $this->travelTo(now()->setTime(9, 0));
+
+    $window = app(\App\Support\OrderWindow::class);
+
+    expect($window->opensAt())->toBe('10:00')
+        ->and($window->closesAt())->toBe('21:00')
+        ->and($window->firstSlotAt())->toBe('10:30')
+        ->and($window->clientPayload()['slots'][0])->toBe('10:30');
+
+    $this->get(route('home'))->assertSuccessful();
+});
+
 it('показывает в оформлении предупреждение и выбор времени ближайшего дня', function () {
     $this->get(route('home'))
         ->assertSuccessful()

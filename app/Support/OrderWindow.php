@@ -14,22 +14,27 @@ class OrderWindow
 
     public function opensAt(): string
     {
-        return (string) config('ordering.opens_at');
+        return $this->clock(config('ordering.opens_at'), '10:00');
     }
 
     public function closesAt(): string
     {
-        return (string) config('ordering.closes_at');
+        return $this->clock(config('ordering.closes_at'), '21:00');
     }
 
     public function slotMinutes(): int
     {
-        return (int) config('ordering.slot_minutes');
+        $value = config('ordering.slot_minutes');
+        $minutes = is_numeric($value) ? (int) $value : 30;
+
+        return $minutes > 0 ? $minutes : 30;
     }
 
     public function morningPrepMinutes(): int
     {
-        return (int) config('ordering.morning_prep_minutes');
+        $value = config('ordering.morning_prep_minutes');
+
+        return is_numeric($value) ? max(0, (int) $value) : 30;
     }
 
     public function firstSlotAt(): string
@@ -188,11 +193,20 @@ class OrderWindow
         return ((int) $moment->format('H')) * 60 + (int) $moment->format('i');
     }
 
+    protected function clock(mixed $value, string $default): string
+    {
+        return is_string($value) && preg_match('/^\d{2}:\d{2}$/', $value) === 1
+            ? $value
+            : $default;
+    }
+
     protected function minutesFromTime(string $time): int
     {
-        [$hour, $minute] = array_map(intval(...), explode(':', $time));
+        if (preg_match('/^(\d{2}):(\d{2})$/', $time, $matches) !== 1) {
+            return 0;
+        }
 
-        return $hour * 60 + $minute;
+        return ((int) $matches[1]) * 60 + (int) $matches[2];
     }
 
     protected function formatMinutes(int $minutes): string
